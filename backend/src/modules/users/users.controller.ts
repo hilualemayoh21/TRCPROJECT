@@ -106,4 +106,81 @@ export class UsersController {
       next(e);
     }
   }
+
+  static async getUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const user = await prisma.user.findUnique({
+        where: { id: id as string, deletedAt: null },
+        include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
+      });
+      if (!user) throw new AppError('User not found', 404);
+      res.json(mapUser(user as any));
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  static async createUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, password, name, role, institution } = req.body;
+      const existing = await prisma.user.findUnique({ where: { email } });
+      if (existing) throw new AppError('Email already in use', 400);
+
+      const passwordHash = await require('bcrypt').hash(password || 'Temporary123!', 10);
+      const dbRole = await prisma.role.findUnique({ where: { name: role as string } });
+
+      const user = await prisma.user.create({
+        data: {
+          email,
+          name,
+          passwordHash,
+          institution,
+          roles: dbRole ? { create: { roleId: dbRole.id } } : undefined
+        },
+        include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
+      });
+
+      await AuditService.log(req, (req.user?.id as string) || null, 'User created by admin', 'User', user.id);
+      res.json(mapUser(user as any));
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  static async updateUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const { name, email, password, active, institution } = req.body;
+
+      const data: any = { name, email, institution };
+      if (password) data.passwordHash = await require('bcrypt').hash(password, 10);
+      if (active !== undefined) data.status = active ? 'active' : 'inactive';
+
+      const user = await prisma.user.update({
+        where: { id: id as string },
+        data,
+        include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
+      });
+
+      await AuditService.log(req, (req.user?.id as string) || null, 'User updated by admin', 'User', id as string);
+      res.json(mapUser(user as any));
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  static async deleteUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      await prisma.user.update({
+        where: { id: id as string },
+        data: { deletedAt: new Date() }
+      });
+      await AuditService.log(req, (req.user?.id as string) || null, 'User deleted by admin', 'User', id as string);
+      res.json({ ok: true });
+    } catch (e) {
+      next(e);
+    }
+  }
 }

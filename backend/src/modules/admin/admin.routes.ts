@@ -7,7 +7,7 @@ const router = Router();
 
 router.use(requireAuth, resolvePermissions);
 
-router.get('/dashboard', requirePermission('view_dashboard'), AdminController.getDashboard);
+router.get('/analytics/overview', requirePermission('view_dashboard'), AdminController.getDashboard);
 router.get('/researchers/requests', requirePermission('manage_users'), AdminController.listResearcherRequests);
 router.get('/resources/pending', requirePermission('approve_resources'), AdminController.listPendingResources);
 router.get('/reports', requirePermission('resolve_reports'), AdminController.listReports);

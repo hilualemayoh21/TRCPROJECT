@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../../prisma/client';
-import { buildPaginatedResponse } from '../../utils/api';
+import { mapPaginatedResponse } from '../../utils/response-mappers';
 
 export class AdminController {
   static async getDashboard(req: Request, res: Response, next: NextFunction) {
@@ -12,12 +12,14 @@ export class AdminController {
 
       res.json({
         totalUsers,
-        totalResources: 0, // Placeholder
-        pendingApprovals: 0, // Placeholder
+        totalResources: 0,
+        pendingApprovals: 0,
         recentActivity: recentLogs.map((l: any) => ({
           id: l.id,
           action: l.action,
-          timestamp: l.createdAt
+          actor: l.actorId || 'System',
+          createdAt: l.createdAt.getTime(),
+          context: l.metadata ? (typeof l.metadata === 'string' ? l.metadata : JSON.stringify(l.metadata)) : ''
         }))
       });
     } catch (e) {
@@ -25,26 +27,25 @@ export class AdminController {
     }
   }
 
-  // Stubs for Approvals and Reports
   static async listResearcherRequests(req: Request, res: Response) {
     const page = parseInt(req.query.page as string) || 1;
     let pageSize = parseInt(req.query.pageSize as string) || 10;
     if (pageSize > 100) pageSize = 100;
-    res.json(buildPaginatedResponse([], page, pageSize, 0));
+    res.json(mapPaginatedResponse([], { page, pageSize, total: 0 }));
   }
 
   static async listPendingResources(req: Request, res: Response) {
     const page = parseInt(req.query.page as string) || 1;
     let pageSize = parseInt(req.query.pageSize as string) || 10;
     if (pageSize > 100) pageSize = 100;
-    res.json(buildPaginatedResponse([], page, pageSize, 0));
+    res.json(mapPaginatedResponse([], { page, pageSize, total: 0 }));
   }
 
   static async listReports(req: Request, res: Response) {
     const page = parseInt(req.query.page as string) || 1;
     let pageSize = parseInt(req.query.pageSize as string) || 10;
     if (pageSize > 100) pageSize = 100;
-    res.json(buildPaginatedResponse([], page, pageSize, 0));
+    res.json(mapPaginatedResponse([], { page, pageSize, total: 0 }));
   }
 
   static async resolveReport(req: Request, res: Response) {

@@ -9,7 +9,11 @@ const adminRouter = Router();
 // /admin/users routes
 adminRouter.use(requireAuth, resolvePermissions, requirePermission('manage_users'));
 adminRouter.get('/', UsersController.listUsers);
+adminRouter.post('/', UsersController.createUser);
+adminRouter.get('/:id', UsersController.getUser);
+adminRouter.patch('/:id', UsersController.updateUser);
 adminRouter.patch('/:id/status', UsersController.updateStatus);
+adminRouter.delete('/:id', UsersController.deleteUser);
 
 // /users/:id/roles route
 router.post('/:id/roles', requireAuth, resolvePermissions, requirePermission('manage_users'), UsersController.assignRole);
