@@ -29,9 +29,9 @@ export function mapUser(user: PrismaUser) {
   let primaryRole = 'public_user';
 
   if (user.roles && user.roles.length > 0) {
-    primaryRole = user.roles[0].role.name;
+    primaryRole = user.roles[0].role.id;
     for (const userRole of user.roles) {
-      if (userRole.role.name === 'super_admin') {
+      if (userRole.role.id === 'super_admin') {
         permissions.add('*');
       }
       if (userRole.role.permissions) {
