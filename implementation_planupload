@@ -1,0 +1,36 @@
+# Implementation Plan - Upload Resource Page
+
+Implement a premium, responsive "Upload Resource" page for the TRC Platform.
+
+## User Review Required
+
+> [!IMPORTANT]
+> The design specifies a multi-step workflow. I will implement a reactive step system to manage Metadata, Authors, and Files sections.
+
+## Proposed Changes
+
+### Resource Module
+
+#### [MODIFY] [UploadResource.vue](file:///c:/Users/hlina/Desktop/TRCPROJECT/frontend/src/modules/resource/pages/UploadResource.vue)
+- Implement the main page layout using `DashboardLayout`.
+- Add a multi-step indicator (Steppers) following the design (1-5 steps).
+- Create sections for:
+    - **Resource Metadata**: Inputs for Title, Category (Select), Primary Institution (Select), Abstract (Textarea), and Keywords (Tag input).
+    - **Authors & Contributors**: A list view of added authors with roles and an "Add Author" button.
+    - **File Upload**: A drag-and-drop zone with file details and progress bar.
+- Implement responsive layout:
+    - **Tablet**: Vertical stack of sections.
+    - **Desktop**: Main form on the left, auxiliary panels (File summary, Submission tips) on the right.
+- Add footer actions: "Save Draft", "Cancel", and "Next Step".
+
+## Verification Plan
+
+### Automated Tests
+- Browser subagent will be used to navigate to `/upload` and verify:
+    - Proper rendering of the multi-step indicator.
+    - Visibility of form fields.
+    - Correct responsive behavior when resizing.
+
+### Manual Verification
+- Verify that the "UPLOAD" button on the Researcher Dashboard correctly redirects to this new page.
+- Test form field interactions.

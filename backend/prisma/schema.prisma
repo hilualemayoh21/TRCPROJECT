@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String         @id @default(uuid())
+  email               String         @unique
+  name                String
+  passwordHash        String
+  status              String         @default("active") // 'active', 'inactive', 'pending'
+  failedLoginAttempts Int            @default(0)
+  lockUntil           DateTime?
+  permissionVersion   Int            @default(0)
+  deletedAt           DateTime?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  roles               UserRole[]
+  tokens              RefreshToken[]
+}
+
+model Role {
+  id          String           @id @default(uuid()) // Can also be strings like 'admin'
+  name        String           @unique
+  description String?
+  isSystem    Boolean          @default(false)
+  deletedAt   DateTime?
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  key         String           @unique
+  description String?
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model UserRole {
+  userId String
+  roleId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?  // Can be null for system actions
+  action     String
+  entityType String
+  entityId   String
+  ipAddress  String?
+  userAgent  String?
+  metadata   Json?    // Use JSON for context details
+  createdAt  DateTime @default(now())
+}

@@ -1,0 +1,94 @@
+name: TRC Enterprise CI/CD
+
+on:
+  push:
+    branches: [ main, staging ]
+  pull_request:
+    branches: [ main, staging ]
+
+jobs:
+  test:
+    name: 🛡️ Continuous Integration
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: trc_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint & Format
+        run: npm run lint
+
+      - name: Database Setup
+        run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/trc_test
+
+      - name: Run Tests
+        run: npm run test
+        env:
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/trc_test
+          JWT_SECRET: testing-secret-at-least-32-chars-long
+
+  deploy:
+    name: 🚀 Continuous Deployment
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: trc/backend:${{ github.sha }}, trc/backend:${{ github.ref == 'refs/heads/main' && 'prod-latest' || 'staging-latest' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Database Migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Trigger Rolling Update (ECS/K8s)
+        run: |
+          # Example for AWS ECS
+          aws ecs update-service --cluster trc-cluster --service trc-backend --force-new-deployment
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
