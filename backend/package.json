@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc && node -e \"require('fs').copyFileSync('src/swagger.yaml', 'dist/swagger.yaml')\"",
-    "start": "node dist/server.js",
+    "start": "npx prisma generate && npx prisma db push --accept-data-loss && npx prisma db seed && node dist/server.js",
     "postinstall": "npx prisma generate",
     "deploy:migrate": "tsx scripts/safe-migrate.ts",
     "test:security": "tsx scripts/security-test.ts",
