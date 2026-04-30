@@ -42,7 +42,7 @@ export function errorHandler(
   return res.status(500).json({
     error: {
       code: 'INTERNAL_SERVER_ERROR',
-      message: process.env.NODE_ENV === 'production' ? 'An unexpected error occurred' : err.message
+      message: err.message
     }
   });
 }
