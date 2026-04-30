@@ -14,6 +14,7 @@ services:
     plan: free
     region: oregon # Choose your preferred region
     healthCheckPath: /health # Ensure your app has this route or change it
+    releaseCommand: npm run deploy:migrate
     envVars:
       - key: NODE_ENV
         value: production
