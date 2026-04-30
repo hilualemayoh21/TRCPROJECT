@@ -14,7 +14,7 @@ services:
     plan: free
     region: oregon # Choose your preferred region
     healthCheckPath: /health # Ensure your app has this route or change it
-    releaseCommand: npm run deploy:migrate && npx prisma db seed
+    releaseCommand: npx prisma db push --accept-data-loss && npx prisma db seed
     envVars:
       - key: NODE_ENV
         value: production
