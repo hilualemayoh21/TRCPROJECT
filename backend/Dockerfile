@@ -1,4 +1,4 @@
-FROM node:20-bookworm-slim AS builder
+FROM node:20-bullseye-slim AS builder
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM node:20-bookworm-slim
+FROM node:20-bullseye-slim
 
 WORKDIR /app
 
