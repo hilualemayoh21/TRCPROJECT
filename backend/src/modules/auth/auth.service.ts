@@ -163,22 +163,11 @@ export class AuthService {
       }
     });
 
-    const permissions = new Set<string>();
-    for (const ur of user.roles) {
-      if (ur.role.id === 'super_admin') permissions.add('*');
-      ur.role.permissions.forEach((rp: any) => permissions.add(rp.permission.key));
-    }
-
-    const { passwordHash, ...safeUser } = user;
-    const primaryRole = user.roles[0]?.role?.name || 'public_user';
-
     return {
-      user: { ...safeUser, role: primaryRole },
-      token: accessToken,
+      user,
       accessToken,
       refreshToken,
-      expiresAt: expiresAt.getTime(),
-      permissions: Array.from(permissions)
+      expiresAt: expiresAt.getTime()
     };
   }
 }

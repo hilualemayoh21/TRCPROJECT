@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../../prisma/client';
 import { AuditService } from '../audit/audit.service';
 import { AppError } from '../../utils/api';
+import { mapRole } from '../../utils/response-mappers';
 
 export class RolesController {
   static async getRoles(req: Request, res: Response, next: NextFunction) {
@@ -11,15 +12,7 @@ export class RolesController {
         include: { permissions: { include: { permission: true } } }
       });
 
-      const formatted = roles.map((r: any) => ({
-        id: r.id,
-        name: r.name,
-        description: r.description,
-        isSystem: r.isSystem,
-        permissions: r.permissions.map((rp: any) => rp.permission.key)
-      }));
-
-      res.json(formatted);
+      res.json(roles.map((r: any) => mapRole(r)));
     } catch (e) {
       next(e);
     }
@@ -43,15 +36,14 @@ export class RolesController {
         }
       }
 
+      const freshRole = await prisma.role.findUnique({
+        where: { id: role.id },
+        include: { permissions: { include: { permission: true } } }
+      });
+
       await AuditService.log(req, req.user?.id || null, 'Role created', 'Role', role.id, { name });
 
-      res.json({
-        id: role.id,
-        name: role.name,
-        description: role.description,
-        isSystem: role.isSystem,
-        permissions: permissions || []
-      });
+      res.json(mapRole(freshRole));
     } catch (e) {
       next(e);
     }
@@ -93,13 +85,7 @@ export class RolesController {
 
       await AuditService.log(req, (req.user?.id as string) || null, 'Role updated', 'Role', id as string, { name });
 
-      res.json({
-        id: freshRole!.id,
-        name: freshRole!.name,
-        description: freshRole!.description,
-        isSystem: freshRole!.isSystem,
-        permissions: freshRole!.permissions.map(rp => rp.permission.key)
-      });
+      res.json(mapRole(freshRole));
     } catch (e) {
       next(e);
     }

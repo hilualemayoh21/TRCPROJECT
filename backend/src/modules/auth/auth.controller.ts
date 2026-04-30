@@ -1,12 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthService, AuthSchema } from './auth.service';
+import { mapAuthResponse, mapUser, mapRefreshResponse } from '../../utils/response-mappers';
 
 export class AuthController {
   static async login(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = AuthSchema.parse(req.body);
       const data = await AuthService.login(req, email, password);
-      res.json(data);
+      res.json(mapAuthResponse(data.user, {
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+        expiresAt: data.expiresAt
+      }));
     } catch (error) {
       next(error);
     }
@@ -15,7 +20,11 @@ export class AuthController {
   static async register(req: Request, res: Response, next: NextFunction) {
     try {
       const data = await AuthService.register(req.body);
-      res.json(data);
+      res.json(mapAuthResponse(data.user, {
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+        expiresAt: data.expiresAt
+      }));
     } catch (error) {
       next(error);
     }
@@ -23,8 +32,7 @@ export class AuthController {
 
   static async me(req: Request, res: Response, next: NextFunction) {
     try {
-      const safeUser = { ...req.user, passwordHash: undefined };
-      res.json(safeUser);
+      res.json(mapUser(req.user as any));
     } catch (error) {
       next(error);
     }
@@ -34,13 +42,11 @@ export class AuthController {
     try {
       const { refreshToken } = req.body;
       const data = await AuthService.refresh(refreshToken);
-      // Contract says to return { token, accessToken, refreshToken, expiresAt } without user
-      res.json({
-        token: data.accessToken,
+      res.json(mapRefreshResponse({
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
         expiresAt: data.expiresAt
-      });
+      }));
     } catch (error) {
       next(error);
     }

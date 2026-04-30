@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../../prisma/client';
-import { buildPaginatedResponse } from '../../utils/api';
 import { AuditService } from './audit.service';
+import { mapPaginatedResponse } from '../../utils/response-mappers';
 
 export class AuditController {
   static async listLogs(req: Request, res: Response, next: NextFunction) {
@@ -24,10 +24,10 @@ export class AuditController {
         action: l.action,
         actor: l.actorId || 'System',
         context: l.metadata ? (typeof l.metadata === 'string' ? l.metadata : JSON.stringify(l.metadata)) : '',
-        createdAt: l.createdAt
+        createdAt: l.createdAt.getTime()
       }));
 
-      res.json(buildPaginatedResponse(items, page, pageSize, total));
+      res.json(mapPaginatedResponse(items, { page, pageSize, total }));
     } catch (e) {
       next(e);
     }

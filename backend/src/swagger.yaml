@@ -2,10 +2,12 @@ openapi: 3.0.0
 info:
   title: TRC Admin API
   version: 1.0.0
-  description: Enterprise-grade administrative API for Tigray Resources Center.
+  description: Enterprise-grade administrative API for Tigray Resources Center. Aligned with frontend Zod schemas.
 servers:
   - url: http://localhost:4000
     description: Development server
+  - url: https://trc-backend.onrender.com
+    description: Production server
 components:
   securitySchemes:
     bearerAuth:
@@ -13,32 +15,84 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: string }
+        role: { type: string }
+        permissions: { type: array, items: { type: string } }
+        active: { type: boolean }
+        institution: { type: string }
+    AuthResponse:
+      type: object
+      properties:
+        user: { $ref: '#/components/schemas/User' }
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        expiresAt: { type: number, description: "Unix timestamp in ms" }
+    RefreshResponse:
+      type: object
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        expiresAt: { type: number }
     Error:
       type: object
       properties:
         error:
           type: object
           properties:
-            code:
-              type: string
-            message:
-              type: string
-            details:
-              type: object
+            code: { type: string }
+            message: { type: string }
 paths:
   /auth/login:
     post:
       summary: User login
       tags: [Auth]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                password: { type: string }
       responses:
         200:
           description: Successful login
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
         401:
           description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+  /auth/me:
+    get:
+      summary: Get current user
+      tags: [Auth]
+      security: [{ bearerAuth: [] }]
+      responses:
+        200:
+          description: Current user profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
   /health:
     get:
       summary: Health check
       tags: [System]
       responses:
         200:
-          description: System is healthy
+          description: System status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  database: { type: string }
+                  uptime: { type: number }

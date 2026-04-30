@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../../prisma/client';
-import { buildPaginatedResponse, AppError } from '../../utils/api';
+import { AppError } from '../../utils/api';
 import { AuditService } from '../audit/audit.service';
 import { withTimeout } from '../../utils/resilience';
+import { mapUser, mapPaginatedResponse } from '../../utils/response-mappers';
 
 export class UsersController {
   static async listUsers(req: Request, res: Response, next: NextFunction) {
@@ -28,7 +29,7 @@ export class UsersController {
             where,
             skip: (page - 1) * pageSize,
             take: pageSize,
-            include: { roles: { include: { role: true } } },
+            include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } },
             orderBy: { createdAt: 'desc' }
           }),
           prisma.user.count({ where })
@@ -37,15 +38,9 @@ export class UsersController {
         'User listing query timed out'
       );
 
-      const items = users.map((u: any) => ({
-        id: u.id,
-        name: u.name,
-        email: u.email,
-        active: u.status === 'active',
-        role: u.roles[0]?.role?.name || 'public_user'
-      }));
+      const items = users.map((u: any) => mapUser(u));
 
-      res.json(buildPaginatedResponse(items, page, pageSize, total));
+      res.json(mapPaginatedResponse(items, { page, pageSize, total }));
     } catch (e) {
       next(e);
     }
@@ -59,18 +54,12 @@ export class UsersController {
       const user = await prisma.user.update({
         where: { id: id as string },
         data: { status: active ? 'active' : 'inactive' },
-        include: { roles: { include: { role: true } } }
+        include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
       });
 
       await AuditService.log(req, (req.user?.id as string) || null, active ? 'User activated' : 'User deactivated', 'User', id as string);
 
-      res.json({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        active: user.status === 'active',
-        role: user.roles[0]?.role?.name || 'public_user'
-      });
+      res.json(mapUser(user as any));
     } catch (e) {
       next(e);
     }
@@ -107,21 +96,11 @@ export class UsersController {
         include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
       });
 
-      const permissions = (updatedUser as any).roles[0]?.role?.permissions.map((rp: any) => rp.permission.key) || [];
-      if ((updatedUser as any).roles[0]?.role?.id === 'super_admin') permissions.push('*');
-
       await AuditService.log(req, (req.user?.id as string) || null, 'User role changed', 'User', id as string, { newRole: role });
 
       res.json({
         ok: true,
-        user: {
-          id: updatedUser!.id,
-          name: updatedUser!.name,
-          email: updatedUser!.email,
-          active: updatedUser!.status === 'active',
-          role: (updatedUser as any).roles[0]?.role?.name,
-          permissions
-        }
+        user: mapUser(updatedUser as any)
       });
     } catch (e) {
       next(e);
