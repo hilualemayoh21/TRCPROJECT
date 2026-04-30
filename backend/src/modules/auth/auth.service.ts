@@ -76,9 +76,18 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(password, 10);
     
-    let dbRole = await prisma.role.findFirst({ where: { name: role, deletedAt: null } });
-    if (!dbRole && role === 'public_user') {
-      dbRole = await prisma.role.create({ data: { id: 'public_user', name: 'public_user', isSystem: true } });
+    let dbRole = await prisma.role.findFirst({ 
+      where: { 
+        OR: [
+          { name: role },
+          { id: role }
+        ],
+        deletedAt: null 
+      } 
+    });
+
+    if (!dbRole && (role === 'public_user' || role === 'Public User')) {
+      dbRole = await prisma.role.create({ data: { id: 'public_user', name: 'Public User', isSystem: true } });
     }
 
     const user = await prisma.user.create({
