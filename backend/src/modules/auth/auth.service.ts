@@ -17,6 +17,14 @@ export const AuthSchema = z.object({
   password: z.string().min(6),
 });
 
+export const RegisterSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  name: z.string().min(1),
+  institution: z.string().optional(),
+  role: z.string().optional()
+});
+
 export class AuthService {
   static async login(req: Request, email: string, password: string) {
     const user = await prisma.user.findUnique({
@@ -61,7 +69,7 @@ export class AuthService {
   }
 
   static async register(data: any) {
-    const { email, password, name, role = 'public_user' } = data;
+    const { email, password, name, institution, role = 'public_user' } = data;
     
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) throw new AppError('Email already in use', 400);
@@ -78,6 +86,7 @@ export class AuthService {
         email,
         name,
         passwordHash,
+        institution,
         roles: dbRole ? { create: { roleId: dbRole.id } } : undefined
       },
       include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }

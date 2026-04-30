@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { AuthService, AuthSchema } from './auth.service';
+import { AuthService, AuthSchema, RegisterSchema } from './auth.service';
 import { mapAuthResponse, mapUser, mapRefreshResponse } from '../../utils/response-mappers';
 
 export class AuthController {
@@ -19,7 +19,8 @@ export class AuthController {
 
   static async register(req: Request, res: Response, next: NextFunction) {
     try {
-      const data = await AuthService.register(req.body);
+      const validatedData = RegisterSchema.parse(req.body);
+      const data = await AuthService.register(validatedData);
       res.json(mapAuthResponse(data.user, {
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
