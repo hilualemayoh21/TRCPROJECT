@@ -87,7 +87,7 @@ export class AuthService {
     });
 
     if (!dbRole && (role === 'public_user' || role === 'Public User')) {
-      dbRole = await prisma.role.create({ data: { id: 'public_user', name: 'Public User', isSystem: true } });
+      dbRole = await prisma.role.create({ data: { id: 'public_user', name: 'public_user', isSystem: true } });
     }
 
     const user = await prisma.user.create({

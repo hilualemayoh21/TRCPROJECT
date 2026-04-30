@@ -29,13 +29,17 @@ export function mapUser(user: PrismaUser) {
   let primaryRole = 'public_user';
 
   if (user.roles && user.roles.length > 0) {
-    primaryRole = user.roles[0].role.id;
+    const roleObj = user.roles[0].role;
+    // Normalize: try ID first, then Name, lowercase it, replace spaces
+    primaryRole = (roleObj.id || roleObj.name || 'public_user').toLowerCase().replace(/\s+/g, '_');
+    
     for (const userRole of user.roles) {
-      if (userRole.role.id === 'super_admin') {
+      const r = userRole.role;
+      if (r.id === 'super_admin' || r.name === 'super_admin' || r.name === 'Super Admin') {
         permissions.add('*');
       }
-      if (userRole.role.permissions) {
-        userRole.role.permissions.forEach(rp => {
+      if (r.permissions) {
+        r.permissions.forEach(rp => {
           permissions.add(rp.permission.key);
         });
       }
