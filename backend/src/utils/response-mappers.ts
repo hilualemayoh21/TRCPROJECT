@@ -38,16 +38,18 @@ export function mapUser(user: PrismaUser) {
   if (user.email === 'admin@trc.local') {
     primaryRole = 'super_admin';
   }  
-    for (const userRole of user.roles || []) {
-      const r = userRole.role;
-      if (r.id === 'super_admin' || r.name === 'super_admin' || r.name === 'Super Admin') {
-        permissions.add('*');
-      }
-      if (r.permissions) {
-        r.permissions.forEach(rp => {
+
+  for (const userRole of user.roles || []) {
+    const r = userRole.role;
+    if (r.id === 'super_admin' || r.name === 'super_admin' || r.name === 'Super Admin') {
+      permissions.add('*');
+    }
+    if (r.permissions) {
+      r.permissions.forEach(rp => {
+        if (rp.permission?.key) {
           permissions.add(rp.permission.key);
-        });
-      }
+        }
+      });
     }
   }
 

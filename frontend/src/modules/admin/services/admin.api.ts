@@ -65,18 +65,25 @@ export const adminApi = {
 
   // ---- Roles & permissions (core) ----
   async listRoles() {
-    try {
-      const data = await get<any>('/admin/roles')
-      const result = AdminRoleSchema.array().safeParse(data)
-      if (!result.success) {
-        console.error('[Admin API] listRoles validation failed:', result.error.issues)
-        return data as AdminRole[] // Fallback to raw data
+    const endpoints = ['/admin/roles', '/roles', '/roles/roles'] as const
+    let lastError: unknown
+
+    for (const endpoint of endpoints) {
+      try {
+        const data = await get<any>(endpoint)
+        const result = AdminRoleSchema.array().safeParse(data)
+        if (!result.success) {
+          console.error('[Admin API] listRoles validation failed:', result.error.issues)
+          return data as AdminRole[] // Fallback to raw data
+        }
+        return result.data as AdminRole[]
+      } catch (e) {
+        lastError = e
       }
-      return result.data as AdminRole[]
-    } catch (e) {
-      console.error('[Admin API] listRoles network error:', e)
-      throw e // Still throw for real network errors (404, 500, etc)
     }
+
+    console.error('[Admin API] listRoles network error:', lastError)
+    throw lastError
   },
 
   async createRole(payload: { name: string; description?: string; permissions: Permission[]; isSystem?: boolean }) {
