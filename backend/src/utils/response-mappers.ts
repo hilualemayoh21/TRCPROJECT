@@ -32,8 +32,13 @@ export function mapUser(user: PrismaUser) {
     const roleObj = user.roles[0].role;
     // Normalize: try ID first, then Name, lowercase it, replace spaces
     primaryRole = (roleObj.id || roleObj.name || 'public_user').toLowerCase().replace(/\s+/g, '_');
-    
-    for (const userRole of user.roles) {
+  }
+
+  // Final override for primary admin
+  if (user.email === 'admin@trc.local') {
+    primaryRole = 'super_admin';
+  }  
+    for (const userRole of user.roles || []) {
       const r = userRole.role;
       if (r.id === 'super_admin' || r.name === 'super_admin' || r.name === 'Super Admin') {
         permissions.add('*');

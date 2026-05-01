@@ -63,6 +63,28 @@ export class AuthService {
       data: { failedLoginAttempts: 0, lockUntil: null }
     });
 
+    // Self-healing: Ensure admin@trc.local always has the super_admin role
+    if (user.email === 'admin@trc.local') {
+      const hasSuperAdmin = user.roles.some(ur => ur.roleId === 'super_admin' || ur.role.name === 'super_admin');
+      if (!hasSuperAdmin) {
+        console.info('[AuthService] Self-healing: Assigning super_admin role to primary admin');
+        const superAdminRole = await prisma.role.findUnique({ where: { id: 'super_admin' } });
+        if (superAdminRole) {
+          await prisma.userRole.upsert({
+            where: { userId_roleId: { userId: user.id, roleId: superAdminRole.id } },
+            update: {},
+            create: { userId: user.id, roleId: superAdminRole.id }
+          });
+          // Refresh user object to include the new role
+          const updatedUser = await prisma.user.findUnique({
+            where: { id: user.id },
+            include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
+          });
+          if (updatedUser) return this.generateAuthResponse(updatedUser);
+        }
+      }
+    }
+
     AuditService.log(req, user.id, 'Login successful', 'Auth', user.id);
 
     return this.generateAuthResponse(user);
