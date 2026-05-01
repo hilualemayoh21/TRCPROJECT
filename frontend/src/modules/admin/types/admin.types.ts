@@ -89,4 +89,3 @@ export type AdminAuditLog = {
   context?: string
   createdAt?: string
 }
-

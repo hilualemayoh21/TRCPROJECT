@@ -30,7 +30,7 @@ async function main() {
   // 2. Create Roles
   const roles = [
     { id: 'super_admin', name: 'super_admin', isSystem: true, perms: ['*'] },
-    { id: 'admin', name: 'admin', isSystem: true, perms: ['manage_users', 'view_dashboard', 'view_audit_logs'] },
+    { id: 'admin', name: 'admin', isSystem: true, perms: ['manage_users', 'manage_roles', 'approve_resources', 'view_dashboard', 'view_audit_logs'] },
     { id: 'moderator', name: 'moderator', isSystem: true, perms: ['resolve_reports'] },
     { id: 'researcher', name: 'researcher', isSystem: true, perms: ['view_dashboard'] },
     { id: 'public_user', name: 'public_user', isSystem: true, perms: [] }

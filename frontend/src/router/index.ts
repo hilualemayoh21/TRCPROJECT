@@ -11,6 +11,14 @@ import { authMiddleware } from "@/middleware/authMiddleware"
 import { useAuthStore } from "@/modules/auth/auth.store"
 
 const routes = [
+  {
+    path: '/',
+    name: 'root-redirect',
+    redirect: () => {
+      const authStore = useAuthStore()
+      return authStore.getPostLoginRoute()
+    }
+  },
   ...authRoutes,
   ...userRoutes,
   ...resourceRoutes,

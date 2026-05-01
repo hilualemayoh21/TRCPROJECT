@@ -156,7 +156,6 @@
       </div>
 
       <MockDevPanel />
-
       <!-- Mobile Bottom Nav -->
       <nav class="fixed bottom-0 left-0 right-0 z-50 flex md:hidden items-center justify-around px-4 pt-3 pb-5
                   backdrop-blur-xl border-t bg-white/90 border-slate-200 dark:bg-[#13151c]/95 dark:border-white/5">
@@ -220,6 +219,7 @@ const visibleNavItems = computed(() => {
   const role = userRole.value.toLowerCase();
   return allNavItems.filter(i => i.roles.includes(role));
 })
+
 
 const handleLogout = async () => {
   await authStore.logout()
