@@ -39,15 +39,15 @@ const responseValidationRules: ValidationRule[] = [
   { method: 'POST', pattern: /^\/auth\/register$/, schema: AuthResponseSchema },
   { method: 'POST', pattern: /^\/auth\/refresh$/, schema: RefreshResponseSchema },
   { method: 'GET', pattern: /^\/auth\/me$/, schema: UserSchema },
-  { method: 'GET', pattern: /^\/roles$/, schema: RoleSchema.array() },
-  { method: 'POST', pattern: /^\/roles$/, schema: RoleSchema },
-  { method: 'PATCH', pattern: /^\/roles\/[^/]+$/, schema: RoleSchema },
-  { method: 'DELETE', pattern: /^\/roles\/[^/]+$/, schema: z.object({ ok: z.boolean() }) },
+  { method: 'GET', pattern: /^\/admin\/roles\/?$/, schema: RoleSchema.array() },
+  { method: 'POST', pattern: /^\/admin\/roles\/?$/, schema: RoleSchema },
+  { method: 'PATCH', pattern: /^\/admin\/roles\/[^/]+$/, schema: RoleSchema },
+  { method: 'DELETE', pattern: /^\/admin\/roles\/[^/]+$/, schema: z.object({ ok: z.boolean() }) },
   { method: 'GET', pattern: /^\/admin\/users$/, schema: PaginatedUsersSchema },
   { method: 'PATCH', pattern: /^\/admin\/users\/[^/]+\/status$/, schema: UserSchema },
   { method: 'POST', pattern: /^\/users\/[^/]+\/roles$/, schema: AssignRoleResponseSchema },
-  { method: 'POST', pattern: /^\/roles\/[^/]+\/permissions$/, schema: RolePermissionToggleSchema },
-  { method: 'DELETE', pattern: /^\/roles\/[^/]+\/permissions$/, schema: RolePermissionToggleSchema }
+  { method: 'POST', pattern: /^\/admin\/roles\/[^/]+\/permissions$/, schema: RolePermissionToggleSchema },
+  { method: 'DELETE', pattern: /^\/admin\/roles\/[^/]+\/permissions$/, schema: RolePermissionToggleSchema }
 ]
 
 export class ApiResponseValidationError extends Error {

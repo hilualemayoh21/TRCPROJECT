@@ -66,7 +66,7 @@ export const adminApi = {
   // ---- Roles & permissions (core) ----
   async listRoles() {
     try {
-      const data = await get<any>('/roles')
+      const data = await get<any>('/admin/roles')
       const result = AdminRoleSchema.array().safeParse(data)
       if (!result.success) {
         console.error('[Admin API] listRoles validation failed:', result.error.issues)
@@ -80,17 +80,17 @@ export const adminApi = {
   },
 
   async createRole(payload: { name: string; description?: string; permissions: Permission[]; isSystem?: boolean }) {
-    const data = await post<AdminRole>('/roles', payload)
+    const data = await post<AdminRole>('/admin/roles', payload)
     return AdminRoleSchema.parse(data) as AdminRole
   },
 
   async updateRole(id: string, payload: Partial<Pick<AdminRole, 'name' | 'description' | 'permissions'>>) {
-    const data = await patch<AdminRole>(`/roles/${encodeURIComponent(id)}`, payload)
+    const data = await patch<AdminRole>(`/admin/roles/${encodeURIComponent(id)}`, payload)
     return AdminRoleSchema.parse(data) as AdminRole
   },
 
   async deleteRole(id: string) {
-    return del(`/roles/${encodeURIComponent(id)}`)
+    return del(`/admin/roles/${encodeURIComponent(id)}`)
   },
 
   // ---- Approvals ----

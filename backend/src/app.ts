@@ -31,7 +31,7 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Routes
 app.use('/auth', authRateLimiter, authRoutes);
-app.use('/roles', rolesRoutes);
+app.use('/admin/roles', rolesRoutes);
 app.use('/users', usersRouter);
 app.use('/admin/users', adminUsersRouter);
 app.use('/admin', auditRoutes);
