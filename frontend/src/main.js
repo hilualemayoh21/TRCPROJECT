@@ -17,9 +17,11 @@ app.use(pinia);
 app.use(VueQueryPlugin, { queryClient });
 app.use(router);
 
-async function start() {
-  await bootstrapModules();
-  app.mount("#app");
-}
+// Mount immediately so the user sees the app
+app.mount("#app");
+console.info('[Main] App mounted');
 
-start();
+// Bootstrap in background (initializes auth etc)
+bootstrapModules().then(() => {
+  console.info('[Main] Modules bootstrapped');
+});

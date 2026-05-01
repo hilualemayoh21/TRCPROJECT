@@ -9,8 +9,8 @@ import type {
   Permission,
   ResearcherApprovalRequest,
   ResourceApprovalItem,
-  AdminRoleSchema,
 } from '../types/admin.types'
+import { AdminRoleSchema } from '../types/admin.types'
 
 export type UpdateUserPayload = Partial<Pick<AdminUser, 'name' | 'email' | 'role' | 'active'>> & {
   permissions?: Permission[]
@@ -32,10 +32,10 @@ export const adminApi = {
         id?: string
         action?: string
         actor?: string
-        createdAt?: string
+        createdAt?: number
         context?: string
       }>
-    }>('/analytics/overview')
+    }>('/admin/analytics/overview')
   },
 
   // ---- Users ----

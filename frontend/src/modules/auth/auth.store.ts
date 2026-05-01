@@ -70,10 +70,15 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: (state) => Boolean(state.tokens.accessToken),
 
     resolvedPermissions(state): string[] {
-      const role = String(state.user?.role || '')
-      if (!role) return []
-      if (role === 'super_admin') return ['*']
+      const role = String(state.user?.role || '').toLowerCase()
+      const email = String(state.user?.email || '').toLowerCase()
 
+      // Primary admin bypass
+      if (email === 'admin@trc.local' || role === 'super_admin') {
+        return ['*']
+      }
+
+      if (!role) return []
       const rolePermissions = permissionsMap[role] || []
       const userPermissions = state.user?.permissions || []
       return Array.from(new Set([...rolePermissions, ...userPermissions]))
@@ -286,7 +291,17 @@ export const useAuthStore = defineStore('auth', {
     },
 
     getPostLoginRoute() {
-      return this.user?.role === 'admin' || this.user?.role === 'super_admin' ? '/admin' : '/dashboard'
+      const role = String(this.user?.role || '').toLowerCase();
+      const email = String(this.user?.email || '').toLowerCase();
+      console.info('[AuthStore] Determining post-login route for:', { email, role });
+      
+      // Safety fallback for the primary admin account
+      const isAdminEmail = email === 'admin@trc.local';
+      const isAdminRole = role === 'admin' || role === 'super_admin';
+      
+      const route = (isAdminEmail || isAdminRole) ? '/admin' : '/dashboard';
+      console.info('[AuthStore] Selected route:', route);
+      return route;
     },
 
     // ✅ Login

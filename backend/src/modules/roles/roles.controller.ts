@@ -9,12 +9,19 @@ export class RolesController {
     try {
       const roles = await prisma.role.findMany({
         where: { deletedAt: null },
-        include: { permissions: { include: { permission: true } } }
+        include: { 
+          permissions: { 
+            include: { permission: true } 
+          } 
+        }
       });
 
-      res.json(roles.map((r: any) => mapRole(r)));
+      // Strict mapping to ensure frontend contract
+      const mappedRoles = roles.map((r: any) => mapRole(r));
+      res.json(mappedRoles);
     } catch (e) {
-      next(e);
+      console.error('[RolesController] Failed to fetch roles:', e);
+      next(new AppError('Failed to fetch roles from database', 500));
     }
   }
 

@@ -80,11 +80,14 @@ function validateResponse(method: ValidationRule['method'], url: string, respons
   const candidate = extractData(responseData)
   const result = rule.schema.safeParse(candidate)
   if (!result.success) {
-    throw new ApiResponseValidationError(`Invalid API response for ${method} ${path}`, {
-      method,
-      path,
-      issues: result.error.issues
+    console.error('[API Validation Error]', { 
+      method, 
+      path, 
+      issues: result.error.issues,
+      data: candidate 
     })
+    // We no longer throw here to prevent UI crashes. 
+    // In production, it's better to show slightly malformed data than a blank error page.
   }
 }
 

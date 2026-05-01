@@ -45,12 +45,16 @@ export type AdminRole = {
 }
 
 export const AdminRoleSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string().optional(),
-  permissions: z.array(z.string()),
-  isSystem: z.boolean().optional()
-})
+  id: z.union([z.string(), z.number()]).transform(String),
+  name: z.string().optional().default('Unnamed Role'),
+  description: z.string().optional().nullable(),
+  permissions: z.array(z.union([
+    z.string(),
+    z.object({ key: z.string() }).transform(o => o.key),
+    z.object({ permission: z.object({ key: z.string() }) }).transform(o => o.permission.key)
+  ])).catch([]).nullable().optional().default([]),
+  isSystem: z.boolean().optional().default(false)
+}).passthrough()
 
 export type ResearcherApprovalRequest = {
   id: string

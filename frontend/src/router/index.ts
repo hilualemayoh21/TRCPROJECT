@@ -8,12 +8,22 @@ import adminRoutes from "@/modules/admin/admin.routes"
 
 import Unauthorized from "@/pages/Unauthorized.vue"
 import { authMiddleware } from "@/middleware/authMiddleware"
+import { useAuthStore } from "@/modules/auth/auth.store"
 
 const routes = [
   ...authRoutes,
   ...userRoutes,
   ...resourceRoutes,
   ...adminRoutes,
+  {
+    path: "/",
+    redirect: (to) => {
+      const auth = useAuthStore()
+      return (auth.user?.role === 'admin' || auth.user?.role === 'super_admin' || auth.user?.email === 'admin@trc.local') 
+        ? '/admin' 
+        : '/dashboard'
+    }
+  },
   {
     path: "/unauthorized",
     name: "Unauthorized",

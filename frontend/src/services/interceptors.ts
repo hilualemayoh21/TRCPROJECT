@@ -23,7 +23,7 @@ export function registerInterceptors(api: AxiosInstance) {
 
       // 🌐 Network / CORS / timeout (no response)
       if (!error.response) {
-        return Promise.reject({ message: 'Network error. Please check your connection.' })
+        return Promise.reject({ message: 'Server is starting up — please wait a moment and try again.' })
       }
 
       // 🔐 Unauthorized → logout + redirect

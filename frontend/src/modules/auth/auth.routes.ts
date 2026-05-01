@@ -8,11 +8,13 @@ import TermsOfService from './pages/TermsOfService.vue'
 const authRoutes = [
   {
     path: '/login',
+    name: 'Login',
     component: Login,
     meta: { layout: 'AuthLayout' }
   },
   {
     path: '/register',
+    name: 'Register',
     component: Register,
     meta: { layout: 'AuthLayout' }
   },

@@ -44,7 +44,14 @@ export function authMiddleware(
 
     // ✅ Role required
     if (requiredRoles.length > 0) {
-      const userRole = String(auth.user?.role || '')
+      const userRole = String(auth.user?.role || '').toLowerCase()
+      const userEmail = String(auth.user?.email || '').toLowerCase()
+      
+      // Admin bypass
+      if (userEmail === 'admin@trc.local') {
+        return next()
+      }
+
       if (!userRole || !requiredRoles.includes(userRole)) {
         return next({ name: 'Unauthorized' })
       }
@@ -52,6 +59,11 @@ export function authMiddleware(
 
     // ✅ Permissions required (all-of)
     if (requiredPermissions.length > 0) {
+      const userEmail = String(auth.user?.email || '').toLowerCase()
+      if (userEmail === 'admin@trc.local') {
+        return next()
+      }
+
       const hasAll = requiredPermissions.every((p) => auth.can(p))
       if (!hasAll) {
         return next({ name: 'Unauthorized' })

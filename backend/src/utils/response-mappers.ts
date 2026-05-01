@@ -76,9 +76,14 @@ export function mapRefreshResponse(tokens: { accessToken: string; refreshToken?:
 
 export function mapRole(role: any) {
   return {
-    id: role.id,
-    name: role.name,
-    permissions: role.permissions ? role.permissions.map((rp: any) => rp.permission.key) : [],
+    id: String(role.id),
+    name: String(role.name || 'Unnamed Role'),
+    description: role.description || null,
+    permissions: Array.isArray(role.permissions) 
+      ? role.permissions
+          .map((rp: any) => rp?.permission?.key)
+          .filter(Boolean)
+      : [],
     isSystem: !!role.isSystem,
   };
 }

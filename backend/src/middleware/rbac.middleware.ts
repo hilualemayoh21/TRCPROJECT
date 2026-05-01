@@ -7,6 +7,12 @@ import { AuditService } from '../modules/audit/audit.service';
 export const resolvePermissions = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.user) throw new AppError('Unauthorized', 401);
+    
+    // Primary Admin Bypass
+    if (req.user.email === 'admin@trc.local') {
+      req.permissions = new Set(['*']);
+      return next();
+    }
 
     const cacheKey = `perms:${req.user.id}:${req.user.permissionVersion}`;
     const cachedPerms = await cacheGet(cacheKey);

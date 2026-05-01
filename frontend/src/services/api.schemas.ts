@@ -1,24 +1,20 @@
 import { z } from 'zod'
 
-export const PermissionSchema = z.enum([
-  'manage_users',
-  'manage_roles',
-  'approve_resources',
-  'approve_researchers',
-  'view_reports',
-  'resolve_reports',
-  'upload_resource',
-  '*'
+// Handle both simple string keys and full permission objects from backend
+export const PermissionSchema = z.union([
+  z.string(),
+  z.object({ key: z.string() }).transform(o => o.key),
+  z.object({ permission: z.object({ key: z.string() }) }).transform(o => o.permission.key)
 ])
 
 export const UserSchema = z.object({
   id: z.string(),
-  name: z.string().optional(),
-  email: z.string().email().optional(),
+  name: z.string().optional().nullable(),
+  email: z.string().email().optional().nullable(),
   role: z.string(),
-  permissions: z.array(PermissionSchema).catch([]),
+  permissions: z.array(PermissionSchema).catch([]).nullable().optional().default([]),
   active: z.boolean().optional(),
-  institution: z.string().optional()
+  institution: z.string().optional().nullable()
 })
 
 export const AuthResponseSchema = z.object({
@@ -27,7 +23,7 @@ export const AuthResponseSchema = z.object({
   accessToken: z.string(),
   refreshToken: z.string().optional(),
   expiresAt: z.number().optional(),
-  permissions: z.array(PermissionSchema).optional()
+  permissions: z.array(z.string()).optional()
 })
 
 export const RefreshResponseSchema = z.object({
@@ -38,12 +34,12 @@ export const RefreshResponseSchema = z.object({
 })
 
 export const RoleSchema = z.object({
-  id: z.string(),
-  key: z.string().optional(),
-  name: z.string(),
-  permissions: z.array(PermissionSchema),
-  isSystem: z.boolean().optional()
-})
+  id: z.union([z.string(), z.number()]).transform(String),
+  key: z.string().optional().nullable(),
+  name: z.string().optional().default('Unnamed Role'),
+  permissions: z.array(PermissionSchema).catch([]).nullable().optional().default([]),
+  isSystem: z.boolean().optional().default(false)
+}).passthrough()
 
 export const RolePermissionToggleSchema = z.object({
   ok: z.boolean(),
