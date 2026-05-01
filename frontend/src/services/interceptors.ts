@@ -7,8 +7,10 @@ export function registerInterceptors(api: AxiosInstance) {
     const auth = useAuthStore()
 
     if (auth.accessToken) {
-      config.headers = (config.headers ?? {}) as any
       config.headers.Authorization = `Bearer ${auth.accessToken}`
+      console.debug(`[API Interceptor] Attached token to ${config.url}`)
+    } else {
+      console.debug(`[API Interceptor] No token for ${config.url}`)
     }
 
     return config
