@@ -6,9 +6,11 @@ export function registerInterceptors(api: AxiosInstance) {
   api.interceptors.request.use((config) => {
     const auth = useAuthStore()
 
-    if (auth.accessToken) {
+    if (auth.accessToken && typeof auth.accessToken === 'string') {
       config.headers.Authorization = `Bearer ${auth.accessToken}`
       console.debug(`[API Interceptor] Attached token to ${config.url}`)
+    } else if (auth.accessToken) {
+      console.error(`[API Interceptor] Invalid token type for ${config.url}:`, typeof auth.accessToken)
     } else {
       console.debug(`[API Interceptor] No token for ${config.url}`)
     }

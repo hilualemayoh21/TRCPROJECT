@@ -37,7 +37,11 @@ export const resolvePermissions = async (req: Request, res: Response, next: Next
       if (ur.role.id === 'super_admin' || ur.role.name === 'Super Admin') {
         permissions.add('*');
       }
-      ur.role.permissions.forEach((rp: any) => permissions.add(rp.permission.key));
+      ur.role.permissions?.forEach((rp: any) => {
+        if (rp.permission?.key) {
+          permissions.add(rp.permission.key);
+        }
+      });
     }
 
     // Cache permissions for 10 minutes
