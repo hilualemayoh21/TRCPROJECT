@@ -36,9 +36,10 @@ export const RefreshResponseSchema = z.object({
 export const RoleSchema = z.object({
   id: z.union([z.string(), z.number()]).transform(String),
   key: z.string().optional().nullable(),
-  name: z.string().optional().default('Unnamed Role'),
-  permissions: z.array(PermissionSchema).catch([]).nullable().optional().default([]),
-  isSystem: z.boolean().optional().default(false)
+  name: z.string().nullable().optional().default('Unnamed Role').catch('Unnamed Role'),
+  description: z.string().nullable().optional().default(null).catch(null),
+  permissions: z.array(z.any()).catch([]).nullable().optional().default([]),
+  isSystem: z.boolean().nullable().optional().default(false).catch(false)
 }).passthrough()
 
 export const RolePermissionToggleSchema = z.object({
