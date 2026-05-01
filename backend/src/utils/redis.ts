@@ -3,7 +3,7 @@ import logger from './logger';
 import { config } from '../config';
 
 const REDIS_URL = config.redisUrl;
-const isDev = config.nodeEnv === 'development';
+const isDev = config.env === 'development';
 
 // ── Graceful Redis: in dev, a failed connection doesn't crash the server ──
 
@@ -20,7 +20,7 @@ function createRedis(): Redis | null {
     client.on('error', (err) => {
       if (isDev) {
         // Only log once to avoid spam
-        logger.warn({ code: err.code }, 'Redis unavailable in dev – running without cache/queues');
+        logger.warn({ code: (err as any).code }, 'Redis unavailable in dev – running without cache/queues');
       } else {
         logger.error({ err }, 'Redis connection error');
       }
@@ -61,12 +61,18 @@ getQueues();
 export const auditQueue = {
   add: async (name: string, data: any) => {
     if (_auditQueue) return _auditQueue.add(name, data);
+  },
+  close: async () => {
+    if (_auditQueue) return _auditQueue.close();
   }
 };
 
 export const emailQueue = {
   add: async (name: string, data: any) => {
     if (_emailQueue) return _emailQueue.add(name, data);
+  },
+  close: async () => {
+    if (_emailQueue) return _emailQueue.close();
   }
 };
 

@@ -2,7 +2,7 @@ import { config } from './config';
 import app from './app';
 import './modules/audit/audit.worker'; // Register worker
 import { prisma } from './prisma/client';
-import { redis, auditQueue } from './utils/redis';
+import { redis, auditQueue, emailQueue } from './utils/redis';
 import logger from './utils/logger';
 
 const server = app.listen(config.port, () => {
@@ -17,7 +17,8 @@ const gracefulShutdown = async (signal: string) => {
     
     try {
       await auditQueue.close();
-      logger.info('Audit queue closed.');
+      await emailQueue.close();
+      logger.info('Queues closed.');
       
       await redis.quit();
       logger.info('Redis connection closed.');
