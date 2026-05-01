@@ -8,7 +8,6 @@ import { errorHandler } from './middleware/error.middleware';
 import { tracingMiddleware } from './middleware/tracing.middleware';
 import { authRateLimiter } from './middleware/rate-limit.middleware';
 import authRoutes from './modules/auth/auth.routes';
-import rolesRoutes from './modules/roles/roles.routes';
 import { adminUsersRouter, usersRouter } from './modules/users/users.routes';
 import auditRoutes from './modules/audit/audit.routes';
 import adminRoutes from './modules/admin/admin.routes';
@@ -31,7 +30,6 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Routes
 app.use('/auth', authRateLimiter, authRoutes);
-app.use('/admin', rolesRoutes);
 app.use('/users', usersRouter);
 app.use('/admin/users', adminUsersRouter);
 app.use('/admin', auditRoutes);
