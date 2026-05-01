@@ -28,13 +28,20 @@ export function registerInterceptors(api: AxiosInstance) {
 
       // 🔐 Unauthorized → logout + redirect
       if (status === 401) {
+        // Don't redirect if we are already on login or if this IS the login request
+        const isLoginRequest = error.config?.url?.includes('/auth/login')
+        const isOnLoginPage = window.location.pathname === '/login'
+
         await auth.logout()
-        try {
-          const { default: router } = await import('@/router')
-          const redirect = `${window.location.pathname}${window.location.search}${window.location.hash}`
-          await router.replace({ name: 'Login', query: { redirect } })
-        } catch {
-          window.location.href = '/login'
+
+        if (!isLoginRequest && !isOnLoginPage) {
+          try {
+            const { default: router } = await import('@/router')
+            const redirect = `${window.location.pathname}${window.location.search}${window.location.hash}`
+            await router.replace({ name: 'Login', query: { redirect } })
+          } catch {
+            window.location.href = '/login'
+          }
         }
         return Promise.reject(error.response.data || { message: 'Unauthorized' })
       }

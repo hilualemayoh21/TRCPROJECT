@@ -151,11 +151,19 @@ export class AuthService {
   }
 
   static async logout(token: string) {
-    await prisma.refreshToken.updateMany({
-      where: { token },
-      data: { revoked: true }
-    });
-    return { ok: true };
+    try {
+      if (!token || typeof token !== 'string') return { ok: true };
+      
+      await prisma.refreshToken.updateMany({
+        where: { token },
+        data: { revoked: true }
+      });
+      return { ok: true };
+    } catch (error) {
+      // Log error but don't crash logout
+      console.error('[AuthService] Logout failed:', error);
+      return { ok: true };
+    }
   }
 
   private static async generateAuthResponse(user: any) {

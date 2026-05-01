@@ -60,7 +60,12 @@ async function main() {
 
   const admin = await prisma.user.upsert({
     where: { email: adminEmail },
-    update: { passwordHash },
+    update: { 
+      passwordHash,
+      failedLoginAttempts: 0,
+      lockUntil: null,
+      status: 'active'
+    },
     create: {
       email: adminEmail,
       name: 'TRC Admin',
@@ -69,11 +74,15 @@ async function main() {
     }
   });
 
-  await prisma.userRole.upsert({
-    where: { userId_roleId: { userId: admin.id, roleId: 'super_admin' } },
-    update: {},
-    create: { userId: admin.id, roleId: 'super_admin' }
-  });
+  // Ensure the admin has the super_admin role
+  const superAdminRole = await prisma.role.findUnique({ where: { id: 'super_admin' } });
+  if (superAdminRole) {
+    await prisma.userRole.upsert({
+      where: { userId_roleId: { userId: admin.id, roleId: superAdminRole.id } },
+      update: {},
+      create: { userId: admin.id, roleId: superAdminRole.id }
+    });
+  }
 
   console.log('✅ Seeding complete.');
   console.log('Email: admin@trc.local');
