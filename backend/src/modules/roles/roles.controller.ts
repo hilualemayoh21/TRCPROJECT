@@ -31,8 +31,11 @@ export class RolesController {
       const existing = await prisma.role.findUnique({ where: { name } });
       if (existing) throw new AppError('Role name must be unique', 400);
 
+      // Generate human-readable ID from role name
+      const roleId = name.toLowerCase().replace(/\s+/g, '_');
+      
       const role = await prisma.role.create({
-        data: { name, description }
+        data: { id: roleId, name, description }
       });
 
       if (permissions && Array.isArray(permissions)) {
