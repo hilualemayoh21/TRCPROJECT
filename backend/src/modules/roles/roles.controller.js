@@ -66,8 +66,8 @@ class RolesController {
             const role = await client_1.prisma.role.findUnique({ where: { id } });
             if (!role)
                 throw new api_1.AppError('Role not found', 404);
-            if (role.isSystem)
-                throw new api_1.AppError('Cannot modify system roles directly', 403);
+            if (role.isSystem && (name || description))
+                throw new api_1.AppError('Cannot modify system role name or description', 403);
             const updated = await client_1.prisma.role.update({
                 where: { id },
                 data: { name, description }
