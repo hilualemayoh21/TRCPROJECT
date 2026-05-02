@@ -31,8 +31,12 @@ class RolesController {
             const existing = await client_1.prisma.role.findUnique({ where: { name } });
             if (existing)
                 throw new api_1.AppError('Role name must be unique', 400);
+            
+            // Generate human-readable ID from role name
+            const roleId = name.toLowerCase().replace(/\s+/g, '_');
+            
             const role = await client_1.prisma.role.create({
-                data: { name, description }
+                data: { id: roleId, name, description }
             });
             if (permissions && Array.isArray(permissions)) {
                 for (const p of permissions) {
