@@ -30,9 +30,10 @@ export class ResourcesController {
   /** GET /resources/:id — Single resource detail */
   static async getById(req: Request, res: Response, next: NextFunction) {
     try {
-      const resource = await ResourcesService.findById(req.params.id);
+      const id = req.params.id as string;
+      const resource = await ResourcesService.findById(id);
       // Increment view count in background
-      ResourcesService.incrementView(req.params.id).catch(() => {});
+      ResourcesService.incrementView(id).catch(() => {});
       res.json(resource);
     } catch (e) { next(e); }
   }
@@ -55,11 +56,12 @@ export class ResourcesController {
   /** PATCH /resources/:id — Update resource (owner or admin) */
   static async update(req: Request, res: Response, next: NextFunction) {
     try {
+      const id = req.params.id as string;
       const data = updateResourceSchema.parse(req.body);
       const isAdmin = req.permissions?.has('*') || req.permissions?.has('approve_resources') || false;
-      const resource = await ResourcesService.update(req.params.id, data, req.user!.id, isAdmin);
+      const resource = await ResourcesService.update(id, data, req.user!.id, isAdmin);
 
-      AuditService.log(req, req.user!.id, 'resource.updated', 'Resource', req.params.id).catch(() => {});
+      AuditService.log(req, req.user!.id, 'resource.updated', 'Resource', id).catch(() => {});
 
       res.json(resource);
     } catch (e: any) {
@@ -71,10 +73,11 @@ export class ResourcesController {
   /** DELETE /resources/:id — Soft-delete resource */
   static async delete(req: Request, res: Response, next: NextFunction) {
     try {
+      const id = req.params.id as string;
       const isAdmin = req.permissions?.has('*') || req.permissions?.has('approve_resources') || false;
-      await ResourcesService.delete(req.params.id, req.user!.id, isAdmin);
+      await ResourcesService.delete(id, req.user!.id, isAdmin);
 
-      AuditService.log(req, req.user!.id, 'resource.deleted', 'Resource', req.params.id).catch(() => {});
+      AuditService.log(req, req.user!.id, 'resource.deleted', 'Resource', id).catch(() => {});
 
       res.json({ ok: true, message: 'Resource deleted' });
     } catch (e) { next(e); }
@@ -83,10 +86,11 @@ export class ResourcesController {
   /** POST /resources/:id/approve — Admin approve */
   static async approve(req: Request, res: Response, next: NextFunction) {
     try {
+      const id = req.params.id as string;
       const { note } = approvalSchema.parse(req.body);
-      const resource = await ResourcesService.approve(req.params.id, req.user!.id, note);
+      const resource = await ResourcesService.approve(id, req.user!.id, note);
 
-      AuditService.log(req, req.user!.id, 'resource.approved', 'Resource', req.params.id).catch(() => {});
+      AuditService.log(req, req.user!.id, 'resource.approved', 'Resource', id).catch(() => {});
 
       res.json(resource);
     } catch (e: any) {
@@ -98,10 +102,11 @@ export class ResourcesController {
   /** POST /resources/:id/reject — Admin reject */
   static async reject(req: Request, res: Response, next: NextFunction) {
     try {
+      const id = req.params.id as string;
       const { note } = approvalSchema.parse(req.body);
-      const resource = await ResourcesService.reject(req.params.id, req.user!.id, note);
+      const resource = await ResourcesService.reject(id, req.user!.id, note);
 
-      AuditService.log(req, req.user!.id, 'resource.rejected', 'Resource', req.params.id).catch(() => {});
+      AuditService.log(req, req.user!.id, 'resource.rejected', 'Resource', id).catch(() => {});
 
       res.json(resource);
     } catch (e: any) {
@@ -113,8 +118,9 @@ export class ResourcesController {
   /** POST /resources/:id/comments — Add comment */
   static async addComment(req: Request, res: Response, next: NextFunction) {
     try {
+      const id = req.params.id as string;
       const { content } = commentSchema.parse(req.body);
-      const comment = await ResourcesService.addComment(req.params.id, content, req.user!.id);
+      const comment = await ResourcesService.addComment(id, content, req.user!.id);
       res.status(201).json(comment);
     } catch (e: any) {
       if (e.name === 'ZodError') return next(new ValidationError('Validation failed', e.errors));
@@ -125,9 +131,10 @@ export class ResourcesController {
   /** GET /resources/:id/comments — List comments */
   static async getComments(req: Request, res: Response, next: NextFunction) {
     try {
+      const id = req.params.id as string;
       const page = parseInt(req.query.page as string) || 1;
       const pageSize = Math.min(parseInt(req.query.pageSize as string) || 20, 100);
-      const result = await ResourcesService.getComments(req.params.id, page, pageSize);
+      const result = await ResourcesService.getComments(id, page, pageSize);
       res.json(result);
     } catch (e) { next(e); }
   }
@@ -135,8 +142,9 @@ export class ResourcesController {
   /** POST /resources/:id/rate — Rate resource */
   static async rate(req: Request, res: Response, next: NextFunction) {
     try {
+      const id = req.params.id as string;
       const { value } = ratingSchema.parse(req.body);
-      const rating = await ResourcesService.rateResource(req.params.id, req.user!.id, value);
+      const rating = await ResourcesService.rateResource(id, req.user!.id, value);
       res.json(rating);
     } catch (e: any) {
       if (e.name === 'ZodError') return next(new ValidationError('Validation failed', e.errors));

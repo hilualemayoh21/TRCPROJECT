@@ -62,11 +62,12 @@ export class AdminController {
   /** POST /admin/researchers/:id/approve — Approve researcher */
   static async approveResearcher(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = await prisma.user.findFirst({ where: { id: req.params.id, status: 'pending' } });
+      const id = req.params.id as string;
+      const user = await prisma.user.findFirst({ where: { id, status: 'pending' } });
       if (!user) throw new NotFoundError('Pending researcher not found');
 
-      await prisma.user.update({ where: { id: req.params.id }, data: { status: 'active' } });
-      AuditService.log(req, req.user!.id, 'researcher.approved', 'User', req.params.id).catch(() => {});
+      await prisma.user.update({ where: { id }, data: { status: 'active' } });
+      AuditService.log(req, req.user!.id, 'researcher.approved', 'User', id).catch(() => {});
 
       res.json({ ok: true, message: 'Researcher approved' });
     } catch (e) { next(e); }
@@ -75,11 +76,12 @@ export class AdminController {
   /** POST /admin/researchers/:id/reject — Reject researcher */
   static async rejectResearcher(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = await prisma.user.findFirst({ where: { id: req.params.id, status: 'pending' } });
+      const id = req.params.id as string;
+      const user = await prisma.user.findFirst({ where: { id, status: 'pending' } });
       if (!user) throw new NotFoundError('Pending researcher not found');
 
-      await prisma.user.update({ where: { id: req.params.id }, data: { status: 'inactive' } });
-      AuditService.log(req, req.user!.id, 'researcher.rejected', 'User', req.params.id).catch(() => {});
+      await prisma.user.update({ where: { id }, data: { status: 'inactive' } });
+      AuditService.log(req, req.user!.id, 'researcher.rejected', 'User', id).catch(() => {});
 
       res.json({ ok: true, message: 'Researcher rejected' });
     } catch (e) { next(e); }
@@ -138,18 +140,19 @@ export class AdminController {
   /** POST /admin/reports/:id/resolve — Resolve a report */
   static async resolveReport(req: Request, res: Response, next: NextFunction) {
     try {
+      const id = req.params.id as string;
       const { action, note } = req.body as { action?: string; note?: string };
-      const report = await prisma.report.findUnique({ where: { id: req.params.id } });
+      const report = await prisma.report.findUnique({ where: { id } });
       if (!report) throw new NotFoundError('Report not found');
       if (report.status !== 'open') throw new AppError('Report already resolved', 400);
 
       const status = action === 'dismiss' ? 'dismissed' : 'resolved';
       const updated = await prisma.report.update({
-        where: { id: req.params.id },
+        where: { id },
         data: { status, resolvedBy: req.user!.id, resolvedAt: new Date(), resolveNote: note || null },
       });
 
-      AuditService.log(req, req.user!.id, `report.${status}`, 'Report', req.params.id, { entityType: report.entityType, entityId: report.entityId }).catch(() => {});
+      AuditService.log(req, req.user!.id, `report.${status}`, 'Report', id, { entityType: report.entityType, entityId: report.entityId }).catch(() => {});
 
       res.json(updated);
     } catch (e) { next(e); }
