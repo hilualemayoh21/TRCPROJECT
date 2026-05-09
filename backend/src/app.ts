@@ -32,14 +32,17 @@ app.use(tracingMiddleware);
 // API Documentation
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+// Debug Ping (to verify deployment updates)
+app.get('/ping', (req, res) => res.send('pong'));
+
 // Routes
+app.use('/public', publicRoutes);
+app.use('/resources', resourceRoutes);
 app.use('/auth', authRateLimiter, authRoutes);
 app.use('/users', usersRouter);
 app.use('/admin/users', adminUsersRouter);
 app.use('/admin', auditRoutes);
 app.use('/admin', adminRoutes);
-app.use('/resources', resourceRoutes);
-app.use('/public', publicRoutes);
 
 // Health Check
 app.get('/health', async (req, res) => {

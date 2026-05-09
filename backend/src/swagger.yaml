@@ -81,6 +81,34 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/User' }
+  /public/stats:
+    get:
+      summary: Get platform statistics
+      tags: [Public]
+      responses:
+        200:
+          description: Global stats
+  /public/categories:
+    get:
+      summary: Get resource categories
+      tags: [Public]
+      responses:
+        200:
+          description: List of categories
+  /resources:
+    get:
+      summary: List all resources
+      tags: [Resources]
+      responses:
+        200:
+          description: List of resources
+    post:
+      summary: Upload a resource
+      tags: [Resources]
+      security: [{ bearerAuth: [] }]
+      responses:
+        201:
+          description: Resource created
   /health:
     get:
       summary: Health check
