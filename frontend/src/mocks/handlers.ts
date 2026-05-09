@@ -341,7 +341,7 @@ export function handleMockRequest(ctx: MockContext): unknown {
   }
 
   // ---- Permissions ----
-  const rolePermMatch = path.match(/^\/roles\/([^/]+)\/permissions$/)
+  const rolePermMatch = path.match(/^\/(?:admin\/)?roles\/([^/]+)\/permissions$/)
   if (rolePermMatch) {
     const roleId = decodeURIComponent(rolePermMatch[1])
     const role = mockDb.roles.find((r) => r.id === roleId)

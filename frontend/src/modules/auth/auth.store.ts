@@ -13,6 +13,7 @@ type AuthUser = {
   permissions: Permission[]
   active?: boolean
   institution?: string
+  status?: string
 }
 
 type AuthTokens = {
@@ -238,6 +239,10 @@ export const useAuthStore = defineStore('auth', {
       this.persistSession()
     },
 
+    async fetchUser() {
+      return this.validateSessionWithMe()
+    },
+
     async initialize(isFromStorageEvent = false) {
       if (initializePromise) return initializePromise
 
@@ -291,6 +296,10 @@ export const useAuthStore = defineStore('auth', {
     },
 
     getPostLoginRoute() {
+      if (this.user?.status === 'pending') {
+        return '/pending-approval';
+      }
+
       const role = String(this.user?.role || '').toLowerCase();
       const email = String(this.user?.email || '').toLowerCase();
       console.info('[AuthStore] Determining post-login route for:', { email, role });

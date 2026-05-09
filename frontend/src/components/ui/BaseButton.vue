@@ -3,8 +3,8 @@
     v-bind="$attrs"
     :type="type"
     :disabled="disabled || loading"
-    class="relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-4 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
-    :class="variantClasses"
+    class="relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-4 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
+    :class="[fullWidth ? 'w-full' : 'w-auto shrink-0', variantClasses]"
     @click="$emit('click', $event)"
   >
     <!-- Loading spinner -->
@@ -40,6 +40,8 @@ interface Props {
   size?: 'sm' | 'md' | 'lg'
   loading?: boolean
   disabled?: boolean
+  /** When false, button sizes to content (toolbar / header actions). Default true for form-style full-width buttons. */
+  fullWidth?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -48,27 +50,28 @@ const props = withDefaults(defineProps<Props>(), {
   size: 'md',
   loading: false,
   disabled: false,
+  fullWidth: true,
 })
 
 defineEmits<{ click: [e: MouseEvent] }>()
 
 const variantClasses = computed(() => {
   const sizes: Record<string, string> = {
-    sm: 'px-4 py-2.5 text-sm',
-    md: 'px-5 py-3.5 text-sm',
-    lg: 'px-6 py-4 text-base',
+    sm: 'px-3.5 py-2 text-[0.7rem] font-black uppercase tracking-widest',
+    md: 'px-5 py-3.5 text-sm font-black uppercase tracking-widest',
+    lg: 'px-8 py-4 text-base font-black uppercase tracking-widest',
   }
   const variants: Record<string, string> = {
     primary:
-      'bg-trc text-white shadow-trc-btn hover:shadow-trc-btn-hover focus-visible:ring-trc-light/40',
+      'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/20 hover:scale-[1.02] hover:shadow-violet-500/30 focus-visible:ring-violet-500/40 dark:shadow-none',
     danger:
-      'bg-red-600 text-white shadow-sm hover:bg-red-700 focus-visible:ring-red-500/40',
+      'bg-red-500 text-white shadow-lg shadow-red-500/20 hover:bg-red-600 focus-visible:ring-red-500/40 dark:shadow-none',
     secondary:
-      'border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 focus-visible:ring-gray-300',
+      'border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus-visible:ring-gray-300 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 dark:focus-visible:ring-white/10',
     ghost:
-      'bg-transparent text-gray-600 hover:bg-gray-100 focus-visible:ring-gray-200',
+      'bg-transparent text-gray-600 hover:bg-gray-100 focus-visible:ring-gray-200 dark:text-gray-400 dark:hover:bg-white/5',
     social:
-      'border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 focus-visible:ring-gray-300',
+      'border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus-visible:ring-gray-300 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10',
   }
   return [sizes[props.size], variants[props.variant]].join(' ')
 })

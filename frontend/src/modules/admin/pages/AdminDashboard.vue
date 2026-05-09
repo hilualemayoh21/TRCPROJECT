@@ -129,6 +129,8 @@ const overview = reactive({
   totalUsers: 0,
   totalResources: 0,
   pendingApprovals: 0,
+  pendingResearchers: 0,
+  openReports: 0,
   recentActivity: [] as any[]
 })
 
@@ -140,25 +142,24 @@ const statCards = computed(() => [
   {
     label: 'Total Users',
     value: overview.totalUsers.toLocaleString(),
-    change: '+12%',
     icon: TeamOutlined,
     gradient: 'linear-gradient(135deg, #6C2BD9 0%, #4a1a9e 100%)',
   },
   {
-    label: 'Active Roles',
-    value: '5',
+    label: 'Pending Researchers',
+    value: overview.pendingResearchers.toLocaleString(),
     icon: FileProtectOutlined,
     gradient: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)',
   },
   {
-    label: 'Resource Types',
-    value: overview.totalResources.toLocaleString(),
+    label: 'Pending Resources',
+    value: overview.pendingApprovals.toLocaleString(),
     icon: AppstoreOutlined,
     gradient: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
   },
   {
-    label: 'Admin Logs',
-    value: overview.recentActivity.length.toString(),
+    label: 'Open Reports',
+    value: overview.openReports.toLocaleString(),
     icon: AuditOutlined,
     gradient: 'linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)',
   },
@@ -190,6 +191,8 @@ async function fetchOverview() {
     overview.totalUsers = (data as any).totalUsers ?? 0
     overview.totalResources = (data as any).totalResources ?? 0
     overview.pendingApprovals = (data as any).pendingApprovals ?? 0
+    overview.pendingResearchers = (data as any).pendingResearchers ?? 0
+    overview.openReports = (data as any).openReports ?? 0
     overview.recentActivity = normalizeActivity((data as any).recentActivity)
   } catch (e: any) {
     error.value = getErrorMessage(e, 'Failed to load dashboard overview.')

@@ -14,19 +14,19 @@
 
     <!-- Input wrapper -->
     <div
-      class="relative flex items-center rounded-xl border bg-gray-50 transition-all duration-200"
+      class="relative flex items-center rounded-xl border transition-all duration-200"
       :class="[
         hasError
-          ? 'border-red-400 shadow-[0_0_0_3px_rgba(239,68,68,0.12)]'
+          ? 'border-red-400 bg-red-50/10 shadow-[0_0_0_3px_rgba(239,68,68,0.12)] dark:border-red-500/50 dark:bg-red-500/5'
           : isFocused
-            ? 'border-purple-500/50 bg-white shadow-[0_0_0_3px_rgba(108,43,217,0.12)]'
-            : 'border-gray-200 hover:border-gray-300'
+            ? 'border-purple-500/50 bg-white shadow-[0_0_0_3px_rgba(108,43,217,0.12)] dark:bg-[#0d1117] dark:shadow-purple-500/10'
+            : 'border-gray-200 bg-gray-50 hover:border-gray-300 dark:border-white/5 dark:bg-white/5 dark:hover:border-white/10'
       ]"
     >
       <!-- Left icon slot -->
       <span
         v-if="$slots.icon"
-        class="pointer-events-none absolute left-3.5 flex shrink-0 text-gray-400"
+        class="pointer-events-none absolute left-3.5 flex shrink-0 text-gray-400 dark:text-gray-500"
         :class="{ 'text-purple-500': isFocused && !hasError }"
         aria-hidden="true"
       >
@@ -43,7 +43,7 @@
         :autocomplete="autocomplete"
         :disabled="disabled"
         :required="required"
-        class="w-full bg-transparent py-3.5 text-sm text-gray-900 outline-none placeholder:text-gray-400 disabled:cursor-not-allowed disabled:opacity-60"
+        class="w-full bg-transparent py-3.5 text-sm text-gray-900 outline-none placeholder:text-gray-400 disabled:cursor-not-allowed disabled:opacity-60 dark:text-white dark:placeholder:text-gray-500"
         :class="[$slots.icon ? 'pl-10' : 'pl-4', $slots.action ? 'pr-11' : 'pr-4']"
         @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
         @focus="isFocused = true"

@@ -73,3 +73,23 @@ export function useAssignRoleMutation() {
   })
 }
 
+export function useCreateUserMutation() {
+  const queryClient = useQueryClient()
+  const authStore = useAuthStore()
+  return useMutation({
+    mutationFn: async (payload: { name: string; email: string; role: RoleKey; password?: string }) => {
+      if (!authStore.can('manage_users')) {
+        throw new Error('You are not allowed to create users.')
+      }
+      return adminApi.createUser(payload)
+    },
+    onSuccess: async () => {
+      notifyAdminSuccess('User created successfully')
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
+    },
+    onError: (error) => {
+      notifyAdminError(error, 'Failed to create user.')
+    }
+  })
+}
+

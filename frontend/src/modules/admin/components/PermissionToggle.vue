@@ -1,59 +1,62 @@
 <template>
-  <div class="flex items-center justify-between gap-4 rounded-xl border border-gray-100 bg-white px-4 py-3">
-    <div class="min-w-0">
-      <div class="flex items-center gap-2">
-        <p class="text-sm font-black text-gray-900 truncate">{{ permissionLabel }}</p>
-        <button
-          v-if="description"
-          type="button"
-          class="inline-flex h-6 w-6 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 transition"
-          :title="description"
-          aria-label="Permission description"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path
-              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-7h2v7zm0-9h-2V7h2v3z"
-            />
-          </svg>
-        </button>
+  <div
+    class="group flex items-center justify-between gap-6 rounded-[1.5rem] border border-gray-100 bg-white p-5 transition-all duration-300 hover:border-violet-200 hover:shadow-xl hover:shadow-violet-500/5 dark:border-white/5 dark:bg-[#0d1117] dark:hover:border-violet-500/30"
+  >
+    <div class="flex items-center gap-5 min-w-0">
+      <!-- Icon Indicator -->
+      <div 
+        class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl transition-all duration-500"
+        :class="localEnabled ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/20' : 'bg-gray-50 text-gray-400 dark:bg-white/5'"
+      >
+        <svg v-if="localEnabled" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        </svg>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+        </svg>
       </div>
-      <p v-if="error" class="mt-1 text-xs font-bold text-red-600">{{ error }}</p>
-      <p v-else class="mt-1 text-xs font-semibold text-gray-500">
-        {{ localEnabled ? 'Enabled' : 'Disabled' }}
-      </p>
+
+      <div class="min-w-0 space-y-1">
+        <div class="flex items-center gap-3">
+          <p class="text-base font-black capitalize tracking-tight text-gray-900 truncate dark:text-white">{{ permissionLabel }}</p>
+          <div 
+            v-if="localEnabled"
+            class="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[0.6rem] font-black uppercase tracking-widest text-emerald-500 ring-1 ring-inset ring-emerald-500/20"
+          >
+            <span class="h-1 w-1 rounded-full bg-emerald-500 animate-pulse"></span>
+            Active
+          </div>
+        </div>
+        <p class="text-xs font-medium leading-relaxed text-gray-500 line-clamp-2 dark:text-gray-400">
+          {{ description || (localEnabled ? 'Currently active for this role.' : 'Inactive for this role.') }}
+        </p>
+      </div>
     </div>
 
-    <div class="flex items-center gap-3 shrink-0">
-      <span
-        class="text-[0.7rem] font-black uppercase tracking-widest"
-        :class="localEnabled ? 'text-trc' : 'text-gray-400'"
-      >
-        {{ localEnabled ? 'ON' : 'OFF' }}
-      </span>
-
+    <div class="flex items-center gap-4 shrink-0">
       <button
         type="button"
-        class="relative inline-flex h-7 w-12 items-center rounded-full transition disabled:opacity-60 disabled:cursor-not-allowed"
-        :class="localEnabled ? 'bg-trc' : 'bg-gray-300'"
+        class="relative inline-flex h-8 w-14 items-center rounded-full transition-all duration-500 focus:outline-none disabled:opacity-30 disabled:cursor-not-allowed"
+        :class="localEnabled ? 'bg-gradient-to-r from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/30' : 'bg-gray-200 dark:bg-white/10'"
         :disabled="!canManageRoles || loading"
         @click="toggle()"
         :aria-pressed="localEnabled"
-        :aria-label="`Toggle ${permissionLabel}`"
       >
         <span
-          class="inline-block h-6 w-6 transform rounded-full bg-white shadow transition"
-          :class="localEnabled ? 'translate-x-5' : 'translate-x-1'"
-        />
+          class="inline-block h-6 w-6 transform rounded-full bg-white shadow-xl transition-transform duration-500 ease-spring"
+          :class="localEnabled ? 'translate-x-7' : 'translate-x-1'"
+        >
+          <span v-if="loading" class="absolute inset-0 flex items-center justify-center">
+            <svg class="h-3 w-3 animate-spin text-violet-600" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          </span>
+        </span>
       </button>
-
-      <span v-if="loading" class="text-xs font-bold text-gray-400">Saving…</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { del, post } from '@/services/http'
 import type { Permission } from '@/modules/admin/types/admin.types'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import { useAuthStore } from '@/modules/auth/auth.store'
@@ -95,18 +98,11 @@ watch(
 const permissionLabel = computed(() => permissionKey.value.replace(/_/g, ' '))
 
 async function addPermission(permission: Permission) {
-  return post<{ ok: boolean; permissions: string[] }>(
-    `/roles/${encodeURIComponent(roleId.value)}/permissions`,
-    { permission }
-  )
+  return adminApi.addRolePermission(roleId.value, permission)
 }
 
 async function removePermission(permission: Permission) {
-  // Some backends accept body in DELETE; if yours expects query params, we can adjust.
-  return del<{ ok: boolean; permissions: string[] }>(
-    `/roles/${encodeURIComponent(roleId.value)}/permissions`,
-    { data: { permission } }
-  )
+  return adminApi.removeRolePermission(roleId.value, permission)
 }
 
 async function toggle() {

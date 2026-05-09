@@ -139,8 +139,8 @@
           <!-- Profile -->
           <div class="flex items-center gap-3 pl-3 border-l border-slate-200 dark:border-white/10">
             <div class="hidden md:flex flex-col items-end">
-              <span class="text-sm font-black text-gray-900 dark:text-white">{{ authStore.user?.name || 'Admin' }}</span>
-              <span class="text-xs font-bold text-trc uppercase tracking-wider">{{ authStore.user?.role }}</span>
+              <span class="text-base font-black text-gray-900 dark:text-white">{{ authStore.user?.name || 'Admin' }}</span>
+              <span class="text-[0.65rem] font-bold text-trc uppercase tracking-widest">{{ authStore.user?.role }}</span>
             </div>
             <img
               :src="`https://ui-avatars.com/api/?name=${authStore.user?.name || 'A'}&background=6C2BD9&color=fff`"

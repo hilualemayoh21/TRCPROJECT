@@ -118,6 +118,7 @@ export class AuthService {
         name,
         passwordHash,
         institution,
+        status: (role === 'researcher' || role === 'Researcher') ? 'pending' : 'active',
         roles: dbRole ? { create: { roleId: dbRole.id } } : undefined
       },
       include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }

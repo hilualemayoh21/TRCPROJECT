@@ -13,7 +13,8 @@ async function main() {
     'view_audit_logs',
     'view_dashboard',
     'approve_resources',
-    'resolve_reports'
+    'resolve_reports',
+    'upload_resources',
   ];
 
   const permMap: Record<string, string> = {};
@@ -26,6 +27,25 @@ async function main() {
     });
     permMap[key] = p.id;
   }
+
+  // Seed Categories
+  const categories = [
+    { name: 'Research Papers', slug: 'research-papers', description: 'Academic research and publications', color: '#6B3FA0' },
+    { name: 'Historical Archives', slug: 'historical-archives', description: 'Historical documents and records', color: '#C05621' },
+    { name: 'Educational Materials', slug: 'educational-materials', description: 'Textbooks, courses, and learning resources', color: '#2B6CB0' },
+    { name: 'Cultural Heritage', slug: 'cultural-heritage', description: 'Art, music, literature, and traditions', color: '#9B2C2C' },
+    { name: 'News & Reports', slug: 'news-reports', description: 'Current news coverage and investigative reports', color: '#2F855A' },
+    { name: 'Datasets', slug: 'datasets', description: 'Statistical and scientific datasets', color: '#6B46C1' },
+  ];
+
+  for (const cat of categories) {
+    await prisma.category.upsert({
+      where: { slug: cat.slug },
+      update: {},
+      create: cat,
+    });
+  }
+  console.log('✅ Categories seeded');
 
   // 2. Create Roles
   const roles = [

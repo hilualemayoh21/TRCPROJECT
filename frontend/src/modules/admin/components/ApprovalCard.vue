@@ -55,10 +55,10 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { post } from '@/services/http'
-import { getErrorMessage } from '@/utils/getErrorMessage'
 import { notifyAdminError, notifyAdminSuccess } from '@/modules/admin/utils/feedback'
+import { getErrorMessage } from '@/utils/getErrorMessage'
 import { useAuthStore } from '@/modules/auth/auth.store'
+import { adminApi } from '@/modules/admin/services/admin.api'
 
 type ApprovalType = 'researcher' | 'resource'
 
@@ -133,8 +133,11 @@ async function approve() {
 
   loadingApprove.value = true
   try {
-    const endpoint = props.type === 'researcher' ? 'researcher-requests' : 'resource-requests'
-    await post(`/admin/${endpoint}/${encodeURIComponent(props.item.id)}/approve`)
+    if (props.type === 'researcher') {
+      await adminApi.approveResearcher(props.item.id)
+    } else {
+      await adminApi.approveResource(props.item.id)
+    }
     notifyAdminSuccess(props.type === 'researcher' ? 'Researcher approved' : 'Resource approved')
     emit('update', { type: props.type, id: props.item.id, action: 'approve' })
   } catch (e: any) {
@@ -159,8 +162,11 @@ async function reject() {
 
   loadingReject.value = true
   try {
-    const endpoint = props.type === 'researcher' ? 'researcher-requests' : 'resource-requests'
-    await post(`/admin/${endpoint}/${encodeURIComponent(props.item.id)}/reject`)
+    if (props.type === 'researcher') {
+      await adminApi.rejectResearcher(props.item.id)
+    } else {
+      await adminApi.rejectResource(props.item.id)
+    }
     notifyAdminSuccess(props.type === 'researcher' ? 'Researcher rejected' : 'Resource rejected')
     emit('update', { type: props.type, id: props.item.id, action: 'reject' })
   } catch (e: any) {

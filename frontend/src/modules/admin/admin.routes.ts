@@ -29,6 +29,16 @@ export default [
     }
   },
   {
+    path: '/admin/roles/content_manager',
+    name: 'admin-role-content-manager',
+    component: () => import('./components/RoleManagement.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'super_admin'],
+      permissions: ['manage_roles']
+    }
+  },
+  {
     path: '/admin/roles/:id',
     name: 'admin-role-details',
     component: () => import('./pages/RoleDetails.vue'),

@@ -42,6 +42,19 @@ export function authMiddleware(
       })
     }
 
+    // ✅ Status check (Handle pending approvals)
+    if (auth.isAuthenticated) {
+      const isPendingPage = to.name === 'PendingApproval'
+      const isPendingStatus = auth.user?.status === 'pending'
+
+      if (isPendingStatus && !isPendingPage) {
+        return next({ name: 'PendingApproval' })
+      }
+      if (!isPendingStatus && isPendingPage) {
+        return next({ path: auth.getPostLoginRoute() })
+      }
+    }
+
     // ✅ Role required
     if (requiredRoles.length > 0) {
       const userRole = String(auth.user?.role || '').toLowerCase()

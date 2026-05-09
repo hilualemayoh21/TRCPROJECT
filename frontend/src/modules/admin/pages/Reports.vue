@@ -95,7 +95,7 @@ async function resolve(id: string) {
   }
   resolvingId.value = id
   try {
-    await adminApi.resolveReport(id)
+    await adminApi.resolveReport(id, 'resolve')
     const report = reports.value.find((entry) => entry.id === id)
     if (report) report.status = 'resolved'
     notifyAdminSuccess('Report resolved')

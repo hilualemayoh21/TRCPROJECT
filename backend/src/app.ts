@@ -11,6 +11,8 @@ import authRoutes from './modules/auth/auth.routes';
 import { adminUsersRouter, usersRouter } from './modules/users/users.routes';
 import auditRoutes from './modules/audit/audit.routes';
 import adminRoutes from './modules/admin/admin.routes';
+import resourceRoutes from './modules/resources/resources.routes';
+import publicRoutes from './modules/public/public.routes';
 import { prisma } from './prisma/client';
 
 const app = express();
@@ -36,6 +38,8 @@ app.use('/users', usersRouter);
 app.use('/admin/users', adminUsersRouter);
 app.use('/admin', auditRoutes);
 app.use('/admin', adminRoutes);
+app.use('/resources', resourceRoutes);
+app.use('/public', publicRoutes);
 
 // Health Check
 app.get('/health', async (req, res) => {

@@ -59,6 +59,7 @@
             <button
               v-if="canManageUsers"
               type="button"
+              @click="showCreateModal = true"
               class="flex items-center gap-2 h-10 rounded-xl px-5 text-sm font-black
                      bg-trc text-white hover:bg-trc-dark shadow-lg shadow-trc/25 transition"
             >
@@ -214,6 +215,14 @@
         </div>
       </section>
     </div>
+
+    <!-- Create User Modal -->
+    <CreateUserModal
+      :is-open="showCreateModal"
+      :role-options="ROLE_OPTIONS"
+      @close="showCreateModal = false"
+      @submit="handleCreateUser"
+    />
   </DashboardLayout>
 </template>
 
@@ -225,8 +234,9 @@ import { useAuthStore } from '@/modules/auth/auth.store'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import type { AdminUser, RoleKey } from '@/modules/admin/types/admin.types'
 import {
-  useAssignRoleMutation, useUpdateUserStatusMutation, useUsersQuery
+  useAssignRoleMutation, useUpdateUserStatusMutation, useUsersQuery, useCreateUserMutation
 } from '@/modules/admin/queries/useUsersQuery'
+import CreateUserModal from '@/modules/admin/components/CreateUserModal.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -239,11 +249,13 @@ const pagination = reactive({ page: 1, pageSize: 10, total: 0 })
 const totalPages = computed(() => Math.max(1, Math.ceil((pagination.total || 0) / Math.max(1, pagination.pageSize))))
 const ROLE_OPTIONS: RoleKey[] = ['super_admin', 'admin', 'moderator', 'researcher', 'public_user']
 const rowLoading = reactive<Record<string, { status?: boolean; assignRole?: boolean }>>({})
+const showCreateModal = ref(false)
 
 const queryParams = computed(() => ({ page: query.page, pageSize: query.pageSize, q: query.q || undefined }))
 const usersQuery = useUsersQuery(queryParams)
 const updateStatusMutation = useUpdateUserStatusMutation()
 const assignRoleMutation = useAssignRoleMutation()
+const createUserMutation = useCreateUserMutation()
 const loading = computed(() => usersQuery.isPending.value || usersQuery.isFetching.value)
 
 watch(() => usersQuery.data.value, (data) => {
@@ -312,6 +324,15 @@ async function handleRoleChange(user: AdminUser, newRole: RoleKey) {
     error.value = getErrorMessage(e, 'Failed to assign role.')
   } finally {
     setRowLoading(user.id, { assignRole: false })
+  }
+}
+
+async function handleCreateUser(userData: { name: string; email: string; role: RoleKey; password?: string }) {
+  try {
+    await createUserMutation.mutateAsync(userData)
+  } catch (e: any) {
+    error.value = getErrorMessage(e, 'Failed to create user.')
+    throw e
   }
 }
 

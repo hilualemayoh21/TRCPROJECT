@@ -1,6 +1,7 @@
 import Login from './pages/Login.vue'
 import Register from './pages/Register.vue'
 import ForgotPassword from './pages/ForgotPassword.vue'
+import PendingApproval from './pages/PendingApproval.vue'
 import Support from './pages/Support.vue'
 import PrivacyPolicy from './pages/PrivacyPolicy.vue'
 import TermsOfService from './pages/TermsOfService.vue'
@@ -17,6 +18,12 @@ const authRoutes = [
     name: 'Register',
     component: Register,
     meta: { layout: 'AuthLayout' }
+  },
+  {
+    path: '/pending-approval',
+    name: 'PendingApproval',
+    component: PendingApproval,
+    meta: { requiresAuth: true }
   },
   {
     path: '/forgot-password',

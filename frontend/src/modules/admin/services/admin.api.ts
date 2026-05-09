@@ -71,13 +71,23 @@ export const adminApi = {
     for (const endpoint of endpoints) {
       try {
         const data = await get<any>(endpoint)
-        const result = AdminRoleSchema.array().safeParse(data)
+        const candidate = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.items)
+            ? data.items
+            : Array.isArray(data?.roles)
+              ? data.roles
+              : data
+        const result = AdminRoleSchema.array().safeParse(candidate)
         if (!result.success) {
           console.error('[Admin API] listRoles validation failed:', result.error.issues)
-          return data as AdminRole[] // Fallback to raw data
+          return candidate as AdminRole[] // Fallback to raw data
         }
         return result.data as AdminRole[]
       } catch (e) {
+        const status = (e as any)?.status ?? (e as any)?.response?.status
+        // 401 means the session/token is invalid; preserve auth behavior.
+        if (status === 401) throw e
         lastError = e
       }
     }
@@ -100,6 +110,39 @@ export const adminApi = {
     return del(`/admin/roles/${encodeURIComponent(id)}`)
   },
 
+  /** Add/remove a single permission via dedicated endpoints (works for system roles; avoids PATCH on protected roles). */
+  async addRolePermission(roleId: string, permission: Permission) {
+    const id = encodeURIComponent(roleId)
+    const paths = [`/admin/roles/${id}/permissions`, `/roles/${id}/permissions`] as const
+    let lastError: unknown
+    for (const path of paths) {
+      try {
+        return await post<{ ok: boolean; permissions: string[] }>(path, { permission })
+      } catch (e) {
+        const status = (e as any)?.status ?? (e as any)?.response?.status
+        if (status === 401) throw e
+        lastError = e
+      }
+    }
+    throw lastError
+  },
+
+  async removeRolePermission(roleId: string, permission: Permission) {
+    const id = encodeURIComponent(roleId)
+    const paths = [`/admin/roles/${id}/permissions`, `/roles/${id}/permissions`] as const
+    let lastError: unknown
+    for (const path of paths) {
+      try {
+        return await del<{ ok: boolean; permissions: string[] }>(path, { data: { permission } })
+      } catch (e) {
+        const status = (e as any)?.status ?? (e as any)?.response?.status
+        if (status === 401) throw e
+        lastError = e
+      }
+    }
+    throw lastError
+  },
+
   // ---- Approvals ----
   async listResearcherRequests(query: AdminQuery = {}) {
     return get<AdminPaginated<ResearcherApprovalRequest>>('/admin/researchers/requests', {
@@ -108,11 +151,11 @@ export const adminApi = {
   },
 
   async approveResearcher(id: string) {
-    return post(`/admin/researchers/requests/${encodeURIComponent(id)}/approve`)
+    return post(`/admin/researchers/${encodeURIComponent(id)}/approve`)
   },
 
   async rejectResearcher(id: string, reason?: string) {
-    return post(`/admin/researchers/requests/${encodeURIComponent(id)}/reject`, { reason })
+    return post(`/admin/researchers/${encodeURIComponent(id)}/reject`, { reason })
   },
 
   async listPendingResources(query: AdminQuery = {}) {
@@ -121,12 +164,12 @@ export const adminApi = {
     })
   },
 
-  async approveResource(id: string) {
-    return post(`/admin/resources/${encodeURIComponent(id)}/approve`)
+  async approveResource(id: string, note?: string) {
+    return post(`/resources/${encodeURIComponent(id)}/approve`, { note })
   },
 
-  async rejectResource(id: string, reason?: string) {
-    return post(`/admin/resources/${encodeURIComponent(id)}/reject`, { reason })
+  async rejectResource(id: string, note?: string) {
+    return post(`/resources/${encodeURIComponent(id)}/reject`, { note })
   },
 
   // ---- Reports ----
@@ -134,8 +177,8 @@ export const adminApi = {
     return get<AdminPaginated<AdminReport>>('/admin/reports', { params: query })
   },
 
-  async resolveReport(id: string) {
-    return post(`/admin/reports/${encodeURIComponent(id)}/resolve`)
+  async resolveReport(id: string, action: 'resolve' | 'dismiss', note?: string) {
+    return post(`/admin/reports/${encodeURIComponent(id)}/resolve`, { action, note })
   },
 
   // ---- Audit logs ----

@@ -5,6 +5,7 @@ import authRoutes from "@/modules/auth/auth.routes"
 import userRoutes from "@/modules/user/user.routes"
 import resourceRoutes from "@/modules/resource/resource.routes"
 import adminRoutes from "@/modules/admin/admin.routes"
+import homeRoutes from "@/modules/home/home.routes"
 
 import Unauthorized from "@/pages/Unauthorized.vue"
 import { authMiddleware } from "@/middleware/authMiddleware"
@@ -19,6 +20,7 @@ const routes = [
       return authStore.getPostLoginRoute()
     }
   },
+  ...homeRoutes,
   ...authRoutes,
   ...userRoutes,
   ...resourceRoutes,
