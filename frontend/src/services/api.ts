@@ -7,7 +7,7 @@ export const USE_MOCK_API = String(import.meta.env.VITE_USE_MOCK_API || 'false')
 
 export const api = axios.create({
   // Hardcoded to ensure it works even if env is missing
-  baseURL: 'https://trc-backend.onrender.com',
+  baseURL: 'https://trc-backend.onrender.com/api',
   timeout: 90000, // 90s — extremely safe for slow cold starts
   headers: {
     "Content-Type": "application/json"

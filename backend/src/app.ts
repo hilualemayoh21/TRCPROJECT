@@ -21,7 +21,7 @@ const swaggerDocument = YAML.load(path.join(__dirname, 'swagger.yaml'));
 // Global Middleware
 app.use(helmet());
 app.use(cors({
-  origin: true, // Reflects the request origin
+  origin: true, 
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
@@ -29,22 +29,23 @@ app.use(cors({
 app.use(express.json());
 app.use(tracingMiddleware);
 
+// ─── DEBUG ROUTES (Top Priority) ───
+app.get('/ping', (req, res) => res.status(200).send('pong'));
+app.get('/api/test', (req, res) => res.status(200).json({ ok: true }));
+
+// ─── API ROUTES ───
+app.use('/api/public', publicRoutes);
+app.use('/api/resources', resourceRoutes);
+app.use('/api/auth', authRateLimiter, authRoutes);
+app.use('/api/users', usersRouter);
+app.use('/api/admin/users', adminUsersRouter);
+app.use('/api/admin', auditRoutes);
+app.use('/api/admin', adminRoutes);
+
 // API Documentation
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Debug Ping (to verify deployment updates)
-app.get('/ping', (req, res) => res.send('pong'));
-
-// Routes
-app.use('/public', publicRoutes);
-app.use('/resources', resourceRoutes);
-app.use('/auth', authRateLimiter, authRoutes);
-app.use('/users', usersRouter);
-app.use('/admin/users', adminUsersRouter);
-app.use('/admin', auditRoutes);
-app.use('/admin', adminRoutes);
-
-// Health Check
+// Health Check (Kept at root for Render health checks)
 app.get('/health', async (req, res) => {
   let dbStatus = 'disconnected';
   try {
