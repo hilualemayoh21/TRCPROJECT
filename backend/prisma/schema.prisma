@@ -76,6 +76,7 @@ model Resource {
   reviewedAt   DateTime?
   reviewNote   String?
   viewCount    Int       @default(0)
+  downloadCount Int      @default(0)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
@@ -115,17 +116,22 @@ model Rating {
 }
 
 model Report {
-  id         String    @id @default(uuid())
-  reason     String
-  details    String?
-  resourceId String
-  reporterId String
-  status     String    @default("pending") // pending, resolved, dismissed
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id          String    @id @default(uuid())
+  reason      String
+  description String?
+  entityType  String    @default("resource")
+  entityId    String    @default("")
+  resourceId  String?
+  reporterId  String
+  status      String    @default("open") // open, resolved, dismissed
+  resolvedBy  String?
+  resolvedAt  DateTime?
+  resolveNote String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  resource   Resource  @relation(fields: [resourceId], references: [id])
-  reporter   User      @relation(fields: [reporterId], references: [id])
+  resource    Resource? @relation(fields: [resourceId], references: [id])
+  reporter    User      @relation(fields: [reporterId], references: [id])
 }
 
 model Role {
