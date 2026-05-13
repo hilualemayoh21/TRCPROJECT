@@ -27,6 +27,10 @@ model User {
   institution         String?
   roles               UserRole[]
   tokens              RefreshToken[]
+  resources           Resource[]
+  comments            Comment[]
+  ratings             Rating[]
+  reports             Report[]
 }
 
 model ResearcherProfile {
@@ -40,6 +44,88 @@ model ResearcherProfile {
   profileUrl      String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String
+  slug        String     @unique
+  color       String?
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+  resources   Resource[]
+}
+
+model Resource {
+  id           String    @id @default(uuid())
+  title        String
+  description  String
+  type         String
+  categoryId   String?
+  fileUrl      String?
+  fileName     String?
+  fileSize     Int?
+  thumbnailUrl String?
+  visibility   String    @default("public")
+  tags         String[]
+  status       String    @default("pending") // pending, approved, rejected
+  authorId     String
+  reviewedBy   String?
+  reviewedAt   DateTime?
+  reviewNote   String?
+  viewCount    Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  author       User      @relation(fields: [authorId], references: [id])
+  category     Category? @relation(fields: [categoryId], references: [id])
+  comments     Comment[]
+  ratings      Rating[]
+  reports      Report[]
+}
+
+model Comment {
+  id         String    @id @default(uuid())
+  content    String
+  resourceId String
+  authorId   String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  resource   Resource  @relation(fields: [resourceId], references: [id])
+  author     User      @relation(fields: [authorId], references: [id])
+}
+
+model Rating {
+  id         String    @id @default(uuid())
+  value      Float
+  resourceId String
+  userId     String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  resource   Resource  @relation(fields: [resourceId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@unique([resourceId, userId])
+}
+
+model Report {
+  id         String    @id @default(uuid())
+  reason     String
+  details    String?
+  resourceId String
+  reporterId String
+  status     String    @default("pending") // pending, resolved, dismissed
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  resource   Resource  @relation(fields: [resourceId], references: [id])
+  reporter   User      @relation(fields: [reporterId], references: [id])
 }
 
 model Role {
