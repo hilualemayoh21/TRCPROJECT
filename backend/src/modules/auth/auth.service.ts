@@ -25,6 +25,24 @@ export const RegisterSchema = z.object({
   role: z.string().optional()
 });
 
+export const VerifyEmailSchema = z.object({
+  email: z.string().email(),
+  otp: z.string().length(6)
+});
+
+export const ResendVerificationSchema = z.object({
+  email: z.string().email()
+});
+
+export const ResearcherInfoSchema = z.object({
+  orcid: z.string().optional(),
+  researchFocus: z.string(),
+  academicTitle: z.string(),
+  yearsExperience: z.number().optional(),
+  bio: z.string().max(500),
+  profileUrl: z.string().url().optional()
+});
+
 export class AuthService {
   static async login(req: Request, email: string, password: string) {
     const user = await prisma.user.findUnique({
@@ -112,6 +130,9 @@ export class AuthService {
       dbRole = await prisma.role.create({ data: { id: 'public_user', name: 'public_user', isSystem: true } });
     }
 
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 15 * 60 * 1000);
+
     const user = await prisma.user.create({
       data: {
         email,
@@ -119,10 +140,14 @@ export class AuthService {
         passwordHash,
         institution,
         status: (role === 'researcher' || role === 'Researcher') ? 'pending' : 'active',
-        roles: dbRole ? { create: { roleId: dbRole.id } } : undefined
+        roles: dbRole ? { create: { roleId: dbRole.id } } : undefined,
+        verificationCode: otp,
+        verificationCodeExpires: expires
       },
       include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
     });
+
+    console.log(`[Email Mock] Sent OTP ${otp} to ${email}`);
 
     return this.generateAuthResponse(user);
   }
@@ -187,6 +212,71 @@ export class AuthService {
       console.error('[AuthService] Logout failed:', error);
       return { ok: true };
     }
+  }
+
+  static async verifyEmail(email: string, otp: string) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) throw new AppError('User not found', 404);
+
+    if (user.emailVerified) throw new AppError('Email already verified', 400);
+
+    if (user.verificationCode !== otp) {
+      throw new AppError('Invalid verification code', 400);
+    }
+
+    if (!user.verificationCodeExpires || user.verificationCodeExpires < new Date()) {
+      throw new AppError('Verification code expired', 400);
+    }
+
+    await prisma.user.update({
+      where: { email },
+      data: {
+        emailVerified: true,
+        verificationCode: null,
+        verificationCodeExpires: null
+      }
+    });
+
+    return { ok: true };
+  }
+
+  static async resendVerification(email: string) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) throw new AppError('User not found', 404);
+
+    if (user.emailVerified) throw new AppError('Email already verified', 400);
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 15 * 60 * 1000);
+
+    await prisma.user.update({
+      where: { email },
+      data: {
+        verificationCode: otp,
+        verificationCodeExpires: expires
+      }
+    });
+
+    console.log(`[Email Mock] Sent new OTP ${otp} to ${email}`);
+
+    return { ok: true };
+  }
+
+  static async submitResearcherInfo(userId: string, data: any) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new AppError('User not found', 404);
+
+    const profile = await prisma.researcherProfile.create({
+      data: {
+        userId,
+        ...data
+      }
+    });
+
+    // Researcher stays pending until admin approves them.
+    // If we wanted to change status, we'd do it here.
+
+    return profile;
   }
 
   private static async generateAuthResponse(user: any) {

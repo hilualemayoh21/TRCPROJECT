@@ -151,11 +151,11 @@ export const adminApi = {
   },
 
   async approveResearcher(id: string) {
-    return post(`/admin/researchers/${encodeURIComponent(id)}/approve`)
+    return post(`/admin/researchers/requests/${encodeURIComponent(id)}/approve`)
   },
 
   async rejectResearcher(id: string, reason?: string) {
-    return post(`/admin/researchers/${encodeURIComponent(id)}/reject`, { reason })
+    return post(`/admin/researchers/requests/${encodeURIComponent(id)}/reject`, { reason })
   },
 
   async listPendingResources(query: AdminQuery = {}) {
@@ -164,12 +164,12 @@ export const adminApi = {
     })
   },
 
-  async approveResource(id: string, note?: string) {
-    return post(`/resources/${encodeURIComponent(id)}/approve`, { note })
+  async approveResource(id: string) {
+    return post(`/admin/resources/${encodeURIComponent(id)}/approve`)
   },
 
-  async rejectResource(id: string, note?: string) {
-    return post(`/resources/${encodeURIComponent(id)}/reject`, { note })
+  async rejectResource(id: string, reason?: string) {
+    return post(`/admin/resources/${encodeURIComponent(id)}/reject`, { reason })
   },
 
   // ---- Reports ----
@@ -177,8 +177,8 @@ export const adminApi = {
     return get<AdminPaginated<AdminReport>>('/admin/reports', { params: query })
   },
 
-  async resolveReport(id: string, action: 'resolve' | 'dismiss', note?: string) {
-    return post(`/admin/reports/${encodeURIComponent(id)}/resolve`, { action, note })
+  async resolveReport(id: string) {
+    return post(`/admin/reports/${encodeURIComponent(id)}/resolve`)
   },
 
   // ---- Audit logs ----

@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia'
 
 export const useAuth = () => {
   const store = useAuthStore()
-   // ✅ make state reactive
+  // ✅ make state reactive
   const { user, loading, error } = storeToRefs(store)
 
   const login = async (email: string, password: string) => {
@@ -14,11 +14,21 @@ export const useAuth = () => {
     return store.register({ name, email, password, role, institution })
   }
 
+  const logout = async () => {
+    return store.logout()
+  }
+
+  const fetchUser = async () => {
+    return store.fetchUser()
+  }
+
   return {
     user,
     loading,
     error,
     login,
-    register
+    register,
+    logout,
+    fetchUser
   }
 }

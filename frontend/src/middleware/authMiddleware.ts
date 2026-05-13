@@ -45,12 +45,15 @@ export function authMiddleware(
     // ✅ Status check (Handle pending approvals)
     if (auth.isAuthenticated) {
       const isPendingPage = to.name === 'PendingApproval'
-      const isPendingStatus = auth.user?.status === 'pending'
+      const isResearcherInfoPage = to.name === 'ResearcherInfo'
+      const isEmailVerificationPage = to.name === 'EmailVerification'
+      const isPendingStatus = auth.user?.status === 'pending' || auth.user?.status === 'unverified'
 
-      if (isPendingStatus && !isPendingPage) {
+      // Pending users may only visit PendingApproval, ResearcherInfo, or EmailVerification
+      if (isPendingStatus && !isPendingPage && !isResearcherInfoPage && !isEmailVerificationPage) {
         return next({ name: 'PendingApproval' })
       }
-      if (!isPendingStatus && isPendingPage) {
+      if (!isPendingStatus && (isPendingPage || isEmailVerificationPage)) {
         return next({ path: auth.getPostLoginRoute() })
       }
     }

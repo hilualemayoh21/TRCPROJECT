@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { AuthService, AuthSchema, RegisterSchema } from './auth.service';
+import { AuthService, AuthSchema, RegisterSchema, VerifyEmailSchema, ResendVerificationSchema, ResearcherInfoSchema } from './auth.service';
 import { mapAuthResponse, mapUser, mapRefreshResponse } from '../../utils/response-mappers';
 
 export class AuthController {
@@ -26,6 +26,37 @@ export class AuthController {
         refreshToken: data.refreshToken,
         expiresAt: data.expiresAt
       }));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async verifyEmail(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, otp } = VerifyEmailSchema.parse(req.body);
+      const result = await AuthService.verifyEmail(email, otp);
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async resendVerification(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email } = ResendVerificationSchema.parse(req.body);
+      const result = await AuthService.resendVerification(email);
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async submitResearcherInfo(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req.user as any).id;
+      const validatedData = ResearcherInfoSchema.parse(req.body);
+      const result = await AuthService.submitResearcherInfo(userId, validatedData);
+      res.json(result);
     } catch (error) {
       next(error);
     }

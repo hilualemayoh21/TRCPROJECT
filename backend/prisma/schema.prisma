@@ -20,9 +20,26 @@ model User {
   deletedAt           DateTime?
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
+  emailVerified       Boolean        @default(false)
+  verificationCode    String?
+  verificationCodeExpires DateTime?
+  researcherProfile   ResearcherProfile?
   institution         String?
   roles               UserRole[]
   tokens              RefreshToken[]
+}
+
+model ResearcherProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  orcid           String?
+  researchFocus   String
+  academicTitle   String
+  yearsExperience Int?
+  bio             String
+  profileUrl      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Role {

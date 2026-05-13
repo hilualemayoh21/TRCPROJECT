@@ -71,6 +71,14 @@
           </header>
 
           <form class="flex flex-col gap-5" @submit.prevent="handleSubmit">
+            <!-- API Error moved to top -->
+            <Transition name="slide-down">
+              <div v-if="authError" class="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600" role="alert">
+                <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                {{ authError }}
+              </div>
+            </Transition>
+
             <!-- Full Name -->
             <div class="space-y-2">
               <label class="text-[0.9rem] font-bold text-gray-700">Full Name</label>
@@ -129,14 +137,6 @@
                 I agree to the <span class="font-bold text-trc">Terms of Service</span> and <span class="font-bold text-trc">Privacy Policy</span> regarding data handling and resource contribution.
               </span>
             </label>
-
-            <!-- API Error -->
-            <Transition name="slide-down">
-              <div v-if="authError" class="mb-2 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600" role="alert">
-                <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                {{ authError }}
-              </div>
-            </Transition>
 
             <!-- Buttons -->
             <div class="mt-4 flex flex-col gap-6">
@@ -412,7 +412,8 @@ const handleSubmit = async () => {
       form.role,
       form.institution?.trim()
     )
-    router.push(authStore.getPostLoginRoute())
+    // Redirect to email verification page, passing the email in query
+    router.push({ path: '/verify-email', query: { email: form.email.trim().toLowerCase() } })
   } catch (err) {
     console.error('Registration failed', err)
   }

@@ -70,23 +70,23 @@
       />
 
       <!-- Roles Table Container -->
-      <div v-else class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/[0.07] dark:bg-[#1c1e26] dark:shadow-lg dark:shadow-black/20">
+      <div v-else class="overflow-hidden rounded-2xl md:rounded-[2.5rem] border border-slate-200 bg-white shadow-lg dark:border-white/5 dark:bg-[#1a1d26]">
         <div class="overflow-x-auto">
           <table class="min-w-full text-left">
-            <thead class="border-b border-slate-100 bg-slate-50 dark:border-white/[0.07] dark:bg-[#242733]">
+            <thead class="border-b border-slate-100 bg-slate-50/50 dark:border-white/5 dark:bg-white/5">
               <tr>
-                <th class="px-4 md:px-6 py-3 text-[0.6rem] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">Name</th>
-                <th class="hidden md:table-cell px-6 py-3 text-[0.6rem] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">ID</th>
-                <th class="hidden lg:table-cell px-6 py-3 text-[0.6rem] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">Description</th>
-                <th class="hidden xl:table-cell px-6 py-3 text-[0.6rem] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">Permissions</th>
-                <th class="px-4 md:px-6 py-3 text-right text-[0.6rem] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">
+                <th class="px-4 md:px-6 py-3 md:py-4 text-[0.65rem] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500">Name</th>
+                <th class="hidden md:table-cell px-6 py-4 text-[0.65rem] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500">ID</th>
+                <th class="hidden lg:table-cell px-6 py-4 text-[0.65rem] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500">Description</th>
+                <th class="hidden xl:table-cell px-6 py-4 text-[0.65rem] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500">Permissions</th>
+                <th class="px-4 md:px-6 py-3 md:py-4 text-right text-[0.65rem] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-slate-500">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-50 dark:divide-white/5">
-              <tr v-for="role in filteredRoles" :key="role.id" class="group transition-colors duration-150 hover:bg-slate-50 dark:hover:bg-white/[0.03]">
-                <td class="px-4 md:px-6 py-2.5 md:py-3">
+              <tr v-for="role in filteredRoles" :key="role.id" class="group transition-all duration-200 hover:bg-slate-50 dark:hover:bg-violet-500/10">
+                <td class="px-4 md:px-6 py-3 md:py-4">
                   <div class="flex flex-col gap-1.5">
                     <div class="flex min-w-0 items-center gap-2">
                       <p
@@ -98,13 +98,13 @@
                       <div class="flex shrink-0 flex-wrap items-center gap-1.5">
                         <span
                           v-if="role.isSystem"
-                          class="inline-flex items-center rounded bg-blue-600 px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-white"
+                          class="inline-flex items-center rounded-full bg-blue-500/10 px-2 py-0.5 text-[0.6rem] font-black uppercase tracking-widest text-blue-600 ring-1 ring-inset ring-blue-500/20 dark:text-blue-400"
                         >
                           System
                         </span>
                         <span
                           v-if="role.id === 'super_admin'"
-                          class="inline-flex items-center gap-1 rounded bg-violet-600 px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-white"
+                          class="inline-flex items-center gap-1 rounded-full bg-purple-500/10 px-2 py-0.5 text-[0.6rem] font-black uppercase tracking-widest text-purple-600 ring-1 ring-inset ring-purple-500/20 dark:text-purple-400"
                         >
                           <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
@@ -115,34 +115,34 @@
                     </div>
                     <!-- Mobile-only info -->
                     <div class="md:hidden flex flex-col gap-1">
-                      <code class="w-fit rounded-md bg-gray-100 px-2 py-0.5 text-[0.65rem] font-bold text-gray-500 dark:bg-black/30 dark:text-gray-400">{{ role.id }}</code>
+                      <code class="w-fit rounded-lg bg-gray-50 px-2 py-0.5 text-[0.65rem] font-bold text-gray-500 ring-1 ring-inset ring-gray-200 dark:bg-[#0f1117] dark:text-gray-400 dark:ring-white/5">{{ role.id }}</code>
                       <p class="text-xs text-gray-400 dark:text-gray-500 truncate max-w-[200px]">{{ role.description || 'No description provided' }}</p>
                     </div>
                   </div>
                 </td>
-                <td class="hidden md:table-cell px-6 py-2.5 md:py-3">
-                  <code class="rounded-md bg-gray-100 px-2 py-0.5 text-[0.7rem] font-bold text-gray-500 dark:bg-black/30 dark:text-gray-400">{{ role.id }}</code>
+                <td class="hidden md:table-cell px-6 py-4">
+                  <code class="rounded-lg bg-gray-50 px-2 py-1 text-[0.7rem] font-bold text-gray-500 ring-1 ring-inset ring-gray-200 dark:bg-[#0f1117] dark:text-gray-400 dark:ring-white/5">{{ role.id }}</code>
                 </td>
-                <td class="hidden lg:table-cell px-6 py-2.5 md:py-3">
+                <td class="hidden lg:table-cell px-6 py-4">
                   <p class="text-sm font-medium text-gray-500 dark:text-gray-400 max-w-xs truncate">
                     {{ role.description || 'No description provided' }}
                   </p>
                 </td>
-                <td class="hidden xl:table-cell px-6 py-2.5 md:py-3">
+                <td class="hidden xl:table-cell px-6 py-4">
                   <PermissionTooltip :permissions="role.permissions" />
                 </td>
-                <td class="px-4 md:px-6 py-2.5 md:py-3">
-                  <div class="flex flex-wrap items-center justify-end gap-2">
+                <td class="px-4 md:px-6 py-3 md:py-4">
+                  <div class="flex flex-wrap items-center justify-end gap-2 md:gap-3">
                     <button
                       type="button"
-                      class="inline-flex h-8 items-center justify-center rounded-lg border border-slate-200 bg-white px-3 text-[0.6rem] font-bold uppercase tracking-wider text-gray-600 transition-all hover:bg-slate-50 hover:border-slate-300 active:scale-95 dark:border-white/10 dark:bg-white/[0.05] dark:text-gray-300 dark:hover:bg-white/10"
+                      class="rounded-lg md:rounded-xl border border-slate-200 bg-white px-3 md:px-4 py-1.5 md:py-2 text-[0.6rem] md:text-[0.65rem] font-black uppercase tracking-widest text-gray-600 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-300 active:scale-95 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10"
                       @click="openEdit(role)"
                     >
                       Edit
                     </button>
                     <button
                       type="button"
-                      class="inline-flex h-8 items-center justify-center rounded-lg bg-violet-600 px-3 text-[0.6rem] font-bold uppercase tracking-wider text-white shadow-md shadow-violet-500/25 transition-all hover:bg-violet-500 active:scale-95"
+                      class="rounded-lg md:rounded-xl bg-violet-600 px-3 md:px-4 py-1.5 md:py-2 text-[0.6rem] md:text-[0.65rem] font-black uppercase tracking-widest text-white shadow-lg shadow-violet-500/20 transition-all hover:bg-violet-500 hover:scale-[1.02] active:scale-95"
                       @click="goToDetails(role.id)"
                     >
                       Perms
@@ -150,7 +150,7 @@
                     <button
                       v-if="canManageRoles"
                       type="button"
-                      class="inline-flex h-8 items-center justify-center rounded-lg px-3 text-[0.6rem] font-bold uppercase tracking-wider text-red-500 transition-all hover:bg-red-500/10 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                      class="rounded-lg md:rounded-xl px-3 md:px-4 py-1.5 md:py-2 text-[0.6rem] md:text-[0.65rem] font-black uppercase tracking-widest text-red-500 transition-all hover:bg-red-500/10 active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
                       :disabled="role.id === 'super_admin' || isDeletingRole"
                       @click="confirmDelete(role)"
                     >
