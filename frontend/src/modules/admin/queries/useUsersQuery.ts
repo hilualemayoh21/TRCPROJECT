@@ -93,3 +93,39 @@ export function useCreateUserMutation() {
   })
 }
 
+export function useUpdateUserMutation() {
+  const queryClient = useQueryClient()
+  const authStore = useAuthStore()
+  return useMutation({
+    mutationFn: async ({ id, payload }: { id: string; payload: any }) => {
+      if (!authStore.can('manage_users')) {
+        throw new Error('You are not allowed to update users.')
+      }
+      return adminApi.updateUser(id, payload)
+    },
+    onSuccess: async () => {
+      notifyAdminSuccess('User updated successfully')
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
+    },
+    onError: (error) => notifyAdminError(error, 'Failed to update user.')
+  })
+}
+
+export function useDeleteUserMutation() {
+  const queryClient = useQueryClient()
+  const authStore = useAuthStore()
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      if (!authStore.can('manage_users')) {
+        throw new Error('You are not allowed to delete users.')
+      }
+      return adminApi.deleteUser(userId)
+    },
+    onSuccess: async () => {
+      notifyAdminSuccess('User deleted successfully')
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
+    },
+    onError: (error) => notifyAdminError(error, 'Failed to delete user.')
+  })
+}
+

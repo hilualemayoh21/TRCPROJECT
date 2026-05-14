@@ -128,14 +128,20 @@
 
                 <!-- Status -->
                 <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center rounded-full px-3 py-1 text-xs font-black"
-                    :class="u.active
-                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400'
-                      : 'bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400'"
+                  <button
+                    v-if="canManageUsers"
+                    type="button"
+                    :disabled="rowLoading[u.id]?.status"
+                    @click="toggleStatus(u.id)"
+                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-trc/30 focus:ring-offset-2"
+                    :class="u.active ? 'bg-trc' : 'bg-slate-200 dark:bg-slate-700'"
                   >
-                    <span class="mr-1.5 h-1.5 w-1.5 rounded-full"
-                      :class="u.active ? 'bg-emerald-500' : 'bg-red-500'"></span>
+                    <span
+                      class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      :class="u.active ? 'translate-x-5' : 'translate-x-0'"
+                    />
+                  </button>
+                  <span v-else class="inline-flex items-center rounded-full px-3 py-1 text-xs font-black" :class="u.active ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'">
                     {{ u.active ? 'Active' : 'Inactive' }}
                   </span>
                 </td>
@@ -146,30 +152,31 @@
                     <button
                       v-if="canManageUsers"
                       type="button"
-                      :disabled="rowLoading[u.id]?.status"
-                      @click="toggleStatus(u.id)"
+                      @click="openEditModal(u)"
                       class="h-8 w-8 flex items-center justify-center rounded-lg border transition
                              border-slate-200 text-slate-400 hover:text-trc hover:border-trc/30
                              dark:border-white/10 dark:text-slate-500 dark:hover:text-trc"
-                      :title="u.active ? 'Deactivate' : 'Activate'"
+                      title="Edit"
                     >
-                      <svg v-if="rowLoading[u.id]?.status" class="h-4 w-4 animate-spin text-trc" viewBox="0 0 24 24" fill="none">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                      </svg>
-                      <svg v-else class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                       </svg>
                     </button>
                     <button
                       v-if="canManageUsers"
                       type="button"
+                      :disabled="rowLoading[u.id]?.deleting"
+                      @click="handleDeleteUser(u.id)"
                       class="h-8 w-8 flex items-center justify-center rounded-lg border transition
                              border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200
-                             dark:border-white/10 dark:text-slate-500 dark:hover:text-red-400"
+                             dark:border-white/10 dark:text-slate-500 dark:hover:text-red-400 disabled:opacity-50"
                       title="Delete"
                     >
-                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <svg v-if="rowLoading[u.id]?.deleting" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                      </svg>
+                      <svg v-else class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                       </svg>
                     </button>
@@ -223,6 +230,15 @@
       @close="showCreateModal = false"
       @submit="handleCreateUser"
     />
+
+    <!-- Edit User Modal -->
+    <EditUserModal
+      :is-open="showEditModal"
+      :role-options="ROLE_OPTIONS"
+      :user="selectedUser"
+      @close="showEditModal = false"
+      @submit="handleUpdateUser"
+    />
   </DashboardLayout>
 </template>
 
@@ -234,9 +250,10 @@ import { useAuthStore } from '@/modules/auth/auth.store'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import type { AdminUser, RoleKey } from '@/modules/admin/types/admin.types'
 import {
-  useAssignRoleMutation, useUpdateUserStatusMutation, useUsersQuery, useCreateUserMutation
+  useAssignRoleMutation, useUpdateUserStatusMutation, useUsersQuery, useCreateUserMutation, useUpdateUserMutation, useDeleteUserMutation
 } from '@/modules/admin/queries/useUsersQuery'
 import CreateUserModal from '@/modules/admin/components/CreateUserModal.vue'
+import EditUserModal from '@/modules/admin/components/EditUserModal.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -248,14 +265,18 @@ const error = ref<string | null>(null)
 const pagination = reactive({ page: 1, pageSize: 10, total: 0 })
 const totalPages = computed(() => Math.max(1, Math.ceil((pagination.total || 0) / Math.max(1, pagination.pageSize))))
 const ROLE_OPTIONS: RoleKey[] = ['super_admin', 'admin', 'moderator', 'researcher', 'public_user']
-const rowLoading = reactive<Record<string, { status?: boolean; assignRole?: boolean }>>({})
+const rowLoading = reactive<Record<string, { status?: boolean; assignRole?: boolean; deleting?: boolean }>>({})
 const showCreateModal = ref(false)
+const showEditModal = ref(false)
+const selectedUser = ref<AdminUser | null>(null)
 
 const queryParams = computed(() => ({ page: query.page, pageSize: query.pageSize, q: query.q || undefined }))
 const usersQuery = useUsersQuery(queryParams)
 const updateStatusMutation = useUpdateUserStatusMutation()
 const assignRoleMutation = useAssignRoleMutation()
 const createUserMutation = useCreateUserMutation()
+const updateUserMutation = useUpdateUserMutation()
+const deleteUserMutation = useDeleteUserMutation()
 const loading = computed(() => usersQuery.isPending.value || usersQuery.isFetching.value)
 
 watch(() => usersQuery.data.value, (data) => {
@@ -333,6 +354,34 @@ async function handleCreateUser(userData: { name: string; email: string; role: R
   } catch (e: any) {
     error.value = getErrorMessage(e, 'Failed to create user.')
     throw e
+  }
+}
+
+function openEditModal(user: AdminUser) {
+  selectedUser.value = user
+  showEditModal.value = true
+}
+
+async function handleUpdateUser(data: { id: string; name: string; email: string; role: RoleKey }) {
+  try {
+    await updateUserMutation.mutateAsync({ id: data.id, payload: { name: data.name, email: data.email, role: data.role } })
+  } catch (e: any) {
+    error.value = getErrorMessage(e, 'Failed to update user.')
+    throw e
+  }
+}
+
+async function handleDeleteUser(userId: string) {
+  if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return
+  
+  setRowLoading(userId, { deleting: true })
+  error.value = null
+  try {
+    await deleteUserMutation.mutateAsync(userId)
+  } catch (e: any) {
+    error.value = getErrorMessage(e, 'Failed to delete user.')
+  } finally {
+    setRowLoading(userId, { deleting: false })
   }
 }
 
