@@ -112,14 +112,22 @@ export class AuthService {
   static async register(data: any) {
     const { email, password, name, institution, role = 'public_user' } = data;
     
-    // Check for active users only with case-insensitivity
-    const existing = await prisma.user.findFirst({ 
-      where: { 
-        email: { equals: email, mode: 'insensitive' },
-        deletedAt: null 
-      } 
+    // 1. Look for ANY user with this email (including legacy deleted ones)
+    const conflict = await prisma.user.findFirst({ 
+      where: { email: { equals: email, mode: 'insensitive' } } 
     });
-    if (existing) throw new AppError('Email already in use by an active account', 400);
+
+    if (conflict) {
+      if (!conflict.deletedAt) {
+        throw new AppError('Email already in use by an active account', 400);
+      }
+      
+      // Legacy cleanup: rename the deleted user to free up the email
+      await prisma.user.update({
+        where: { id: conflict.id },
+        data: { email: `${conflict.id}_cleanup_${Date.now()}_${conflict.email}`.slice(0, 254) }
+      });
+    }
 
     const passwordHash = await bcrypt.hash(password, 10);
     
