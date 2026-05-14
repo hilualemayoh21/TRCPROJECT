@@ -1,7 +1,7 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { AppError } from '../errors/AppError';
+import { AppError } from '../../utils/api';
 
 // Ensure uploads directory exists
 const uploadDir = path.join(process.cwd(), 'uploads/avatars');
@@ -10,10 +10,10 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (_req: any, _file: any, cb: any) => {
     cb(null, uploadDir);
   },
-  filename: (req, file, cb) => {
+  filename: (req: any, file: any, cb: any) => {
     // @ts-ignore - user is attached by auth middleware
     const userId = req.user?.id || 'anonymous';
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -21,7 +21,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const fileFilter = (req: any, file: any, cb: any) => {
+const fileFilter = (_req: any, file: any, cb: any) => {
   const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);

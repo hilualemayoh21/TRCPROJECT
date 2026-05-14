@@ -30,7 +30,7 @@ export class UsersController {
         })
       ]);
 
-      res.json(mapPaginatedResponse(items.map(u => mapUser(u as any)), total, page, pageSize));
+      res.json(mapPaginatedResponse(items.map(u => mapUser(u as any)), { total, page, pageSize }));
     } catch (e) {
       next(e);
     }
@@ -95,7 +95,6 @@ export class UsersController {
       const { id } = req.params;
       const { name, email, password, active, institution } = req.body;
 
-      // Check if email is being changed and if new email exists
       if (email) {
         const existing = await prisma.user.findFirst({
           where: {
@@ -130,20 +129,55 @@ export class UsersController {
       const user = await prisma.user.findUnique({ where: { id: id as string } });
       if (!user) throw new AppError('User not found', 404);
 
-      // Rename email to allow reuse
       const deletedEmail = `${id}_deleted_${user.email}`;
 
       await prisma.user.update({
         where: { id: id as string },
         data: { 
           deletedAt: new Date(),
-          email: deletedEmail.slice(0, 254), // Ensure it fits in typical email fields
+          email: deletedEmail.slice(0, 254),
           status: 'inactive'
         }
       });
 
       await AuditService.log(req, (req.user?.id as string) || null, 'User deleted by admin', 'User', id as string);
       res.json({ ok: true });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  static async updateStatus(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const { active } = req.body;
+      const user = await prisma.user.update({
+        where: { id: id as string },
+        data: { status: active ? 'active' : 'inactive' }
+      });
+      res.json({ ok: true, active: user.status === 'active' });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  static async assignRole(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+      const { role } = req.body;
+      const dbRole = await prisma.role.findFirst({
+        where: { OR: [{ id: role }, { name: role }] }
+      });
+      if (!dbRole) throw new AppError('Role not found', 404);
+
+      await prisma.userRole.deleteMany({ where: { userId: id } });
+      await prisma.userRole.create({ data: { userId: id, roleId: dbRole.id } });
+
+      const user = await prisma.user.findUnique({
+        where: { id },
+        include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
+      });
+      res.json({ ok: true, user: mapUser(user as any) });
     } catch (e) {
       next(e);
     }
@@ -200,10 +234,10 @@ export class UsersController {
 
   static async updateAvatar(req: Request, res: Response, next: NextFunction) {
     try {
-      if (!req.file) throw new AppError('No file uploaded', 400);
+      if (!(req as any).file) throw new AppError('No file uploaded', 400);
 
       const userId = (req as any).user.id;
-      const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+      const avatarUrl = `/uploads/avatars/${(req as any).file.filename}`;
 
       const user = await prisma.user.update({
         where: { id: userId },
