@@ -20,7 +20,7 @@
                 <SearchOutlined class="absolute left-6 top-1/2 -translate-y-1/2 text-white/30 text-2xl group-focus-within:text-trc transition-colors" />
                 <input 
                    v-model="searchQuery"
-                   @input="triggerSearch"
+                   @input="handleSearchInput"
                    type="text" 
                    placeholder="Query by title, Ge'ez script, or author..." 
                    class="w-full rounded-[2rem] bg-white/5 backdrop-blur-2xl border border-white/10 py-6 md:py-8 pl-18 md:pl-20 pr-10 text-[1.1rem] md:text-[1.3rem] font-black text-white placeholder:text-white/20 shadow-2xl transition-all focus:ring-8 focus:ring-trc/10 focus:bg-white/10 outline-none" 
@@ -48,8 +48,8 @@
     <!-- ── STABILIZED LAYOUT ENGINE ── -->
     <div class="flex flex-col lg:flex-row gap-8">
        
-       <!-- LEFT: SIDEBAR (Slimmed for more card space) -->
-       <aside class="hidden lg:flex flex-col gap-6 w-full lg:w-[200px] shrink-0">
+       <!-- LEFT: SIDEBAR -->
+       <aside class="hidden lg:flex flex-col gap-6 w-full lg:w-[220px] shrink-0">
           <div class="rounded-[2rem] bg-white p-6 border border-gray-100 shadow-sm relative z-10">
              <h3 class="text-[0.65rem] font-black uppercase tracking-[0.2em] text-gray-400 mb-6 flex items-center justify-between">
                 Departments
@@ -59,19 +59,18 @@
                 <button 
                   v-for="cat in categoryList" 
                   :key="cat.name"
-                  @click="activeCategory = activeCategory === cat.name ? '' : cat.name"
+                  @click="toggleCategory(cat.id)"
                   :class="[
                     'flex items-center justify-between p-3 rounded-2xl font-black text-[0.75rem] transition-all border',
-                    activeCategory === cat.name ? 'bg-trc text-white border-trc shadow-lg shadow-trc/20' : 'text-gray-500 bg-white border-transparent hover:border-gray-100 hover:bg-gray-50'
+                    activeCategoryId === cat.id ? 'bg-trc text-white border-trc shadow-lg shadow-trc/20' : 'text-gray-500 bg-white border-transparent hover:border-gray-100 hover:bg-gray-50'
                   ]"
                 >
                   <div class="flex items-center gap-3">
-                     <div :class="[activeCategory === cat.name ? 'bg-white/20' : 'bg-gray-50']" class="flex h-8 w-8 items-center justify-center rounded-xl transition-all">
+                     <div :class="[activeCategoryId === cat.id ? 'bg-white/20' : 'bg-gray-50']" class="flex h-8 w-8 items-center justify-center rounded-xl transition-all">
                         <component :is="cat.icon" style="font-size: 15px" />
                      </div>
                      <span class="text-[0.72rem]">{{ cat.name }}</span>
                   </div>
-                  <span :class="activeCategory === cat.name ? 'bg-white/20' : 'bg-gray-100'" class="px-2 py-1 rounded-lg text-[0.55rem] font-black">{{ getReactiveCount(cat.name) }}</span>
                 </button>
              </div>
           </div>
@@ -87,19 +86,22 @@
           </div>
        </aside>
 
-       <!-- RIGHT: RESULTS (Flex-1) -->
+       <!-- RIGHT: RESULTS -->
        <main class="flex-1 min-w-0">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12 px-2">
              <div class="flex flex-col gap-1.5">
                 <div class="flex items-center gap-3">
                    <h2 class="text-3xl font-black text-gray-900 tracking-tight">Curation Results</h2>
                 </div>
-                <p class="text-[0.85rem] font-medium text-gray-400">Showing active nodes from {{ resources.length }} historical records.</p>
+                <p class="text-[0.85rem] font-medium text-gray-400">
+                  <span v-if="loading">Locating active nodes...</span>
+                  <span v-else>Showing {{ resources.length }} historical records.</span>
+                </p>
              </div>
           </div>
 
-          <!-- SKELETON STATE -->
-          <div v-if="isSearching" class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
+          <!-- LOADING STATE -->
+          <div v-if="loading" class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
              <div v-for="i in 6" :key="i" class="flex flex-col rounded-[3rem] bg-white p-6 shadow-sm border border-gray-50 animate-pulse">
                 <div class="w-full aspect-square bg-gray-50 rounded-[2.5rem] mb-6"></div>
                 <div class="h-6 w-3/4 bg-gray-50 rounded-full mb-4"></div>
@@ -111,41 +113,42 @@
              </div>
           </div>
 
-          <!-- ACTIVE GRID -->
-          <div v-else-if="filteredResults.length > 0" class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
+          <!-- RESULTS GRID -->
+          <div v-else-if="resources.length > 0" class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
              <div 
-               v-for="(res, idx) in filteredResults" 
+               v-for="(res, idx) in resources" 
                :key="res.id" 
                class="reveal-item flex flex-col rounded-[3rem] bg-white p-6 shadow-sm border border-gray-100 hover:shadow-2xl hover:-translate-y-3 transition-all duration-500 group overflow-hidden relative"
                :style="{ animationDelay: `${idx * 80}ms` }"
              >
                 <div class="absolute inset-0 bg-gradient-to-br from-trc/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                 
-                <!-- Square image: looks great at wider card sizes -->
                 <div class="relative mb-6 aspect-square w-full overflow-hidden rounded-[2.2rem] bg-gray-50 border border-gray-100 shadow-inner group-hover:rounded-[1.8rem] transition-all duration-700">
-                   <div v-if="res.image" :style="{ backgroundImage: `url(${res.image})` }" class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"></div>
+                   <div v-if="res.thumbnailUrl" :style="{ backgroundImage: `url(${res.thumbnailUrl})` }" class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"></div>
+                   <div v-else class="absolute inset-0 flex items-center justify-center bg-slate-100">
+                      <FileTextOutlined class="text-slate-300 text-6xl" />
+                   </div>
                    
                    <div class="absolute inset-x-5 top-5 flex items-center justify-between gap-2">
                       <div class="flex flex-col gap-2">
-                         <span class="rounded-xl bg-black/40 backdrop-blur-xl px-4 py-2 text-[0.6rem] font-black uppercase text-white tracking-widest border border-white/10">
-                            {{ res.category }}
+                         <span v-if="res.category" class="rounded-xl bg-black/40 backdrop-blur-xl px-4 py-2 text-[0.6rem] font-black uppercase text-white tracking-widest border border-white/10">
+                            {{ res.category.name }}
                          </span>
                          <span class="rounded-xl bg-trc/80 backdrop-blur-xl px-3 py-1.5 text-[0.55rem] font-black uppercase text-white tracking-[0.2em] border border-white/10 w-fit">
-                            {{ res.date.split(' ')[1] }}
+                            {{ new Date(res.createdAt).getFullYear() }}
                          </span>
                       </div>
-                      <div v-if="res.verified" class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/40 backdrop-blur-xl text-white border border-white/10 shadow-2xl">
+                      <div v-if="res.status === 'approved'" class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/40 backdrop-blur-xl text-white border border-white/10 shadow-2xl">
                          <VerifiedOutlined style="font-size: 20px" />
                       </div>
                    </div>
 
                    <div class="absolute inset-x-0 bottom-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-gradient-to-t from-black/80 to-transparent">
                       <span class="text-[0.65rem] font-black text-white uppercase tracking-widest">Main Curator:</span>
-                      <p class="text-white font-bold text-sm">{{ res.authors[0] }}</p>
+                      <p class="text-white font-bold text-sm">{{ res.author?.name || 'Unknown' }}</p>
                    </div>
                 </div>
 
-                <!-- Explicit Content Area -->
                 <div class="relative z-10 flex flex-1 flex-col px-3">
                    <h3 class="text-[1.15rem] font-black text-gray-900 mb-2 leading-tight group-hover:text-trc transition-colors tracking-tight line-clamp-1 italic">{{ res.title }}</h3>
                    <p class="mb-8 text-[0.85rem] font-medium text-gray-400 leading-relaxed line-clamp-2">{{ res.description }}</p>
@@ -158,7 +161,7 @@
                                   <span class="text-[0.6rem] font-black uppercase text-gray-400">Rate this Archive</span>
                                   <div class="flex gap-2">
                                      <button v-for="i in 5" :key="i" @click="handleRate(res, i)" class="hover:scale-125 transition-transform p-1">
-                                        <StarFilled v-if="i <= Math.round(res.rating)" class="text-yellow-400 text-xl" />
+                                        <StarFilled v-if="i <= Math.round(res.averageRating || 0)" class="text-yellow-400 text-xl" />
                                         <StarOutlined v-else class="text-gray-200 text-xl" />
                                      </button>
                                   </div>
@@ -166,8 +169,8 @@
                             </template>
                             <div class="flex items-center gap-2.5 cursor-pointer hover:bg-gray-50 rounded-2xl px-3 py-2 transition-all group/rate border border-transparent hover:border-gray-100">
                                <StarFilled class="text-yellow-400 text-[12px]" />
-                               <span class="text-gray-900 font-black">{{ res.rating.toFixed(1) }}</span>
-                               <span class="opacity-30">({{ res.reviews }})</span>
+                               <span class="text-gray-900 font-black">{{ (res.averageRating || 0).toFixed(1) }}</span>
+                               <span class="opacity-30">({{ res._count?.ratings || 0 }})</span>
                             </div>
                          </a-popover>
                          <div class="flex items-center gap-1.5 group-hover:text-trc transition-colors">
@@ -216,57 +219,65 @@ import {
   LoadingOutlined,
   TranslationOutlined,
   ExperimentOutlined,
-  EnvironmentOutlined
+  EnvironmentOutlined,
+  FileTextOutlined
 } from '@ant-design/icons-vue'
-import { useResources } from '../composables/useResources'
+import { useResources, useCategories } from '../composables/useResources'
+import { debounce } from 'lodash-es'
 
 const route = useRoute()
-const { downloadingId, handleRead, handleDownload, handleRate, getFilteredResources, resources } = useResources()
 
 const searchQuery = ref('')
-const activeCategory = ref('')
+const activeCategoryId = ref('')
 const activeChips = ref<string[]>([])
-const isSearching = ref(false)
 
-const categoryList = [
-  { name: 'History', icon: markRaw(BankOutlined) },
-  { name: 'Linguistics', icon: markRaw(TranslationOutlined) },
-  { name: 'Science', icon: markRaw(ExperimentOutlined) },
-  { name: 'Geopolitics', icon: markRaw(EnvironmentOutlined) },
-]
+// Build dynamic query params for the composable
+const queryParams = computed(() => ({
+  q: searchQuery.value || undefined,
+  categoryId: activeCategoryId.value || undefined,
+  page: 1,
+  pageSize: 20
+}))
+
+const { loading, resources, handleRead, handleDownload, handleRate, downloadingId } = useResources(queryParams)
+const { data: categories } = useCategories()
+
+const categoryIcons: Record<string, any> = {
+  'History': BankOutlined,
+  'Linguistics': TranslationOutlined,
+  'Science': ExperimentOutlined,
+  'Geopolitics': EnvironmentOutlined
+}
+
+const categoryList = computed(() => {
+  const list = [
+    { id: '', name: 'All Archive', icon: markRaw(BankOutlined) }
+  ]
+  if (categories.value) {
+    categories.value.forEach(cat => {
+      list.push({
+        id: cat.id,
+        name: cat.name,
+        icon: markRaw(categoryIcons[cat.name] || FileTextOutlined)
+      })
+    })
+  }
+  return list
+})
 
 onMounted(() => {
   if (route.query.q) {
     searchQuery.value = route.query.q as string
-    triggerSearch()
   }
 })
 
-const triggerSearch = () => {
-  isSearching.value = true
-  setTimeout(() => {
-    isSearching.value = false
-  }, 600)
-}
+// Use debounce for search input to avoid hitting backend too frequently
+const handleSearchInput = debounce(() => {
+  // queryParams computed will automatically trigger vue-query refetch
+}, 500)
 
-watch([activeCategory, activeChips], () => {
-  triggerSearch()
-})
-
-const filteredResults = computed(() => {
-  let results = getFilteredResources(searchQuery.value)
-  if (activeCategory.value) {
-    results = results.filter(r => r.category === activeCategory.value)
-  }
-  if (activeChips.value.includes('Verified Only')) {
-    results = results.filter(r => r.verified)
-  }
-  return results
-})
-
-const getReactiveCount = (catName: string) => {
-  const baselineResults = getFilteredResources(searchQuery.value)
-  return baselineResults.filter(r => r.category === catName).length
+const toggleCategory = (id: string) => {
+  activeCategoryId.value = activeCategoryId.value === id ? '' : id
 }
 
 const toggleChip = (chip: string) => {
@@ -277,7 +288,7 @@ const toggleChip = (chip: string) => {
 
 const resetFilters = () => {
   searchQuery.value = ''
-  activeCategory.value = ''
+  activeCategoryId.value = ''
   activeChips.value = []
 }
 </script>

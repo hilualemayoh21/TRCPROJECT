@@ -12,6 +12,7 @@ model User {
   id                  String         @id @default(uuid())
   email               String         @unique
   name                String
+  avatarUrl           String?
   passwordHash        String
   status              String         @default("active") // 'active', 'inactive', 'pending'
   failedLoginAttempts Int            @default(0)
@@ -192,4 +193,12 @@ model AuditLog {
   userAgent  String?
   metadata   Json?    // Use JSON for context details
   createdAt  DateTime @default(now())
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

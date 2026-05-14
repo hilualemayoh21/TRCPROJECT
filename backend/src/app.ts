@@ -29,6 +29,9 @@ app.use(cors({
 app.use(express.json());
 app.use(tracingMiddleware);
 
+// Serve uploads as static files
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
 // ─── DEBUG ROUTES (Top Priority) ───
 app.get('/ping', (req, res) => res.status(200).send('pong'));
 app.get('/api/test', (req, res) => res.status(200).json({ ok: true }));

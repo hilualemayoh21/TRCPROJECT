@@ -1,4 +1,4 @@
-import { get } from '@/services/http'
+import { get, post } from '@/services/http'
 
 export interface PublicStats {
   totalResources: number
@@ -31,5 +31,9 @@ export const publicApi = {
   
   async getFeatured() {
     return get<{ items: FeaturedResource[] }>('/public/featured')
+  },
+
+  async subscribe(email: string) {
+    return post<{ message: string }>('/public/subscribe', { email })
   }
 }

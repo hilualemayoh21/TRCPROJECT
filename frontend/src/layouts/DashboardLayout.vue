@@ -204,6 +204,8 @@ function isActive(path: string) {
 
 const allNavItems = [
   { name: 'Dashboard', to: '/dashboard', icon: DashboardOutlined, roles: ['public_user', 'researcher', 'admin', 'super_admin'] },
+  { name: 'Profile',   to: '/profile',   icon: TeamOutlined,      roles: ['public_user', 'researcher', 'admin', 'super_admin'] },
+  { name: 'Notifications', to: '/notifications', icon: BellOutlined, roles: ['public_user', 'researcher', 'admin', 'super_admin'] },
   { name: 'Users',     to: '/admin/users', icon: TeamOutlined,       roles: ['admin', 'super_admin'] },
   { name: 'Roles',     to: '/admin/roles', icon: SafetyOutlined,     roles: ['admin', 'super_admin'] },
   { name: 'Resources', to: '/search',   icon: FolderOpenOutlined, roles: ['public_user', 'researcher', 'admin', 'super_admin'] },

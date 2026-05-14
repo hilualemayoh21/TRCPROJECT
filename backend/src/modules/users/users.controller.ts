@@ -189,4 +189,41 @@ export class UsersController {
       next(e);
     }
   }
+
+  static async getMe(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.user?.id;
+      if (!id) throw new AppError('Unauthorized', 401);
+
+      const user = await prisma.user.findUnique({
+        where: { id, deletedAt: null },
+        include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
+      });
+      if (!user) throw new AppError('User not found', 404);
+      res.json(mapUser(user as any));
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  static async updateMe(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.user?.id;
+      if (!id) throw new AppError('Unauthorized', 401);
+
+      const { name, email, institution } = req.body;
+      const data: any = { name, email, institution };
+
+      const user = await prisma.user.update({
+        where: { id },
+        data,
+        include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
+      });
+
+      await AuditService.log(req, id, 'Profile updated by user', 'User', id);
+      res.json(mapUser(user as any));
+    } catch (e) {
+      next(e);
+    }
+  }
 }

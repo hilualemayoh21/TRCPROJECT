@@ -7,5 +7,6 @@ const router = Router();
 router.get('/stats', PublicController.getStats);
 router.get('/featured', PublicController.getFeatured);
 router.get('/categories', PublicController.getCategories);
+router.post('/subscribe', PublicController.subscribe);
 
 export default router;

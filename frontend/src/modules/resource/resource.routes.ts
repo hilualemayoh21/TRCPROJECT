@@ -10,5 +10,11 @@ export default [
     name: 'UploadResource',
     component: () => import('./pages/UploadResource.vue'),
     meta: { layout: 'DashboardLayout', requiresAuth: true }
+  },
+  {
+    path: '/resources/:id',
+    name: 'ResourceDetail',
+    component: () => import('./pages/ResourceDetail.vue'),
+    meta: { layout: 'DashboardLayout' }
   }
 ]

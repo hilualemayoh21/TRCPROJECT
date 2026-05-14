@@ -1,0 +1,33 @@
+<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Orbit 1 (Horizontal-ish) -->
+  <ellipse cx="100" cy="100" rx="80" ry="30" transform="rotate(30 100 100)" stroke="url(#purpleGrad)" stroke-width="6" fill="none"/>
+  <!-- Orbit 2 -->
+  <ellipse cx="100" cy="100" rx="80" ry="30" transform="rotate(90 100 100)" stroke="url(#greyGrad)" stroke-width="6" fill="none"/>
+  <!-- Orbit 3 -->
+  <ellipse cx="100" cy="100" rx="80" ry="30" transform="rotate(150 100 100)" stroke="url(#purpleGrad2)" stroke-width="6" fill="none"/>
+  
+  <!-- Spheres -->
+  <circle cx="169" cy="140" r="12" fill="url(#sphereGrad)"/>
+  <circle cx="31" cy="60" r="12" fill="url(#sphereGrad)"/>
+  <circle cx="100" cy="180" r="14" fill="url(#sphereGrad)"/>
+
+  <defs>
+    <linearGradient id="purpleGrad" x1="20" y1="70" x2="180" y2="130" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A855F7" />
+      <stop offset="1" stop-color="#4C1D95" />
+    </linearGradient>
+    <linearGradient id="greyGrad" x1="100" y1="20" x2="100" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9CA3AF" />
+      <stop offset="1" stop-color="#374151" />
+    </linearGradient>
+    <linearGradient id="purpleGrad2" x1="20" y1="130" x2="180" y2="70" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3AED" />
+      <stop offset="1" stop-color="#312E81" />
+    </linearGradient>
+    <radialGradient id="sphereGrad" cx="30%" cy="30%" r="70%">
+      <stop stop-color="#D8B4FE" />
+      <stop offset="0.5" stop-color="#9333EA" />
+      <stop offset="1" stop-color="#4C1D95" />
+    </radialGradient>
+  </defs>
+</svg>

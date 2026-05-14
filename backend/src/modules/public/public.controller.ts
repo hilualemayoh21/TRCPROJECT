@@ -76,4 +76,35 @@ export class PublicController {
       })));
     } catch (e) { next(e); }
   }
+
+  /** POST /public/subscribe — Newsletter subscription */
+  static async subscribe(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+
+      // Check if already exists
+      const existing = await prisma.newsletterSubscriber.findUnique({
+        where: { email }
+      });
+
+      if (existing) {
+        if (existing.isActive) {
+          return res.status(200).json({ message: 'Already subscribed' });
+        }
+        await prisma.newsletterSubscriber.update({
+          where: { email },
+          data: { isActive: true }
+        });
+      } else {
+        await prisma.newsletterSubscriber.create({
+          data: { email }
+        });
+      }
+
+      res.status(201).json({ message: 'Subscribed successfully' });
+    } catch (e) { next(e); }
+  }
 }
