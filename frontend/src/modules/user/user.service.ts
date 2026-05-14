@@ -1,24 +1,21 @@
-import { axiosInstance } from '@/shared/services/axios';
+import { get, patch } from '@/services/http';
 
 export const userService = {
   getMe: async () => {
-    const response = await axiosInstance.get('/users/me');
-    return response.data;
+    return get<any>('/users/me');
   },
 
   updateMe: async (data: any) => {
-    const response = await axiosInstance.patch('/users/me', data);
-    return response.data;
+    return patch<any>('/users/me', data);
   },
 
   updateAvatar: async (file: File) => {
     const formData = new FormData();
     formData.append('avatar', file);
-    const response = await axiosInstance.patch('/users/me/avatar', formData, {
+    return patch<any>('/users/me/avatar', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
-    return response.data;
   },
 };
