@@ -8,6 +8,7 @@ import { AuditService } from '../audit/audit.service';
 import { AlertingService } from '../../utils/alerting';
 import { EmailService } from '../../utils/email';
 
+import { mapUser } from '../../utils/response-mappers';
 import { config } from '../../config';
 
 const ACCESS_EXP = '15m';
@@ -237,8 +238,13 @@ export class AuthService {
   }
 
   static async verifyEmail(email: string, otp: string) {
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) throw new AppError('User not found', 404);
+    const user = await prisma.user.findFirst({ 
+      where: { 
+        email: { equals: email, mode: 'insensitive' },
+        deletedAt: null
+      } 
+    });
+    if (!user) throw new AppError('User not found or account deleted', 404);
 
     if (user.emailVerified) throw new AppError('Email already verified', 400);
 
@@ -263,8 +269,13 @@ export class AuthService {
   }
 
   static async resendVerification(email: string) {
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) throw new AppError('User not found', 404);
+    const user = await prisma.user.findFirst({ 
+      where: { 
+        email: { equals: email, mode: 'insensitive' },
+        deletedAt: null
+      } 
+    });
+    if (!user) throw new AppError('User not found or account deleted', 404);
 
     if (user.emailVerified) throw new AppError('Email already verified', 400);
 
@@ -325,7 +336,7 @@ export class AuthService {
     });
 
     return {
-      user,
+      user: mapUser(user),
       accessToken,
       refreshToken,
       expiresAt: expiresAt.getTime()
