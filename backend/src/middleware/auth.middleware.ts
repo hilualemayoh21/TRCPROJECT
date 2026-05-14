@@ -21,10 +21,28 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
       throw new AppError('Unauthorized', 401);
     }
 
-    const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
-    if (!user || user.status !== 'active' || user.deletedAt) {
-      console.warn(`[AuthMiddleware] User not found or inactive: ${decoded.userId}`);
+    const user = await prisma.user.findUnique({ 
+      where: { id: decoded.userId },
+      include: {
+        roles: {
+          include: {
+            role: {
+              include: {
+                permissions: { include: { permission: true } }
+              }
+            }
+          }
+        }
+      }
+    });
+    if (!user || user.deletedAt) {
+      console.warn(`[AuthMiddleware] User not found or deleted: ${decoded.userId}`);
       throw new AppError('Unauthorized', 401);
+    }
+    
+    if (user.status === 'inactive') {
+      console.warn(`[AuthMiddleware] User inactive: ${decoded.userId}`);
+      throw new AppError('Account is inactive', 401);
     }
 
     if (user.permissionVersion !== decoded.permissionVersion) {

@@ -6,6 +6,7 @@ import { AppError, AuthError } from '../../utils/api';
 import { z } from 'zod';
 import { AuditService } from '../audit/audit.service';
 import { AlertingService } from '../../utils/alerting';
+import { EmailService } from '../../utils/email';
 
 import { config } from '../../config';
 
@@ -126,8 +127,15 @@ export class AuthService {
       } 
     });
 
-    if (!dbRole && (role === 'public_user' || role === 'Public User')) {
-      dbRole = await prisma.role.create({ data: { id: 'public_user', name: 'public_user', isSystem: true } });
+    if (!dbRole) {
+      const isPublic = role === 'public_user' || role === 'Public User';
+      const isResearcher = role === 'researcher' || role === 'Researcher';
+      
+      if (isPublic) {
+        dbRole = await prisma.role.create({ data: { id: 'public_user', name: 'public_user', isSystem: true } });
+      } else if (isResearcher) {
+        dbRole = await prisma.role.create({ data: { id: 'researcher', name: 'researcher', isSystem: true } });
+      }
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -147,7 +155,7 @@ export class AuthService {
       include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
     });
 
-    console.log(`[Email Mock] Sent OTP ${otp} to ${email}`);
+    await EmailService.sendOTP(email, otp);
 
     return this.generateAuthResponse(user);
   }
@@ -257,7 +265,7 @@ export class AuthService {
       }
     });
 
-    console.log(`[Email Mock] Sent new OTP ${otp} to ${email}`);
+    await EmailService.sendOTP(email, otp);
 
     return { ok: true };
   }
