@@ -206,7 +206,7 @@ const allNavItems = [
   { name: 'Dashboard', to: '/dashboard', icon: DashboardOutlined, roles: ['public_user', 'researcher', 'admin', 'super_admin'] },
   { name: 'Users',     to: '/admin/users', icon: TeamOutlined,       roles: ['admin', 'super_admin'] },
   { name: 'Roles',     to: '/admin/roles', icon: SafetyOutlined,     roles: ['admin', 'super_admin'] },
-  { name: 'Resources', to: '/resources',   icon: FolderOpenOutlined, roles: ['public_user', 'researcher', 'admin', 'super_admin'] },
+  { name: 'Resources', to: '/search',   icon: FolderOpenOutlined, roles: ['public_user', 'researcher', 'admin', 'super_admin'] },
   { name: 'Logs',      to: '/admin/audit-logs', icon: AuditOutlined, roles: ['admin', 'super_admin'] },
   { name: 'Settings',  to: '/settings',    icon: SettingOutlined,    roles: ['public_user', 'researcher', 'admin', 'super_admin'] },
 ]
