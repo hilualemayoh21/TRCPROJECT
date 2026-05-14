@@ -173,9 +173,15 @@ export class UsersController {
   static async deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
+      const user = await prisma.user.findUnique({ where: { id: id as string } });
+      if (!user) throw new AppError('User not found', 404);
+
       await prisma.user.update({
         where: { id: id as string },
-        data: { deletedAt: new Date() }
+        data: { 
+          deletedAt: new Date(),
+          email: `${Date.now()}_deleted_${user.email}` 
+        }
       });
       await AuditService.log(req, (req.user?.id as string) || null, 'User deleted by admin', 'User', id as string);
       res.json({ ok: true });
