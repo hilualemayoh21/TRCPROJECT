@@ -38,9 +38,9 @@ export class UsersController {
 
   static async getUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
       const user = await prisma.user.findUnique({
-        where: { id: id as string, deletedAt: null },
+        where: { id, deletedAt: null },
         include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
       });
       if (!user) throw new AppError('User not found', 404);
@@ -92,7 +92,7 @@ export class UsersController {
 
   static async updateUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
       const { name, email, password, active, institution } = req.body;
 
       if (email) {
@@ -100,7 +100,7 @@ export class UsersController {
           where: {
             email: { equals: email, mode: 'insensitive' },
             deletedAt: null,
-            NOT: { id: id as string }
+            NOT: { id }
           }
         });
         if (existing) throw new AppError('New email is already in use', 400);
@@ -111,12 +111,12 @@ export class UsersController {
       if (active !== undefined) data.status = active ? 'active' : 'inactive';
 
       const user = await prisma.user.update({
-        where: { id: id as string },
+        where: { id },
         data,
         include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
       });
 
-      await AuditService.log(req, (req.user?.id as string) || null, 'User updated by admin', 'User', id as string);
+      await AuditService.log(req, (req.user?.id as string) || null, 'User updated by admin', 'User', id);
       res.json(mapUser(user as any));
     } catch (e) {
       next(e);
@@ -125,14 +125,14 @@ export class UsersController {
 
   static async deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
-      const user = await prisma.user.findUnique({ where: { id: id as string } });
+      const id = req.params.id as string;
+      const user = await prisma.user.findUnique({ where: { id } });
       if (!user) throw new AppError('User not found', 404);
 
       const deletedEmail = `${id}_deleted_${user.email}`;
 
       await prisma.user.update({
-        where: { id: id as string },
+        where: { id },
         data: { 
           deletedAt: new Date(),
           email: deletedEmail.slice(0, 254),
@@ -140,7 +140,7 @@ export class UsersController {
         }
       });
 
-      await AuditService.log(req, (req.user?.id as string) || null, 'User deleted by admin', 'User', id as string);
+      await AuditService.log(req, (req.user?.id as string) || null, 'User deleted by admin', 'User', id);
       res.json({ ok: true });
     } catch (e) {
       next(e);
@@ -149,10 +149,10 @@ export class UsersController {
 
   static async updateStatus(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
       const { active } = req.body;
       const user = await prisma.user.update({
-        where: { id: id as string },
+        where: { id },
         data: { status: active ? 'active' : 'inactive' }
       });
       res.json({ ok: true, active: user.status === 'active' });
@@ -163,7 +163,7 @@ export class UsersController {
 
   static async assignRole(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const id = req.params.id as string;
       const { role } = req.body;
       const dbRole = await prisma.role.findFirst({
         where: { OR: [{ id: role }, { name: role }] }
