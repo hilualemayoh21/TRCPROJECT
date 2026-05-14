@@ -42,18 +42,47 @@ export function authMiddleware(
       })
     }
 
-    // ✅ Status check (Handle pending approvals)
+    // ✅ Status check (Handle email verification and pending approvals)
     if (auth.isAuthenticated) {
-      const isPendingPage = to.name === 'PendingApproval'
-      const isResearcherInfoPage = to.name === 'ResearcherInfo'
-      const isEmailVerificationPage = to.name === 'EmailVerification'
-      const isPendingStatus = auth.user?.status === 'pending' || auth.user?.status === 'unverified'
+      const userEmail = String(auth.user?.email || '').toLowerCase()
+      const userRole = String(auth.user?.role || '').toLowerCase()
+      
+      // Super Admin bypass for verification/pending flows
+      if (userEmail === 'admin@trc.local' || userRole === 'super_admin') {
+        return next()
+      }
 
-      // Pending users may only visit PendingApproval, ResearcherInfo, or EmailVerification
-      if (isPendingStatus && !isPendingPage && !isResearcherInfoPage && !isEmailVerificationPage) {
+      const isEmailVerificationPage = to.name === 'EmailVerification'
+      const isResearcherInfoPage = to.name === 'ResearcherInfo'
+      const isPendingPage = to.name === 'PendingApproval'
+      
+      const emailVerified = auth.user?.emailVerified
+      const isPendingStatus = auth.user?.status === 'pending'
+      const isResearcher = userRole === 'researcher'
+
+      // 1. Force Email Verification
+      if (!emailVerified) {
+        if (!isEmailVerificationPage) {
+          return next({ name: 'EmailVerification', query: { email: auth.user?.email } })
+        }
+        return next()
+      }
+
+      // 2. Handle Researcher Flow (Researcher Info -> Pending Approval)
+      if (isPendingStatus && isResearcher) {
+        if (!isResearcherInfoPage && !isPendingPage) {
+          return next({ name: 'ResearcherInfo' })
+        }
+        return next()
+      }
+
+      // 3. Handle Other Pending Statuses (e.g. general pending)
+      if (isPendingStatus && !isResearcher && !isPendingPage) {
         return next({ name: 'PendingApproval' })
       }
-      if (!isPendingStatus && (isPendingPage || isEmailVerificationPage)) {
+
+      // 4. Redirect approved users away from pending pages
+      if (!isPendingStatus && emailVerified && (isPendingPage || isEmailVerificationPage || isResearcherInfoPage)) {
         return next({ path: auth.getPostLoginRoute() })
       }
     }
