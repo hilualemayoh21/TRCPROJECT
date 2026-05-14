@@ -2,106 +2,35 @@ import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../../prisma/client';
 import { AppError } from '../../utils/api';
 import { AuditService } from '../audit/audit.service';
-import { withTimeout } from '../../utils/resilience';
 import { mapUser, mapPaginatedResponse } from '../../utils/response-mappers';
 
 export class UsersController {
   static async listUsers(req: Request, res: Response, next: NextFunction) {
     try {
       const page = parseInt(req.query.page as string) || 1;
-      let pageSize = parseInt(req.query.pageSize as string) || 10;
-      if (pageSize > 100) pageSize = 100;
-      const q = (req.query.q as string) || '';
+      const pageSize = parseInt(req.query.pageSize as string) || 10;
+      const q = req.query.q as string;
 
-      const where = {
-        deletedAt: null,
-        ...(q ? {
-          OR: [
-            { name: { contains: q, mode: 'insensitive' as const } },
-            { email: { contains: q, mode: 'insensitive' as const } }
-          ]
-        } : {})
-      };
-
-      const [users, total] = await withTimeout(
-        Promise.all([
-          prisma.user.findMany({
-            where,
-            skip: (page - 1) * pageSize,
-            take: pageSize,
-            include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } },
-            orderBy: { createdAt: 'desc' }
-          }),
-          prisma.user.count({ where })
-        ]),
-        5000,
-        'User listing query timed out'
-      );
-
-      const items = users.map((u: any) => mapUser(u));
-
-      res.json(mapPaginatedResponse(items, { page, pageSize, total }));
-    } catch (e) {
-      next(e);
-    }
-  }
-
-  static async updateStatus(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { id } = req.params;
-      const { active } = req.body;
-
-      const user = await prisma.user.update({
-        where: { id: id as string },
-        data: { status: active ? 'active' : 'inactive' },
-        include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
-      });
-
-      await AuditService.log(req, (req.user?.id as string) || null, active ? 'User activated' : 'User deactivated', 'User', id as string);
-
-      res.json(mapUser(user as any));
-    } catch (e) {
-      next(e);
-    }
-  }
-
-  static async assignRole(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { id } = req.params;
-      const { role } = req.body;
-
-      const dbRole = await prisma.role.findUnique({ where: { name: role as string } });
-      if (!dbRole) throw new AppError('Role not found', 404);
-
-      // Prevent removing last admin
-      if (dbRole.id !== 'super_admin') {
-        const adminRole = await prisma.role.findUnique({ where: { name: 'super_admin' } });
-        if (adminRole) {
-          const userRoles = await prisma.userRole.findFirst({ where: { userId: id as string, roleId: adminRole.id } });
-          if (userRoles) {
-            const adminCount = await prisma.userRole.count({ where: { roleId: adminRole.id } });
-            if (adminCount <= 1) {
-              throw new AppError('Cannot remove the last super_admin', 400);
-            }
-          }
-        }
+      const where: any = { deletedAt: null };
+      if (q) {
+        where.OR = [
+          { name: { contains: q, mode: 'insensitive' } },
+          { email: { contains: q, mode: 'insensitive' } }
+        ];
       }
 
-      await prisma.userRole.deleteMany({ where: { userId: id as string } });
-      await prisma.userRole.create({ data: { userId: id as string, roleId: dbRole.id } });
+      const [total, items] = await Promise.all([
+        prisma.user.count({ where }),
+        prisma.user.findMany({
+          where,
+          include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+          orderBy: { createdAt: 'desc' }
+        })
+      ]);
 
-      const updatedUser = await prisma.user.update({
-        where: { id: id as string },
-        data: { permissionVersion: { increment: 1 } },
-        include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
-      });
-
-      await AuditService.log(req, (req.user?.id as string) || null, 'User role changed', 'User', id as string, { newRole: role });
-
-      res.json({
-        ok: true,
-        user: mapUser(updatedUser as any)
-      });
+      res.json(mapPaginatedResponse(items.map(u => mapUser(u as any)), total, page, pageSize));
     } catch (e) {
       next(e);
     }
@@ -124,11 +53,24 @@ export class UsersController {
   static async createUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password, name, role, institution } = req.body;
-      const existing = await prisma.user.findUnique({ where: { email } });
-      if (existing) throw new AppError('Email already in use', 400);
+      
+      const existing = await prisma.user.findFirst({ 
+        where: { 
+          email: { equals: email, mode: 'insensitive' },
+          deletedAt: null 
+        } 
+      });
+      if (existing) throw new AppError('Email already in use by an active account', 400);
 
       const passwordHash = await require('bcrypt').hash(password || 'Temporary123!', 10);
-      const dbRole = await prisma.role.findUnique({ where: { name: role as string } });
+      const dbRole = await prisma.role.findFirst({ 
+        where: { 
+          OR: [
+            { name: role as string },
+            { id: role as string }
+          ]
+        } 
+      });
 
       const user = await prisma.user.create({
         data: {
@@ -142,7 +84,7 @@ export class UsersController {
       });
 
       await AuditService.log(req, (req.user?.id as string) || null, 'User created by admin', 'User', user.id);
-      res.json(mapUser(user as any));
+      res.status(201).json(mapUser(user as any));
     } catch (e) {
       next(e);
     }
@@ -152,6 +94,18 @@ export class UsersController {
     try {
       const { id } = req.params;
       const { name, email, password, active, institution } = req.body;
+
+      // Check if email is being changed and if new email exists
+      if (email) {
+        const existing = await prisma.user.findFirst({
+          where: {
+            email: { equals: email, mode: 'insensitive' },
+            deletedAt: null,
+            NOT: { id: id as string }
+          }
+        });
+        if (existing) throw new AppError('New email is already in use', 400);
+      }
 
       const data: any = { name, email, institution };
       if (password) data.passwordHash = await require('bcrypt').hash(password, 10);
@@ -176,13 +130,18 @@ export class UsersController {
       const user = await prisma.user.findUnique({ where: { id: id as string } });
       if (!user) throw new AppError('User not found', 404);
 
+      // Rename email to allow reuse
+      const deletedEmail = `${id}_deleted_${user.email}`;
+
       await prisma.user.update({
         where: { id: id as string },
         data: { 
           deletedAt: new Date(),
-          email: `${Date.now()}_deleted_${user.email}` 
+          email: deletedEmail.slice(0, 254), // Ensure it fits in typical email fields
+          status: 'inactive'
         }
       });
+
       await AuditService.log(req, (req.user?.id as string) || null, 'User deleted by admin', 'User', id as string);
       res.json({ ok: true });
     } catch (e) {
@@ -212,6 +171,18 @@ export class UsersController {
       if (!id) throw new AppError('Unauthorized', 401);
 
       const { name, email, institution } = req.body;
+      
+      if (email) {
+        const existing = await prisma.user.findFirst({
+          where: {
+            email: { equals: email, mode: 'insensitive' },
+            deletedAt: null,
+            NOT: { id }
+          }
+        });
+        if (existing) throw new AppError('Email already in use', 400);
+      }
+
       const data: any = { name, email, institution };
 
       const user = await prisma.user.update({
@@ -222,6 +193,25 @@ export class UsersController {
 
       await AuditService.log(req, id, 'Profile updated by user', 'User', id);
       res.json(mapUser(user as any));
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  static async updateAvatar(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.file) throw new AppError('No file uploaded', 400);
+
+      const userId = (req as any).user.id;
+      const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+
+      const user = await prisma.user.update({
+        where: { id: userId },
+        data: { avatarUrl }
+      });
+
+      await AuditService.log(req, userId, 'Avatar updated', 'User', userId);
+      res.json({ message: 'Avatar updated', avatarUrl });
     } catch (e) {
       next(e);
     }

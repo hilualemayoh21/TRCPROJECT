@@ -112,8 +112,14 @@ export class AuthService {
   static async register(data: any) {
     const { email, password, name, institution, role = 'public_user' } = data;
     
-    const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) throw new AppError('Email already in use', 400);
+    // Check for active users only with case-insensitivity
+    const existing = await prisma.user.findFirst({ 
+      where: { 
+        email: { equals: email, mode: 'insensitive' },
+        deletedAt: null 
+      } 
+    });
+    if (existing) throw new AppError('Email already in use by an active account', 400);
 
     const passwordHash = await bcrypt.hash(password, 10);
     
