@@ -9,6 +9,7 @@ export interface PrismaUser {
   name: string;
   email: string;
   status?: string;
+  emailVerified?: boolean;
   institution?: string;
   permissionVersion?: number;
   roles?: {
@@ -60,6 +61,8 @@ export function mapUser(user: PrismaUser) {
     role: primaryRole,
     permissions: Array.from(permissions),
     active: user.status === 'active',
+    status: user.status,
+    emailVerified: !!user.emailVerified,
     institution: user.institution || undefined,
   };
 }

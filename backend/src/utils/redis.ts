@@ -1,102 +1,50 @@
 import Redis from 'ioredis';
-import logger from './logger';
 import { config } from '../config';
 
-const REDIS_URL = config.redisUrl;
-const isDev = config.env === 'development';
+const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+  maxRetriesPerRequest: null,
+});
 
-// ── Graceful Redis: in dev, a failed connection doesn't crash the server ──
+redis.on('error', (err) => {
+  console.error('[Redis Error]', err);
+});
 
-let redisInstance: Redis | null = null;
+redis.on('connect', () => {
+  console.log('[Redis] Connected successfully');
+});
 
-function createRedis(): Redis | null {
-  try {
-    const client = new Redis(REDIS_URL, {
-      maxRetriesPerRequest: null,
-      enableOfflineQueue: false,
-      lazyConnect: true,
-    });
-
-    client.on('error', (err) => {
-      if (isDev) {
-        // Only log once to avoid spam
-        logger.warn({ code: (err as any).code }, 'Redis unavailable in dev – running without cache/queues');
-      } else {
-        logger.error({ err }, 'Redis connection error');
-      }
-    });
-
-    client.on('connect', () => logger.info('Connected to Redis'));
-
-    // Don't await – just attempt connection
-    client.connect().catch(() => {});
-
-    return client;
-  } catch (err) {
-    logger.warn('Could not initialise Redis client');
-    return null;
+export class RedisService {
+  /**
+   * Store an OTP for a specific purpose (verification, reset)
+   * @param key Unique key (e.g., `otp:verify:user@example.com`)
+   * @param otp The 6-digit code
+   * @param ttlSeconds Time to live in seconds (default 15 mins)
+   */
+  static async setOTP(key: string, otp: string, ttlSeconds: number = 900) {
+    await redis.set(key, otp, 'EX', ttlSeconds);
   }
-}
 
-export const redis = createRedis()!;
-
-// ── Null-safe BullMQ queues ──
-// We only create queues when Redis is actually available
-let _auditQueue: import('bullmq').Queue | null = null;
-let _emailQueue: import('bullmq').Queue | null = null;
-
-async function getQueues() {
-  if (!redis) return;
-  try {
-    const { Queue } = await import('bullmq');
-    _auditQueue = new Queue('audit-logs', { connection: redis });
-    _emailQueue = new Queue('emails', { connection: redis });
-  } catch {
-    // bullmq failed (no Redis), queues stay null
+  /**
+   * Retrieve and delete an OTP (one-time use)
+   */
+  static async getAndVerifyOTP(key: string, submittedOtp: string): Promise<boolean> {
+    const storedOtp = await redis.get(key);
+    if (!storedOtp) return false;
+    
+    if (storedOtp === submittedOtp) {
+      await redis.del(key);
+      return true;
+    }
+    
+    return false;
   }
-}
 
-getQueues();
-
-export const auditQueue = {
-  add: async (name: string, data: any) => {
-    if (_auditQueue) return _auditQueue.add(name, data);
-  },
-  close: async () => {
-    if (_auditQueue) return _auditQueue.close();
-  }
-};
-
-export const emailQueue = {
-  add: async (name: string, data: any) => {
-    if (_emailQueue) return _emailQueue.add(name, data);
-  },
-  close: async () => {
-    if (_emailQueue) return _emailQueue.close();
-  }
-};
-
-// ── Cache helpers (no-ops when Redis is down) ──
-export async function cacheGet(key: string): Promise<any> {
-  if (!redis) return null;
-  try {
-    const val = await redis.get(key);
-    return val ? JSON.parse(val) : null;
-  } catch {
-    return null;
-  }
-}
-
-export async function cacheSet(key: string, value: any, ttl = 3600): Promise<void> {
-  if (!redis) return;
-  try {
-    await redis.set(key, JSON.stringify(value), 'EX', ttl);
-  } catch {}
-}
-
-export async function cacheDel(key: string): Promise<void> {
-  if (!redis) return;
-  try {
+  /**
+   * General purpose delete
+   */
+  static async delete(key: string) {
     await redis.del(key);
-  } catch {}
+  }
 }
+
+export default redis;

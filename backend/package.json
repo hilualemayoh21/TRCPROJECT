@@ -21,6 +21,7 @@
   "type": "commonjs",
   "dependencies": {
     "@prisma/client": "^5.11.0",
+    "@sendgrid/mail": "^8.1.6",
     "axios": "^1.15.2",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.76.4",

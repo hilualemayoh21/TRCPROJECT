@@ -14,6 +14,7 @@ type AuthUser = {
   active?: boolean
   institution?: string
   status?: string
+  emailVerified?: boolean
 }
 
 type AuthTokens = {

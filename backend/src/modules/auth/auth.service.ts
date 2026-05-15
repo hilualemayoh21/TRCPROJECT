@@ -14,6 +14,8 @@ import { config } from '../../config';
 const ACCESS_EXP = '15m';
 const REFRESH_EXP_DAYS = 7;
 
+import { RedisService } from '../../utils/redis';
+
 export const AuthSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
@@ -34,6 +36,16 @@ export const VerifyEmailSchema = z.object({
 
 export const ResendVerificationSchema = z.object({
   email: z.string().email()
+});
+
+export const ForgotPasswordSchema = z.object({
+  email: z.string().email()
+});
+
+export const ResetPasswordSchema = z.object({
+  email: z.string().email(),
+  otp: z.string().length(6),
+  password: z.string().min(6)
 });
 
 export const ResearcherInfoSchema = z.object({
@@ -113,66 +125,118 @@ export class AuthService {
   static async register(data: any) {
     const { email, password, name, institution, role = 'public_user' } = data;
     
-    // 1. Look for ANY user with this email (including legacy deleted ones)
+    // 1. Conflict check
     const conflict = await prisma.user.findFirst({ 
       where: { email: { equals: email, mode: 'insensitive' } } 
     });
 
     if (conflict) {
-      if (!conflict.deletedAt) {
-        throw new AppError('Email already in use by an active account', 400);
-      }
+      if (!conflict.deletedAt) throw new AppError('Email already in use', 400);
       
-      // Legacy cleanup: rename the deleted user to free up the email
+      // Cleanup legacy deleted account
       await prisma.user.update({
         where: { id: conflict.id },
-        data: { email: `${conflict.id}_cleanup_${Date.now()}_${conflict.email}`.slice(0, 254) }
+        data: { email: `${conflict.id}_del_${Date.now()}` }
       });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
     
     let dbRole = await prisma.role.findFirst({ 
-      where: { 
-        OR: [
-          { name: role },
-          { id: role }
-        ],
-        deletedAt: null 
-      } 
+      where: { name: { equals: role, mode: 'insensitive' }, deletedAt: null } 
     });
 
     if (!dbRole) {
-      const isPublic = role === 'public_user' || role === 'Public User';
-      const isResearcher = role === 'researcher' || role === 'Researcher';
-      
-      if (isPublic) {
-        dbRole = await prisma.role.create({ data: { id: 'public_user', name: 'public_user', isSystem: true } });
-      } else if (isResearcher) {
-        dbRole = await prisma.role.create({ data: { id: 'researcher', name: 'researcher', isSystem: true } });
-      }
+      dbRole = await prisma.role.findFirst({ where: { id: 'public_user' } });
     }
-
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expires = new Date(Date.now() + 15 * 60 * 1000);
 
     const user = await prisma.user.create({
       data: {
-        email,
+        email: email.toLowerCase(),
         name,
         passwordHash,
         institution,
-        status: (role === 'researcher' || role === 'Researcher') ? 'pending' : 'active',
+        status: (role.toLowerCase() === 'researcher') ? 'pending' : 'active',
         roles: dbRole ? { create: { roleId: dbRole.id } } : undefined,
-        verificationCode: otp,
-        verificationCodeExpires: expires
       },
       include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
     });
 
-    await EmailService.sendOTP(email, otp);
+    // 2. Redis OTP for verification
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    await RedisService.setOTP(`otp:verify:${user.email}`, otp);
+    await EmailService.sendOTP(user.email, otp, 'verification');
 
     return this.generateAuthResponse(user);
+  }
+
+  static async verifyEmail(email: string, otp: string) {
+    const user = await prisma.user.findFirst({ 
+      where: { email: { equals: email, mode: 'insensitive' }, deletedAt: null } 
+    });
+    if (!user) throw new AppError('User not found', 404);
+    if (user.emailVerified) throw new AppError('Email already verified', 400);
+
+    const isValid = await RedisService.getAndVerifyOTP(`otp:verify:${user.email}`, otp);
+    if (!isValid) throw new AppError('Invalid or expired verification code', 400);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { emailVerified: true }
+    });
+
+    return { ok: true, message: 'Email verified successfully' };
+  }
+
+  static async resendVerification(email: string) {
+    const user = await prisma.user.findFirst({ 
+      where: { email: { equals: email, mode: 'insensitive' }, deletedAt: null } 
+    });
+    if (!user) throw new AppError('User not found', 404);
+    if (user.emailVerified) throw new AppError('Email already verified', 400);
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    await RedisService.setOTP(`otp:verify:${user.email}`, otp);
+    await EmailService.sendOTP(user.email, otp, 'verification');
+
+    return { ok: true, message: 'Verification code resent' };
+  }
+
+  static async forgotPassword(email: string) {
+    const user = await prisma.user.findFirst({ 
+      where: { email: { equals: email, mode: 'insensitive' }, deletedAt: null } 
+    });
+    
+    // Security: Don't reveal if email exists, just say "If account exists..."
+    if (user) {
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      await RedisService.setOTP(`otp:reset:${user.email}`, otp);
+      await EmailService.sendOTP(user.email, otp, 'reset');
+    }
+
+    return { ok: true, message: 'If an account exists with that email, a reset code has been sent.' };
+  }
+
+  static async resetPassword(email: string, otp: string, newPassword: string) {
+    const user = await prisma.user.findFirst({ 
+      where: { email: { equals: email, mode: 'insensitive' }, deletedAt: null } 
+    });
+    if (!user) throw new AppError('User not found', 404);
+
+    const isValid = await RedisService.getAndVerifyOTP(`otp:reset:${user.email}`, otp);
+    if (!isValid) throw new AppError('Invalid or expired reset code', 400);
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { 
+        passwordHash,
+        failedLoginAttempts: 0,
+        lockUntil: null
+      }
+    });
+
+    return { ok: true, message: 'Password reset successfully' };
   }
 
   static async refresh(token: string) {
@@ -183,115 +247,35 @@ export class AuthService {
     }
 
     const rt = await prisma.refreshToken.findUnique({ where: { token } });
-    
     if (!rt) throw new AuthError('Invalid refresh token');
 
-    // Token Reuse Detection
     if (rt.revoked) {
       await prisma.refreshToken.updateMany({
         where: { userId: rt.userId },
         data: { revoked: true }
       });
-
-      AlertingService.critical(`Security Alert: Refresh token reuse detected for user ${rt.userId}. Panic mode triggered.`, {
-        userId: rt.userId,
-        tokenId: rt.id
-      }).catch(() => {});
-
-      throw new AuthError('Security Alert: Refresh token reuse detected. All sessions invalidated.');
+      throw new AuthError('Security Alert: Token reuse detected.');
     }
 
-    if (rt.expiresAt < new Date()) {
-      throw new AuthError('Refresh token expired');
-    }
+    if (rt.expiresAt < new Date()) throw new AuthError('Refresh token expired');
 
-    await prisma.$transaction(async (tx: any) => {
-      await tx.refreshToken.update({ where: { id: rt.id }, data: { revoked: true } });
-    });
+    await prisma.refreshToken.update({ where: { id: rt.id }, data: { revoked: true } });
 
     const user = await prisma.user.findUnique({
       where: { id: rt.userId },
       include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
     });
 
-    if (!user || user.status !== 'active' || user.deletedAt) {
-      throw new AuthError('User account is inactive or deleted');
-    }
+    if (!user || user.deletedAt) throw new AuthError('User not found');
 
     return this.generateAuthResponse(user);
   }
 
   static async logout(token: string) {
-    try {
-      if (!token || typeof token !== 'string') return { ok: true };
-      
-      await prisma.refreshToken.updateMany({
-        where: { token },
-        data: { revoked: true }
-      });
-      return { ok: true };
-    } catch (error) {
-      // Log error but don't crash logout
-      console.error('[AuthService] Logout failed:', error);
-      return { ok: true };
-    }
-  }
-
-  static async verifyEmail(email: string, otp: string) {
-    const user = await prisma.user.findFirst({ 
-      where: { 
-        email: { equals: email, mode: 'insensitive' },
-        deletedAt: null
-      } 
+    await prisma.refreshToken.updateMany({
+      where: { token },
+      data: { revoked: true }
     });
-    if (!user) throw new AppError('User not found or account deleted', 404);
-
-    if (user.emailVerified) throw new AppError('Email already verified', 400);
-
-    if (user.verificationCode !== otp) {
-      throw new AppError('Invalid verification code', 400);
-    }
-
-    if (!user.verificationCodeExpires || user.verificationCodeExpires < new Date()) {
-      throw new AppError('Verification code expired', 400);
-    }
-
-    await prisma.user.update({
-      where: { email },
-      data: {
-        emailVerified: true,
-        verificationCode: null,
-        verificationCodeExpires: null
-      }
-    });
-
-    return { ok: true };
-  }
-
-  static async resendVerification(email: string) {
-    const user = await prisma.user.findFirst({ 
-      where: { 
-        email: { equals: email, mode: 'insensitive' },
-        deletedAt: null
-      } 
-    });
-    if (!user) throw new AppError('User not found or account deleted', 404);
-
-    if (user.emailVerified) throw new AppError('Email already verified', 400);
-
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expires = new Date(Date.now() + 15 * 60 * 1000);
-
-    await prisma.user.update({
-      where: { email },
-      data: {
-        verificationCode: otp,
-        verificationCodeExpires: expires
-      }
-    });
-
-    await EmailService.sendOTP(email, otp);
-
     return { ok: true };
   }
 

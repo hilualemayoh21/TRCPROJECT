@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { AuthService, AuthSchema, RegisterSchema, VerifyEmailSchema, ResendVerificationSchema, ResearcherInfoSchema } from './auth.service';
+import { AuthService, AuthSchema, RegisterSchema, VerifyEmailSchema, ResendVerificationSchema, ResearcherInfoSchema, ForgotPasswordSchema, ResetPasswordSchema } from './auth.service';
 import { mapAuthResponse, mapUser, mapRefreshResponse } from '../../utils/response-mappers';
 
 export class AuthController {
@@ -45,6 +45,26 @@ export class AuthController {
     try {
       const { email } = ResendVerificationSchema.parse(req.body);
       const result = await AuthService.resendVerification(email);
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email } = ForgotPasswordSchema.parse(req.body);
+      const result = await AuthService.forgotPassword(email);
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, otp, password } = ResetPasswordSchema.parse(req.body);
+      const result = await AuthService.resetPassword(email, otp, password);
       res.json(result);
     } catch (error) {
       next(error);

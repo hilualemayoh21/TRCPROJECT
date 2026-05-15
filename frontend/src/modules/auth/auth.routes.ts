@@ -2,6 +2,7 @@ import Login from './pages/Login.vue'
 import Register from './pages/Register.vue'
 import ForgotPassword from './pages/ForgotPassword.vue'
 import PendingApproval from './pages/PendingApproval.vue'
+import ResetPassword from './pages/ResetPassword.vue'
 import ResearcherInfo from './pages/ResearcherInfo.vue'
 import EmailVerification from './pages/EmailVerification.vue'
 import Support from './pages/Support.vue'
@@ -41,7 +42,14 @@ const authRoutes = [
   },
   {
     path: '/forgot-password',
+    name: 'ForgotPassword',
     component: ForgotPassword,
+    meta: { layout: 'AuthLayout' }
+  },
+  {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: ResetPassword,
     meta: { layout: 'AuthLayout' }
   },
   {
