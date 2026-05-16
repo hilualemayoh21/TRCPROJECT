@@ -1,0 +1,10 @@
+<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="100" fill="#F3F4F6"/>
+  <path d="M40 140L80 60L120 120L150 80L180 140H40Z" fill="url(#mountGrad)"/>
+  <defs>
+    <linearGradient id="mountGrad" x1="100" y1="60" x2="100" y2="140" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9333EA"/>
+      <stop offset="1" stop-color="#4C1D95"/>
+    </linearGradient>
+  </defs>
+</svg>

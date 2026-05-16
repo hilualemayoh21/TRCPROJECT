@@ -1,36 +1,44 @@
 <template>
   <div class="bg-white min-h-screen font-sans">
     
-    <!-- Cinematic About Hero -->
-    <section class="relative h-[60vh] flex items-center justify-center overflow-hidden">
+    <!-- Hero Section (Synced with Landing Page Design) -->
+    <section class="relative h-[65vh] flex items-center overflow-hidden pt-20">
+      <!-- Background Image -->
       <div class="absolute inset-0 z-0">
         <img 
           src="@/assets/images/hero_bg_gheralta.png" 
           alt="Gheralta Mountains" 
-          class="w-full h-full object-cover"
+          class="w-full h-full object-cover object-center"
         />
-        <div class="absolute inset-0 bg-[#2c154f]/60 mix-blend-multiply"></div>
-        <div class="absolute inset-0 bg-gradient-to-b from-[#1a0b2e]/20 via-transparent to-white"></div>
+        <!-- Signature White/Purple Wash -->
+        <div class="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent"></div>
+        <div class="absolute inset-0 bg-[#5e35b1]/5 mix-blend-multiply"></div>
       </div>
 
-      <div class="relative z-10 text-center px-4 max-w-4xl">
-        <h2 class="text-xs md:text-sm font-black text-[#b68eff] uppercase tracking-[0.4em] mb-4 animate-fade-in">Our Story</h2>
-        <h1 class="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-tight mb-6 tracking-tight">
-          Preserving the past.<br/>
-          <span class="text-[#b68eff]">Inspiring the future.</span>
-        </h1>
-        <p class="text-lg md:text-xl text-gray-200 font-medium max-w-2xl mx-auto leading-relaxed">
-          The Tigray Resource Center is a collective effort to archive, protect, and celebrate the world-class heritage of the Tigray region.
-        </p>
+      <!-- Content -->
+      <div class="relative z-10 mx-auto max-w-7xl px-6 w-full">
+        <div class="max-w-3xl animate-fade-up">
+          <h2 class="text-xs font-black text-[#5e35b1] uppercase tracking-[0.4em] mb-6">Our Story</h2>
+          <h1 class="text-5xl md:text-7xl font-black text-gray-900 leading-[1.05] tracking-tight">
+            Preserving the past.
+          </h1>
+          <div class="mt-5 h-1.5 w-24 rounded-full bg-[#5e35b1]"></div>
+          <h1 class="mt-4 text-5xl md:text-7xl font-black text-[#5e35b1] leading-[1.05] tracking-tight">
+            Inspiring the future.
+          </h1>
+          <p class="mt-10 text-lg md:text-xl text-gray-600 font-medium max-w-xl leading-relaxed">
+            The Tigray Resource Center is a collective effort to archive, protect, and celebrate the world-class heritage of the Tigray region.
+          </p>
+        </div>
       </div>
     </section>
 
     <!-- Mission & Vision Cards -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 -mt-20 relative z-20">
+    <section class="max-w-7xl mx-auto px-6 py-24 -mt-20 relative z-20">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Mission -->
-        <div class="bg-white p-10 md:p-14 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col gap-8 hover:-translate-y-2 transition-transform duration-500 group">
-          <div class="w-16 h-16 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-all duration-500">
+        <div class="bg-white p-12 rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col gap-8 hover:-translate-y-2 transition-all duration-500 group">
+          <div class="w-16 h-16 bg-[#5e35b1]/5 text-[#5e35b1] rounded-2xl flex items-center justify-center group-hover:bg-[#5e35b1] group-hover:text-white transition-all">
             <RocketOutlined style="font-size: 28px" />
           </div>
           <div>
@@ -42,8 +50,8 @@
         </div>
 
         <!-- Vision -->
-        <div class="bg-white p-10 md:p-14 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-gray-100 flex flex-col gap-8 hover:-translate-y-2 transition-transform duration-500 group">
-          <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-all duration-500">
+        <div class="bg-white p-12 rounded-[3rem] shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col gap-8 hover:-translate-y-2 transition-all duration-500 group">
+          <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all">
             <EyeOutlined style="font-size: 28px" />
           </div>
           <div>
@@ -58,16 +66,16 @@
 
     <!-- Core Values Section -->
     <section class="bg-gray-50/50 py-32 overflow-hidden">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto px-6">
         <div class="text-center mb-20">
-          <h2 class="text-xs font-black text-purple-700 uppercase tracking-[0.3em] mb-4">Values</h2>
+          <h2 class="text-xs font-black text-[#5e35b1] uppercase tracking-[0.3em] mb-4">Values</h2>
           <h2 class="text-4xl font-black text-gray-900 uppercase tracking-tight">What Drives Us</h2>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
           <!-- Value 1 -->
           <div class="flex flex-col items-center text-center">
-            <div class="w-20 h-20 bg-white rounded-3xl shadow-sm flex items-center justify-center text-purple-600 mb-8 border border-gray-100">
+            <div class="w-20 h-20 bg-white rounded-3xl shadow-sm flex items-center justify-center text-[#5e35b1] mb-8 border border-gray-100 transition-transform hover:scale-110">
               <SafetyCertificateOutlined style="font-size: 32px" />
             </div>
             <h4 class="text-lg font-black text-gray-900 uppercase tracking-tight mb-4">Preservation</h4>
@@ -78,7 +86,7 @@
 
           <!-- Value 2 -->
           <div class="flex flex-col items-center text-center">
-            <div class="w-20 h-20 bg-white rounded-3xl shadow-sm flex items-center justify-center text-blue-500 mb-8 border border-gray-100">
+            <div class="w-20 h-20 bg-white rounded-3xl shadow-sm flex items-center justify-center text-blue-500 mb-8 border border-gray-100 transition-transform hover:scale-110">
               <GlobalOutlined style="font-size: 32px" />
             </div>
             <h4 class="text-lg font-black text-gray-900 uppercase tracking-tight mb-4">Accessibility</h4>
@@ -89,7 +97,7 @@
 
           <!-- Value 3 -->
           <div class="flex flex-col items-center text-center">
-            <div class="w-20 h-20 bg-white rounded-3xl shadow-sm flex items-center justify-center text-orange-500 mb-8 border border-gray-100">
+            <div class="w-20 h-20 bg-white rounded-3xl shadow-sm flex items-center justify-center text-orange-500 mb-8 border border-gray-100 transition-transform hover:scale-110">
               <TeamOutlined style="font-size: 32px" />
             </div>
             <h4 class="text-lg font-black text-gray-900 uppercase tracking-tight mb-4">Collaboration</h4>
@@ -101,28 +109,24 @@
       </div>
     </section>
 
-    <!-- Final Call to Action -->
-    <section class="py-32 px-4">
-      <div class="max-w-5xl mx-auto bg-[#1a0b2e] rounded-[4rem] p-12 md:p-24 text-center relative overflow-hidden">
-        <!-- Abstract Glow -->
-        <div class="absolute top-0 right-0 w-64 h-64 bg-purple-700/20 blur-[120px] rounded-full"></div>
-        <div class="absolute bottom-0 left-0 w-64 h-64 bg-blue-700/10 blur-[120px] rounded-full"></div>
-
-        <div class="relative z-10">
-          <h2 class="text-3xl md:text-5xl font-black text-white uppercase tracking-tight mb-8">
-            Be Part of the Legacy
-          </h2>
-          <p class="text-lg text-gray-400 font-medium mb-12 max-w-2xl mx-auto leading-relaxed">
-            Whether you're a researcher, a student, or a community member, there's a place for you at the Tigray Resource Center.
-          </p>
-          <div class="flex flex-col sm:flex-row gap-6 justify-center">
-             <RouterLink to="/get-involved" class="px-10 py-4 bg-[#5222b0] hover:bg-[#3c1f62] text-white font-bold text-lg rounded-2xl transition-all shadow-xl shadow-purple-900/40">
-               Apply to Volunteer
-             </RouterLink>
-             <RouterLink to="/search" class="px-10 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 font-bold text-lg rounded-2xl transition-all">
-               Explore Archives
-             </RouterLink>
-          </div>
+    <!-- Final CTA Section (Synced with Landing Page) -->
+    <section class="py-32 bg-[#5e35b1] relative overflow-hidden">
+      <div class="absolute inset-0" style="background-image: radial-gradient(ellipse at 80% 50%, rgba(255,255,255,0.08) 0%, transparent 60%);"></div>
+      <div class="relative z-10 max-w-4xl mx-auto px-6 text-center">
+        <h2 class="text-xs font-black uppercase tracking-[0.4em] text-purple-200 mb-8">Get Started</h2>
+        <h3 class="text-4xl md:text-6xl font-black text-white mb-8 tracking-tighter leading-none">
+          Ready to contribute to<br/>the digital legacy?
+        </h3>
+        <p class="text-xl text-white/70 max-w-xl mx-auto mb-12 font-medium">
+          Join thousands of community members who are already archiving, learning, and building the future of Tigray.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-6 justify-center">
+          <RouterLink to="/register" class="px-12 py-5 bg-white text-[#5e35b1] rounded-2xl font-black text-base uppercase tracking-wider shadow-2xl hover:-translate-y-1 transition-all">
+            Join Now
+          </RouterLink>
+          <RouterLink to="/contact-us" class="px-12 py-5 border-2 border-white/40 text-white rounded-2xl font-black text-base uppercase tracking-wider hover:bg-white hover:text-[#5e35b1] transition-all hover:-translate-y-1">
+            Contact Us
+          </RouterLink>
         </div>
       </div>
     </section>
@@ -141,12 +145,11 @@ import { RouterLink } from 'vue-router'
 </script>
 
 <style scoped>
-.animate-fade-in {
-  animation: fadeIn 1.5s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 </style>

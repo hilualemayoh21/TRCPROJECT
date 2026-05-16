@@ -6,7 +6,7 @@
         <!-- Brand & Description -->
         <div class="lg:col-span-1">
           <div class="flex items-center gap-3 mb-4">
-            <img src="@/assets/images/tigray-hero.svg" alt="Tigray Logo" class="h-8 w-auto brightness-0 invert" />
+            <img src="@/assets/images/tigray-logo.svg" alt="Tigray Logo" class="h-10 w-auto brightness-0 invert" />
             <div class="flex flex-col">
               <span class="text-lg font-bold tracking-widest text-white leading-none uppercase">TIGRAY</span>
               <span class="text-[10px] font-semibold tracking-widest text-[#9d72ff] leading-none mt-1 uppercase">RESOURCE CENTER</span>
@@ -25,6 +25,7 @@
             <li><RouterLink to="/search" class="text-sm text-gray-400 hover:text-white transition-colors">Resources</RouterLink></li>
             <li><RouterLink to="/news" class="text-sm text-gray-400 hover:text-white transition-colors">News & Updates</RouterLink></li>
             <li><RouterLink to="/events" class="text-sm text-gray-400 hover:text-white transition-colors">Events</RouterLink></li>
+            <li><RouterLink to="/get-involved" class="text-sm text-gray-400 hover:text-white transition-colors">Get Involved</RouterLink></li>
           </ul>
         </div>
 
@@ -36,6 +37,7 @@
             <li><RouterLink to="/search" class="text-sm text-gray-400 hover:text-white transition-colors">Reports & Publications</RouterLink></li>
             <li><RouterLink to="/search" class="text-sm text-gray-400 hover:text-white transition-colors">Multimedia</RouterLink></li>
             <li><RouterLink to="/search" class="text-sm text-gray-400 hover:text-white transition-colors">Community Stories</RouterLink></li>
+            <li><RouterLink to="/faqs" class="text-sm text-gray-400 hover:text-white transition-colors">FAQs</RouterLink></li>
           </ul>
         </div>
 
@@ -43,9 +45,10 @@
         <div>
           <h3 class="text-sm font-semibold mb-4 text-white">Get Involved</h3>
           <ul class="space-y-3">
-            <li><RouterLink to="/register" class="text-sm text-gray-400 hover:text-white transition-colors">Volunteer</RouterLink></li>
-            <li><RouterLink to="/about" class="text-sm text-gray-400 hover:text-white transition-colors">Partnerships</RouterLink></li>
+            <li><RouterLink to="/get-involved" class="text-sm text-gray-400 hover:text-white transition-colors">Volunteer</RouterLink></li>
+            <li><RouterLink to="/get-involved" class="text-sm text-gray-400 hover:text-white transition-colors">Partnerships</RouterLink></li>
             <li><RouterLink to="/support-us" class="text-sm text-gray-400 hover:text-white transition-colors">Donate</RouterLink></li>
+            <li><RouterLink to="/get-involved" class="text-sm text-gray-400 hover:text-white transition-colors">Community Programs</RouterLink></li>
           </ul>
         </div>
 
@@ -59,7 +62,7 @@
             <input 
               v-model="email"
               type="email" 
-              placeholder="Your email" 
+              placeholder="Your email address" 
               required
               class="bg-transparent border border-gray-600 rounded-l-md px-3 py-2 text-sm w-full focus:outline-none focus:border-[#9d72ff] text-white" 
             />
@@ -87,6 +90,8 @@
           <RouterLink to="/privacy-policy" class="hover:text-white transition-colors">Privacy Policy</RouterLink>
           <span class="text-gray-600">|</span>
           <RouterLink to="/terms-of-use" class="hover:text-white transition-colors">Terms of Use</RouterLink>
+          <span class="text-gray-600">|</span>
+          <RouterLink to="/contact-us" class="hover:text-white transition-colors">Contact Us</RouterLink>
         </div>
       </div>
     </div>

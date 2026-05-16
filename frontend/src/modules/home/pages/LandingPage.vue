@@ -1,237 +1,144 @@
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { publicApi } from '../services/public.api'
-import type { PublicStats, FeaturedResource } from '../services/public.api'
-import { useRouter } from 'vue-router'
-import HeroSection from '@/components/common/HeroSection.vue'
-import AppFooter from '@/components/layout/AppFooter.vue'
-import AppHeader from '@/components/layout/AppHeader.vue'
+<template>
+  <div class="min-h-screen bg-white font-sans overflow-x-hidden">
+    <!-- Header -->
+    <header class="absolute top-0 left-0 right-0 z-[100] bg-transparent">
+      <nav class="mx-auto flex h-24 max-w-7xl items-center justify-between px-6 lg:px-8">
+        <!-- Logo -->
+        <div class="flex items-center gap-3">
+          <img src="@/assets/images/tigray-logo.svg" alt="Tigray Logo" class="h-14 w-14" />
+          <div class="flex flex-col">
+            <span class="text-2xl font-black uppercase leading-none tracking-tight text-gray-900">TIGRAY</span>
+            <span class="mt-1 text-[11px] font-bold uppercase tracking-[0.25em] leading-none text-[#5e35b1]">Resource Center</span>
+          </div>
+        </div>
 
-const router = useRouter()
-const isScrolled = ref(false)
+        <!-- Links -->
+        <div class="hidden items-center gap-10 lg:flex">
+          <RouterLink v-for="l in nav" :key="l" to="#" class="text-[15px] font-bold text-gray-700 hover:text-[#5e35b1] transition-colors">{{ l }}</RouterLink>
+        </div>
 
-const stats = ref<PublicStats | null>(null)
-const featured = ref<FeaturedResource[]>([])
-const loading = ref(true)
+        <!-- CTA -->
+        <button class="hidden lg:block rounded-xl bg-[#5e35b1] px-8 py-3.5 text-sm font-black text-white hover:bg-[#4a2bb1] transition-all shadow-md">
+          Support Us
+        </button>
+      </nav>
+    </header>
 
-onMounted(async () => {
-  window.addEventListener('scroll', () => {
-    isScrolled.value = window.scrollY > 20
-  })
+    <!-- Hero Section -->
+    <section class="relative min-h-[90vh] flex flex-col justify-center overflow-hidden">
+      <!-- Background Image -->
+      <div class="absolute inset-0 z-0">
+        <img
+          src="@/assets/images/landing-hero-mockup.png"
+          alt=""
+          class="h-full w-full object-cover object-[70%_center] lg:object-[80%_center]"
+        />
+        <!-- White to Transparent Gradient -->
+        <div class="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-transparent lg:via-white/60"></div>
+      </div>
 
-  try {
-    const [statsRes, featuredRes] = await Promise.all([
-      publicApi.getStats(),
-      publicApi.getFeatured()
-    ])
-    stats.value = statsRes
-    featured.value = featuredRes.items
-  } catch (err) {
-    console.error('Failed to load public data', err)
-  } finally {
-    loading.value = false
-  }
-})
+      <!-- Hero Content Container -->
+      <!-- Added explicit pt-32 (128px) so it clears the 96px header -->
+      <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-8 w-full pt-32 pb-48">
+        <div class="max-w-3xl flex flex-col gap-6">
+          
+          <!-- Headings Container -->
+          <div class="flex flex-col gap-4 animate-fade-up">
+            <!-- First Line -->
+            <div>
+              <h1 class="text-5xl sm:text-6xl lg:text-[5rem] font-black text-gray-900 tracking-tight leading-tight">
+                Empowering Tigray.
+              </h1>
+              <!-- Underline -->
+              <div class="mt-4 h-2 w-24 rounded-full bg-[#5e35b1]"></div>
+            </div>
+            
+            <!-- Second Line -->
+            <div>
+              <h1 class="text-5xl sm:text-6xl lg:text-[5rem] font-black text-[#5e35b1] tracking-tight leading-tight">
+                Inspiring the Future.
+              </h1>
+            </div>
+          </div>
 
-const scrollToFeatures = () => {
-  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
-}
+          <!-- Description -->
+          <p class="animate-fade-up max-w-xl text-lg lg:text-xl text-gray-600 font-medium leading-relaxed mt-4" style="animation-delay: 0.1s">
+            The Tigray Resource Center is dedicated to preserving our heritage, promoting knowledge, and supporting sustainable development for a stronger tomorrow.
+          </p>
 
-const navLinks = [
-  { label: 'About Us', href: '#about' },
-  { label: 'Resources', href: '#resources' },
-  { label: 'News & Updates', href: '#news' },
-  { label: 'Events', href: '#events' },
-  { label: 'Get Involved', href: '#involved' },
-]
+          <!-- Action Buttons -->
+          <div class="animate-fade-up flex flex-wrap items-center gap-5 mt-6" style="animation-delay: 0.2s">
+            <button class="flex items-center gap-3 rounded-xl bg-[#5e35b1] px-8 py-4 text-base font-black text-white hover:bg-[#4a2bb1] transition-all shadow-xl shadow-[#5e35b1]/30">
+              Explore Resources
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </button>
 
-const features = [
-  {
-    icon: 'M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25',
-    title: 'Knowledge',
-    desc: 'Access reliable information and research.',
-  },
-  {
-    icon: 'M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z',
-    title: 'Community',
-    desc: 'Building connections and strengthening unity.',
-  },
-  {
-    icon: 'M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-1.81 3.37A3.75 3.75 0 0012 18z',
-    title: 'Development',
-    desc: 'Supporting sustainable growth and innovation.',
-  },
-  {
-    icon: 'M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z',
-    title: 'Heritage',
-    desc: 'Preserving our rich history and culture.',
-  },
+            <button class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white/80 px-6 py-4 text-base font-black text-gray-700 backdrop-blur-md hover:border-[#5e35b1] hover:text-[#5e35b1] transition-all">
+              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-[#5e35b1]/10 text-[#5e35b1] group-hover:bg-[#5e35b1] group-hover:text-white transition-all">
+                <svg class="ml-0.5 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
+              Learn More
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Bar / Waves -->
+      <div class="absolute bottom-0 left-0 right-0 z-20">
+        <!-- SVG Waves -->
+        <div class="relative h-20 sm:h-28 -mb-px">
+          <!-- Light Wave -->
+          <svg class="absolute inset-0 w-full h-full text-[#5e35b1]/10" viewBox="0 0 1440 320" preserveAspectRatio="none">
+            <path fill="currentColor" d="M0,160L48,176C96,192,192,224,288,213.3C384,203,480,149,576,144C672,139,768,181,864,181.3C960,181,1056,139,1152,122.7C1248,107,1344,117,1392,122.7L1440,128L1440,320L0,320Z"></path>
+          </svg>
+          <!-- Dark Wave -->
+          <svg class="absolute inset-0 w-full h-full text-[#1a0b2e]" viewBox="0 0 1440 320" preserveAspectRatio="none">
+            <path fill="currentColor" d="M0,224L60,213.3C120,203,240,181,360,186.7C480,192,600,224,720,213.3C840,203,960,149,1080,144C1200,139,1320,181,1380,202.7L1440,224L1440,320L0,320Z"></path>
+          </svg>
+        </div>
+        <!-- Dark Bar -->
+        <div class="bg-[#1a0b2e] pb-12 pt-0">
+          <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div v-for="f in feats" :key="f.t" class="flex items-center gap-5 group">
+                <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white/5 border border-white/10 text-white transition-all group-hover:bg-white group-hover:text-[#1a0b2e]">
+                  <component :is="f.i" class="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 class="text-base font-black uppercase tracking-tight text-white leading-none">{{ f.t }}</h3>
+                  <p class="mt-1.5 text-xs font-medium text-white/50 leading-tight pr-4">{{ f.d }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</template>
+
+<script setup>
+import { markRaw } from 'vue'
+
+const nav = ['About Us', 'Resources', 'News & Updates', 'Events', 'Get Involved']
+const feats = [
+  { t: 'Knowledge', d: 'Access reliable information and research.', i: markRaw({ template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"></path></svg>' }) },
+  { t: 'Community', d: 'Building connections and strengthening unity.', i: markRaw({ template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>' }) },
+  { t: 'Development', d: 'Supporting sustainable growth and innovation.', i: markRaw({ template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 22V10m0 0c-3-2-6-1-6 2s3 4 6 2zm0 0c3-2 6-1 6 2s-3 4-6 2"></path></svg>' }) },
+  { t: 'Heritage', d: 'Preserving our rich history and culture.', i: markRaw({ template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path></svg>' }) }
 ]
 </script>
 
-<template>
-  <div class="min-h-screen bg-white font-sans">
-    <!-- Navbar -->
-    <AppHeader />
-
-    <!-- Hero Section -->
-    <HeroSection 
-      title="Empowering Tigray."
-      subtitle="Inspiring the Future."
-      description="The Tigray Resource Center is dedicated to preserving our heritage, promoting knowledge, and supporting sustainable development for a stronger tomorrow."
-      backgroundImage="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=80&auto=format"
-      backgroundAlt="Tigray Landscape"
-      showDivider
-    >
-      <template #actions>
-        <button
-          class="inline-flex items-center gap-2 rounded-xl bg-trc px-10 py-4 text-base font-bold text-white shadow-lg shadow-trc/30 transition hover:-translate-y-0.5 hover:bg-trc-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-trc focus-visible:ring-offset-2"
-          @click="router.push('/search')"
-        >
-          Explore Resources
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-          </svg>
-        </button>
-
-        <button
-          @click="scrollToFeatures"
-          class="group inline-flex items-center justify-center rounded-xl border-2 border-trc bg-transparent px-8 py-4 text-base font-bold text-trc transition hover:-translate-y-0.5 hover:bg-trc/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-trc focus-visible:ring-offset-2"
-        >
-          <span class="mr-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-trc text-trc transition-colors group-hover:bg-trc group-hover:text-white">
-            <svg class="ml-0.5 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
-            </svg>
-          </span>
-          Learn More
-        </button>
-      </template>
-    </HeroSection>
-
-    <!-- Features Section -->
-    <section id="features" class="relative bg-[#1e0a45] pt-16 pb-24 lg:pt-20 lg:pb-28">
-      <div class="mx-auto max-w-7xl px-6 lg:px-8">
-        <div class="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
-          <!-- Knowledge -->
-          <div class="group flex items-start gap-4">
-            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20 transition-all group-hover:scale-110">
-              <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-              </svg>
-            </div>
-            <div>
-              <h3 class="text-base font-bold text-white">Knowledge</h3>
-              <p class="mt-1 text-sm leading-relaxed text-purple-200/60">Access reliable information and research.</p>
-            </div>
-          </div>
-
-          <!-- Community -->
-          <div class="group flex items-start gap-4">
-            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20 transition-all group-hover:scale-110">
-              <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-              </svg>
-            </div>
-            <div>
-              <h3 class="text-base font-bold text-white">Community</h3>
-              <p class="mt-1 text-sm leading-relaxed text-purple-200/60">Building connections and strengthening unity.</p>
-            </div>
-          </div>
-
-          <!-- Development -->
-          <div class="group flex items-start gap-4">
-            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20 transition-all group-hover:scale-110">
-              <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 22V10m0 0c-3-2-6-1-6 2s3 4 6 2zm0 0c3-2 6-1 6 2s-3 4-6 2" />
-              </svg>
-            </div>
-            <div>
-              <h3 class="text-base font-bold text-white">Development</h3>
-              <p class="mt-1 text-sm leading-relaxed text-purple-200/60">Supporting sustainable growth and innovation.</p>
-            </div>
-          </div>
-
-          <!-- Heritage -->
-          <div class="group flex items-start gap-4">
-            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20 transition-all group-hover:scale-110">
-              <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
-              </svg>
-            </div>
-            <div>
-              <h3 class="text-base font-bold text-white">Heritage</h3>
-              <p class="mt-1 text-sm leading-relaxed text-purple-200/60">Preserving our rich history and culture.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Stats & Featured Section -->
-    <section v-if="!loading && stats" class="relative bg-slate-50 py-24">
-      <div class="mx-auto max-w-7xl px-6 lg:px-8">
-        <!-- Live Stats -->
-        <div class="grid gap-8 sm:grid-cols-3 mb-24">
-          <div class="rounded-[2rem] bg-white p-8 shadow-sm border border-slate-100 text-center transition-all hover:-translate-y-1 hover:shadow-md">
-            <div class="text-5xl font-black text-trc mb-2">{{ stats.totalResources.toLocaleString() }}</div>
-            <div class="text-sm font-bold uppercase tracking-widest text-slate-400">Total Resources</div>
-          </div>
-          <div class="rounded-[2rem] bg-white p-8 shadow-sm border border-slate-100 text-center transition-all hover:-translate-y-1 hover:shadow-md">
-            <div class="text-5xl font-black text-trc mb-2">{{ stats.totalCategories.toLocaleString() }}</div>
-            <div class="text-sm font-bold uppercase tracking-widest text-slate-400">Categories</div>
-          </div>
-          <div class="rounded-[2rem] bg-white p-8 shadow-sm border border-slate-100 text-center transition-all hover:-translate-y-1 hover:shadow-md">
-            <div class="text-5xl font-black text-trc mb-2">{{ stats.totalDownloads.toLocaleString() }}</div>
-            <div class="text-sm font-bold uppercase tracking-widest text-slate-400">Downloads</div>
-          </div>
-        </div>
-
-        <!-- Featured Resources -->
-        <div v-if="featured.length > 0">
-          <div class="mb-12 flex items-end justify-between">
-            <div>
-              <h2 class="text-3xl font-black tracking-tight text-gray-900">Featured Resources</h2>
-              <p class="mt-2 text-gray-500">Discover the highest-rated materials in our catalog.</p>
-            </div>
-            <button @click="router.push('/dashboard')" class="hidden md:inline-flex items-center gap-2 text-sm font-bold text-trc hover:text-trc-dark">
-              View all
-              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>
-            </button>
-          </div>
-
-          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <article v-for="item in featured" :key="item.id" class="group relative flex flex-col items-start justify-between rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 transition-all hover:shadow-lg">
-              <div class="flex items-center gap-x-4 text-xs mb-4">
-                <span class="text-gray-500">{{ item.viewCount }} views</span>
-                <span class="relative z-10 rounded-full bg-slate-50 px-3 py-1.5 font-bold text-slate-600">{{ item.category?.name || 'General' }}</span>
-              </div>
-              <div class="group relative">
-                <h3 class="mt-3 text-lg font-black leading-6 text-gray-900 group-hover:text-trc">
-                  <a href="#">
-                    <span class="absolute inset-0"></span>
-                    {{ item.title }}
-                  </a>
-                </h3>
-                <p class="mt-3 line-clamp-3 text-sm leading-6 text-gray-600">{{ item.description }}</p>
-              </div>
-              <div class="relative mt-6 flex items-center gap-x-4">
-                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-trc/10 text-trc font-bold uppercase">
-                  {{ item.author.name.charAt(0) }}
-                </div>
-                <div class="text-sm leading-6">
-                  <p class="font-bold text-gray-900">{{ item.author.name }}</p>
-                  <p class="text-gray-500">{{ item.author.institution || 'Tigray Resource Center' }}</p>
-                </div>
-              </div>
-            </article>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <AppFooter />
-  </div>
-</template>
+<style scoped>
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+</style>

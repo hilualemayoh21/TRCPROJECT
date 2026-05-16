@@ -1,15 +1,14 @@
-import sgMail from '@sendgrid/mail';
+import { Resend } from 'resend';
 
 /**
- * Email Service (Production - Option B)
+ * Email Service (Production - Resend Integration)
  * 
- * Uses SendGrid for reliable delivery.
- * Requires SENDGRID_API_KEY and SENDGRID_FROM_EMAIL environment variables.
+ * Uses Resend for reliable, fast delivery.
+ * Requires RESEND_API_KEY and RESEND_FROM_EMAIL environment variables.
+ * For testing without a domain, you can use a verified email or Resend's test domain (onboarding@resend.dev)
  */
 
-if (process.env.SENDGRID_API_KEY) {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-}
+const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key_for_mock');
 
 export class EmailService {
   /**
@@ -51,25 +50,33 @@ export class EmailService {
       </div>
     `;
 
-    if (!process.env.SENDGRID_API_KEY) {
+    if (!process.env.RESEND_API_KEY) {
       console.log('\n' + '='.repeat(40));
-      console.log(`✉️  [MOCK EMAIL - SENDGRID MISSING] To: ${email}`);
+      console.log(`✉️  [MOCK EMAIL - RESEND MISSING] To: ${email}`);
       console.log(`🔑  [MOCK EMAIL] Type: ${type} | Code: ${otp}`);
       console.log('='.repeat(40) + '\n');
       return;
     }
 
     try {
-      await sgMail.send({
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'TRC <onboarding@resend.dev>';
+      
+      const { data, error } = await resend.emails.send({
+        from: fromEmail,
         to: email,
-        from: process.env.SENDGRID_FROM_EMAIL || 'noreply@trc.local', // Must be verified in SendGrid
         subject,
         html,
       });
-      console.log(`[SendGrid Success] ${type} OTP delivered to ${email}`);
+
+      if (error) {
+        console.error('[Resend Failure] Error from Resend API:', error);
+        // Fallback log
+        console.log(`\n🔑 [EMERGENCY LOG] ${type} OTP for ${email}: ${otp}\n`);
+      } else {
+        console.log(`[Resend Success] ${type} OTP delivered to ${email}. ID: ${data?.id}`);
+      }
     } catch (error: any) {
-      console.error('[SendGrid Failure] Error:', error.response?.body || error.message);
-      // Fallback log
+      console.error('[Resend Exception] Error:', error.message);
       console.log(`\n🔑 [EMERGENCY LOG] ${type} OTP for ${email}: ${otp}\n`);
     }
   }
