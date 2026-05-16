@@ -35,11 +35,6 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 // ─── DEBUG ROUTES (Top Priority) ───
 app.get('/ping', (req, res) => res.status(200).send('pong'));
 app.get('/api/test', (req, res) => res.status(200).json({ ok: true }));
-app.get('/api/test-email', async (req, res) => {
-  const { EmailService } = await import('./utils/email');
-  const result = await EmailService.verifyConnection();
-  res.json(result);
-});
 
 // ─── API ROUTES ───
 app.use('/api/public', publicRoutes);

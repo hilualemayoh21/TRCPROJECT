@@ -1,4 +1,5 @@
 import Redis from 'ioredis';
+import { Queue } from 'bullmq';
 import { config } from '../config';
 
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
@@ -46,5 +47,9 @@ export class RedisService {
     await redis.del(key);
   }
 }
+
+export { redis };
+export const auditQueue = new Queue('audit-logs', { connection: redis });
+export const emailQueue = new Queue('email-tasks', { connection: redis });
 
 export default redis;

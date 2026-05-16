@@ -29,8 +29,8 @@
       <!-- Background Image -->
       <div class="absolute inset-0 z-0">
         <img
-          src="@/assets/images/landing-hero-mockup.png"
-          alt=""
+          src="@/assets/images/aksum_landscape_bg.png"
+          alt="Tigray Landscape"
           class="h-full w-full object-cover object-[70%_center] lg:object-[80%_center]"
         />
         <!-- White to Transparent Gradient -->

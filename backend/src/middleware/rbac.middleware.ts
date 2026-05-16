@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../prisma/client';
 import { AppError, PermissionError } from '../utils/api';
-import { cacheGet, cacheSet } from '../utils/redis';
+import redis from '../utils/redis';
 import { AuditService } from '../modules/audit/audit.service';
 
 export const resolvePermissions = async (req: Request, res: Response, next: NextFunction) => {
@@ -15,10 +15,10 @@ export const resolvePermissions = async (req: Request, res: Response, next: Next
     }
 
     const cacheKey = `perms:${req.user.id}:${req.user.permissionVersion}`;
-    const cachedPerms = await cacheGet(cacheKey);
+    const cachedPerms = await redis.get(cacheKey);
 
     if (cachedPerms) {
-      req.permissions = new Set(cachedPerms);
+      req.permissions = new Set(JSON.parse(cachedPerms));
       return next();
     }
 
@@ -45,7 +45,7 @@ export const resolvePermissions = async (req: Request, res: Response, next: Next
     }
 
     // Cache permissions for 10 minutes
-    await cacheSet(cacheKey, Array.from(permissions), 600);
+    await redis.set(cacheKey, JSON.stringify(Array.from(permissions)), 'EX', 600);
 
     req.permissions = permissions;
     next();
