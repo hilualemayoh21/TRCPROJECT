@@ -64,18 +64,21 @@ async function main() {
   ];
 
   for (const r of roles) {
-    const role = await prisma.role.upsert({
+    await prisma.role.upsert({
       where: { id: r.id },
       update: { name: r.name, isSystem: r.isSystem },
       create: { id: r.id, name: r.name, isSystem: r.isSystem }
     });
 
+    // 🔑 Clear ALL existing permissions for this role first, then re-add
+    await prisma.rolePermission.deleteMany({ where: { roleId: r.id } });
+
     if (r.perms[0] !== '*') {
       for (const pKey of r.perms) {
-        await prisma.rolePermission.upsert({
-          where: { roleId_permissionId: { roleId: role.id, permissionId: permMap[pKey] } },
-          update: {},
-          create: { roleId: role.id, permissionId: permMap[pKey] }
+        const permId = permMap[pKey];
+        if (!permId) { console.warn(`⚠️  Unknown permission key: ${pKey}`); continue; }
+        await prisma.rolePermission.create({
+          data: { roleId: r.id, permissionId: permId }
         });
       }
     }
