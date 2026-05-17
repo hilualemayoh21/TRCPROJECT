@@ -423,7 +423,10 @@ const handleSubmit = async () => {
   if (!validate()) return
   try {
     await login(email.value.trim().toLowerCase(), password.value)
-    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null
+    let redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null
+    if (redirect === '/') {
+      redirect = null
+    }
     router.push(redirect || authStore.getPostLoginRoute())
   } catch {
     /* error surfaced from store */

@@ -11,7 +11,7 @@ router.get('/:id', ResourcesController.getById);
 router.get('/:id/comments', ResourcesController.getComments);
 
 // ── Authenticated routes ──
-router.post('/', requireAuth, resolvePermissions, requirePermission('upload_resources'), ResourcesController.create);
+router.post('/', requireAuth, resolvePermissions, requirePermission('create_resources'), ResourcesController.create);
 router.patch('/:id', requireAuth, resolvePermissions, ResourcesController.update);
 router.delete('/:id', requireAuth, resolvePermissions, ResourcesController.delete);
 router.post('/:id/comments', requireAuth, ResourcesController.addComment);

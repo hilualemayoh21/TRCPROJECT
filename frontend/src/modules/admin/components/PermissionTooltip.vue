@@ -130,15 +130,34 @@ function formatPermission(permission: Permission): string {
 }
 
 function getPermissionDescription(permission: Permission): string {
-  const descriptions: Record<Permission, string> = {
-    'manage_users': 'Create, edit, activate/deactivate users and assign roles',
-    'manage_roles': 'Create, edit, delete roles and manage their permissions',
-    'approve_resources': 'Approve or reject submitted resources before publishing',
-    'approve_researchers': 'Approve or reject researcher access requests',
-    'view_reports': 'View abuse/issue reports submitted by users',
-    'resolve_reports': 'Mark reports as resolved and take moderation actions'
+  const PERMISSION_LABELS: Record<string, string> = {
+    // Users
+    'view_users': 'View users',
+    'create_users': 'Create users',
+    'update_users': 'Edit users',
+    'delete_users': 'Delete users',
+    // Roles
+    'view_roles': 'View roles',
+    'create_roles': 'Create roles',
+    'update_roles': 'Edit roles',
+    'delete_roles': 'Delete roles',
+    // Resources
+    'view_resources': 'View resources',
+    'create_resources': 'Create resources',
+    'update_resources': 'Edit resources',
+    'delete_resources': 'Delete resources',
+    'approve_resources': 'Approve resources',
+    // Reports
+    'view_reports': 'View reports',
+    'resolve_reports': 'Resolve reports',
+    // Researchers
+    'view_researchers': 'View researchers',
+    'approve_researchers': 'Approve researchers',
+    // System
+    'view_audit_logs': 'View audit logs',
+    'view_dashboard': 'View dashboard'
   }
-  return descriptions[permission] || 'System permission'
+  return PERMISSION_LABELS[permission] || 'System permission'
 }
 
 function showTooltip() {

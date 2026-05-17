@@ -15,7 +15,7 @@ export default [
     meta: {
       requiresAuth: true,
       roles: ['admin', 'super_admin'],
-      permissions: ['manage_users']
+      permissions: ['view_users']
     }
   },
   {
@@ -25,7 +25,7 @@ export default [
     meta: {
       requiresAuth: true,
       roles: ['admin', 'super_admin'],
-      permissions: ['manage_roles']
+      permissions: ['view_roles']
     }
   },
   {
@@ -35,7 +35,7 @@ export default [
     meta: {
       requiresAuth: true,
       roles: ['admin', 'super_admin'],
-      permissions: ['manage_roles']
+      permissions: ['view_roles']
     }
   },
   {
@@ -45,7 +45,7 @@ export default [
     meta: {
       requiresAuth: true,
       roles: ['admin', 'super_admin'],
-      permissions: ['manage_roles']
+      permissions: ['view_roles']
     }
   },
   {
@@ -55,7 +55,7 @@ export default [
     meta: {
       requiresAuth: true,
       roles: ['admin', 'super_admin'],
-      permissions: ['manage_roles']
+      permissions: ['view_roles']
     }
   },
   {

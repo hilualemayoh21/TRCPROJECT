@@ -15,6 +15,15 @@ export default [
     name: 'home',
     component: LandingPage,
     meta: { public: true, layout: 'MainLayout' },
+    beforeEnter: (to, from, next) => {
+      const { useAuthStore } = require('@/modules/auth/auth.store')
+      const auth = useAuthStore()
+      if (auth.isAuthenticated) {
+        next(auth.getPostLoginRoute())
+      } else {
+        next()
+      }
+    }
   },
   {
     path: '/about',

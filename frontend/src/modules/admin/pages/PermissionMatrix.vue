@@ -203,14 +203,34 @@ import type { Permission } from '@/modules/admin/types/admin.types'
 import { useRolesQuery } from '@/modules/admin/queries/useRolesQuery'
 
 const authStore = useAuthStore()
-const canManageRoles = computed(() => authStore.can('manage_roles'))
+const canManageRoles = computed(() => authStore.can('update_roles'))
 
 const PERMISSIONS: Array<{ key: Permission; description: string }> = [
-  { key: 'manage_users', description: 'Create, edit, activate/deactivate, and assign roles to users.' },
-  { key: 'manage_roles', description: 'Create, edit, and delete roles and manage their permissions.' },
-  { key: 'approve_resources', description: 'Approve or reject submitted resources before publishing.' },
-  { key: 'approve_researchers', description: 'Approve or reject researcher access requests.' },
-  { key: 'view_reports', description: 'View abuse/issue reports submitted by users.' }
+  // Users
+  { key: 'view_users', description: 'View user list and details.' },
+  { key: 'create_users', description: 'Create new users manually.' },
+  { key: 'update_users', description: 'Edit users, change roles and status.' },
+  { key: 'delete_users', description: 'Remove user accounts permanently.' },
+  // Roles
+  { key: 'view_roles', description: 'View existing roles and permissions.' },
+  { key: 'create_roles', description: 'Create custom roles.' },
+  { key: 'update_roles', description: 'Edit roles and change permissions.' },
+  { key: 'delete_roles', description: 'Delete custom roles.' },
+  // Resources
+  { key: 'view_resources', description: 'View all submitted resources.' },
+  { key: 'create_resources', description: 'Upload new resources.' },
+  { key: 'update_resources', description: 'Edit resource metadata.' },
+  { key: 'delete_resources', description: 'Remove resources from the platform.' },
+  { key: 'approve_resources', description: 'Approve or reject pending resources.' },
+  // Reports
+  { key: 'view_reports', description: 'View user-submitted reports.' },
+  { key: 'resolve_reports', description: 'Resolve reports and take action.' },
+  // Researchers
+  { key: 'view_researchers', description: 'View researcher verification requests.' },
+  { key: 'approve_researchers', description: 'Approve or reject researcher access.' },
+  // System
+  { key: 'view_audit_logs', description: 'View system audit logs and activity.' },
+  { key: 'view_dashboard', description: 'View the admin analytics dashboard.' }
 ]
 
 const formatKey = (key: string) => {

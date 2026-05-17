@@ -38,7 +38,7 @@
         type="button"
         class="relative inline-flex h-8 w-14 items-center rounded-full transition-all duration-500 focus:outline-none disabled:opacity-30 disabled:cursor-not-allowed"
         :class="localEnabled ? 'bg-gradient-to-r from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/30' : 'bg-gray-200 dark:bg-white/10'"
-        :disabled="!canManageRoles || loading"
+        :disabled="!canManageRoles || loading || disabled"
         @click="toggle()"
         :aria-pressed="localEnabled"
       >
@@ -68,6 +68,7 @@ const props = defineProps<{
   permission: string
   enabled: boolean
   description?: string
+  disabled?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -78,7 +79,7 @@ const emit = defineEmits<{
 const authStore = useAuthStore()
 
 const error = ref<string | null>(null)
-const canManageRoles = computed(() => authStore.can('manage_roles'))
+const canManageRoles = computed(() => authStore.can('update_roles'))
 
 const localEnabled = ref(Boolean(props.enabled))
 const loading = ref(false)
@@ -108,7 +109,7 @@ async function removePermission(permission: Permission) {
 async function toggle() {
   error.value = null
 
-  if (!authStore.can('manage_roles')) {
+  if (!authStore.can('update_roles')) {
     const msg = 'You are not allowed to update role permissions.'
     error.value = msg
     notifyAdminError(new Error(msg), msg)

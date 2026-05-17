@@ -8,13 +8,13 @@ async function main() {
 
   // 1. Create Permissions
   const permissions = [
-    'manage_users',
-    'manage_roles',
+    'view_users', 'create_users', 'update_users', 'delete_users',
+    'view_roles', 'create_roles', 'update_roles', 'delete_roles',
+    'view_resources', 'create_resources', 'update_resources', 'delete_resources', 'approve_resources',
+    'view_reports', 'resolve_reports',
+    'view_researchers', 'approve_researchers',
     'view_audit_logs',
-    'view_dashboard',
-    'approve_resources',
-    'resolve_reports',
-    'upload_resources',
+    'view_dashboard'
   ];
 
   const permMap: Record<string, string> = {};
@@ -50,9 +50,16 @@ async function main() {
   // 2. Create Roles
   const roles = [
     { id: 'super_admin', name: 'super_admin', isSystem: true, perms: ['*'] },
-    { id: 'admin', name: 'admin', isSystem: true, perms: ['manage_users', 'manage_roles', 'approve_resources', 'view_dashboard', 'view_audit_logs'] },
-    { id: 'moderator', name: 'moderator', isSystem: true, perms: ['resolve_reports'] },
-    { id: 'researcher', name: 'researcher', isSystem: true, perms: ['view_dashboard'] },
+    { id: 'admin', name: 'admin', isSystem: true, perms: [
+      'view_users', 'create_users', 'update_users', 'delete_users',
+      'view_roles', 'create_roles', 'update_roles', 'delete_roles',
+      'view_resources', 'create_resources', 'update_resources', 'delete_resources', 'approve_resources',
+      'view_reports', 'resolve_reports',
+      'view_researchers', 'approve_researchers',
+      'view_audit_logs', 'view_dashboard'
+    ] },
+    { id: 'moderator', name: 'moderator', isSystem: true, perms: ['view_reports', 'resolve_reports', 'view_resources', 'update_resources', 'approve_resources', 'view_dashboard'] },
+    { id: 'researcher', name: 'researcher', isSystem: true, perms: ['view_dashboard', 'create_resources', 'update_resources'] },
     { id: 'public_user', name: 'public_user', isSystem: true, perms: [] }
   ];
 

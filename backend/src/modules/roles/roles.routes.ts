@@ -8,15 +8,15 @@ const router = Router();
 // Apply auth and permission resolve to all role routes
 router.use(requireAuth, resolvePermissions);
 
-// Anyone with manage_roles or manage_users can see roles
-router.get('/roles', RolesController.getRoles);
+// Read roles
+router.get('/roles', requirePermission('view_roles'), RolesController.getRoles);
 
-// Only manage_roles can modify
-router.post('/roles', requirePermission('manage_roles'), RolesController.createRole);
-router.patch('/roles/:id', requirePermission('manage_roles'), RolesController.updateRole);
-router.delete('/roles/:id', requirePermission('manage_roles'), RolesController.deleteRole);
+// Modify roles
+router.post('/roles', requirePermission('create_roles'), RolesController.createRole);
+router.patch('/roles/:id', requirePermission('update_roles'), RolesController.updateRole);
+router.delete('/roles/:id', requirePermission('delete_roles'), RolesController.deleteRole);
 
-router.post('/roles/:id/permissions', requirePermission('manage_roles'), RolesController.togglePermission);
-router.delete('/roles/:id/permissions', requirePermission('manage_roles'), RolesController.togglePermission);
+router.post('/roles/:id/permissions', requirePermission('update_roles'), RolesController.togglePermission);
+router.delete('/roles/:id/permissions', requirePermission('update_roles'), RolesController.togglePermission);
 
 export default router;

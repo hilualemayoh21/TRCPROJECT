@@ -32,7 +32,7 @@ export function useUpdateUserStatusMutation() {
   const authStore = useAuthStore()
   return useMutation({
     mutationFn: async ({ userId, active }: { userId: string; active: boolean }) => {
-      if (!authStore.can('manage_users')) {
+      if (!authStore.can('update_users')) {
         throw new Error('You are not allowed to manage users.')
       }
       return adminApi.setUserActive(userId, active)
@@ -53,7 +53,7 @@ export function useAssignRoleMutation() {
   const authStore = useAuthStore()
   return useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: RoleKey }) => {
-      if (!authStore.can('manage_users')) {
+      if (!authStore.can('update_users')) {
         throw new Error('You are not allowed to update roles.')
       }
       return post<{ ok: boolean; user: AdminUser & { permissions?: string[] } }>(
@@ -78,7 +78,7 @@ export function useCreateUserMutation() {
   const authStore = useAuthStore()
   return useMutation({
     mutationFn: async (payload: { name: string; email: string; role: RoleKey; password?: string }) => {
-      if (!authStore.can('manage_users')) {
+      if (!authStore.can('create_users')) {
         throw new Error('You are not allowed to create users.')
       }
       return adminApi.createUser(payload)
@@ -98,7 +98,7 @@ export function useUpdateUserMutation() {
   const authStore = useAuthStore()
   return useMutation({
     mutationFn: async ({ id, payload }: { id: string; payload: any }) => {
-      if (!authStore.can('manage_users')) {
+      if (!authStore.can('update_users')) {
         throw new Error('You are not allowed to update users.')
       }
       return adminApi.updateUser(id, payload)
@@ -116,7 +116,7 @@ export function useDeleteUserMutation() {
   const authStore = useAuthStore()
   return useMutation({
     mutationFn: async (userId: string) => {
-      if (!authStore.can('manage_users')) {
+      if (!authStore.can('delete_users')) {
         throw new Error('You are not allowed to delete users.')
       }
       return adminApi.deleteUser(userId)

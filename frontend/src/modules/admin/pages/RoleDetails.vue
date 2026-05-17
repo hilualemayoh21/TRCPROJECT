@@ -36,8 +36,8 @@
             </button>
             <button
               v-if="canManageRoles"
-              class="group flex h-12 items-center gap-2 rounded-2xl bg-red-500/10 px-6 text-[0.7rem] font-black uppercase tracking-widest text-red-500 ring-1 ring-inset ring-red-500/20 transition-all hover:bg-red-500 hover:text-white hover:shadow-lg hover:shadow-red-500/20 active:scale-95 disabled:opacity-20"
-              :disabled="roleId === 'super_admin' || isDeletingRole"
+              class="group flex h-12 items-center gap-2 rounded-2xl bg-red-500/10 px-6 text-[0.7rem] font-black uppercase tracking-widest text-red-500 ring-1 ring-inset ring-red-500/20 transition-all hover:bg-red-500 hover:text-white hover:shadow-lg hover:shadow-red-500/20 active:scale-95 disabled:opacity-20 disabled:pointer-events-none"
+              :disabled="role?.isSystem || roleId === 'super_admin' || isDeletingRole"
               @click="onDelete()"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -80,8 +80,8 @@
                   <input 
                     v-model="editName" 
                     type="text"
-                    :disabled="!canManageRoles"
-                    class="w-full rounded-2xl border-2 border-gray-100 bg-gray-50/50 px-4 py-3.5 text-sm font-black text-gray-900 transition-all focus:border-violet-500 focus:bg-white focus:outline-none dark:border-white/5 dark:bg-[#0f1117] dark:text-white dark:focus:border-violet-500/50"
+                    :disabled="!canManageRoles || role?.isSystem"
+                    class="w-full rounded-2xl border-2 border-gray-100 bg-gray-50/50 px-4 py-3.5 text-sm font-black text-gray-900 transition-all focus:border-violet-500 focus:bg-white focus:outline-none dark:border-white/5 dark:bg-[#0f1117] dark:text-white dark:focus:border-violet-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="e.g. Lead Moderator"
                   />
                   <div v-if="nameError" class="mt-2 text-[0.65rem] font-bold text-red-500">{{ nameError }}</div>
@@ -96,15 +96,15 @@
 
             <div class="mt-10 flex gap-3">
               <button
-                class="flex-1 rounded-2xl border border-gray-200 bg-white py-3.5 text-[0.7rem] font-black uppercase tracking-widest text-gray-600 transition-all hover:bg-gray-50 active:scale-95 dark:border-white/5 dark:bg-white/5 dark:text-gray-300"
-                :disabled="!canManageRoles || isUpdatingRole"
+                class="flex-1 rounded-2xl border border-gray-200 bg-white py-3.5 text-[0.7rem] font-black uppercase tracking-widest text-gray-600 transition-all hover:bg-gray-50 active:scale-95 dark:border-white/5 dark:bg-white/5 dark:text-gray-300 disabled:opacity-50 disabled:pointer-events-none"
+                :disabled="!canManageRoles || isUpdatingRole || role?.isSystem"
                 @click="resetName()"
               >
                 Reset
               </button>
               <button
-                class="flex-[2] rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 py-3.5 text-[0.7rem] font-black uppercase tracking-widest text-white shadow-lg shadow-violet-200 transition-all hover:scale-[1.02] hover:shadow-xl active:scale-95 disabled:opacity-50 dark:shadow-none"
-                :disabled="!canManageRoles || isUpdatingRole"
+                class="flex-[2] rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 py-3.5 text-[0.7rem] font-black uppercase tracking-widest text-white shadow-lg shadow-violet-200 transition-all hover:scale-[1.02] hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:pointer-events-none dark:shadow-none"
+                :disabled="!canManageRoles || isUpdatingRole || role?.isSystem"
                 @click="saveName()"
               >
                 <span v-if="!isUpdatingRole">Sync Changes</span>
@@ -139,6 +139,7 @@
               :permission="perm.key"
               :description="perm.description"
               :enabled="(role!.permissions ?? []).includes(perm.key)"
+              :disabled="role?.isSystem"
               @updated="onPermissionToggled"
             />
           </div>
@@ -170,7 +171,7 @@ const authStore = useAuthStore()
 const queryClient = useQueryClient()
 
 const roleId = computed(() => String(route.params.id || ''))
-const canManageRoles = computed(() => authStore.can('manage_roles'))
+const canManageRoles = computed(() => authStore.can('update_roles'))
 
 const rolesQuery = useRolesQuery()
 const roles = computed(() => {
@@ -197,12 +198,31 @@ const editName = ref('')
 const nameError = ref<string | null>(null)
 
 const ALL_PERMISSIONS: Array<{ key: Permission; description: string }> = [
-  { key: 'manage_users', description: 'Create, edit, activate/deactivate, and assign roles to users.' },
-  { key: 'manage_roles', description: 'Create, edit, and delete roles and manage their permissions.' },
-  { key: 'approve_resources', description: 'Approve or reject submitted resources before publishing.' },
-  { key: 'approve_researchers', description: 'Approve or reject researcher access requests.' },
-  { key: 'view_reports', description: 'View abuse/issue reports submitted by users.' },
-  { key: 'resolve_reports', description: 'Mark reports as resolved and take moderation actions.' }
+  // Users
+  { key: 'view_users', description: 'View user list and details.' },
+  { key: 'create_users', description: 'Create new users manually.' },
+  { key: 'update_users', description: 'Edit users, change roles and status.' },
+  { key: 'delete_users', description: 'Remove user accounts permanently.' },
+  // Roles
+  { key: 'view_roles', description: 'View existing roles and permissions.' },
+  { key: 'create_roles', description: 'Create custom roles.' },
+  { key: 'update_roles', description: 'Edit roles and change permissions.' },
+  { key: 'delete_roles', description: 'Delete custom roles.' },
+  // Resources
+  { key: 'view_resources', description: 'View all submitted resources.' },
+  { key: 'create_resources', description: 'Upload new resources.' },
+  { key: 'update_resources', description: 'Edit resource metadata.' },
+  { key: 'delete_resources', description: 'Remove resources from the platform.' },
+  { key: 'approve_resources', description: 'Approve or reject pending resources.' },
+  // Reports
+  { key: 'view_reports', description: 'View user-submitted reports.' },
+  { key: 'resolve_reports', description: 'Resolve reports and take action.' },
+  // Researchers
+  { key: 'view_researchers', description: 'View researcher verification requests.' },
+  { key: 'approve_researchers', description: 'Approve or reject researcher access.' },
+  // System
+  { key: 'view_audit_logs', description: 'View system audit logs and activity.' },
+  { key: 'view_dashboard', description: 'View the admin analytics dashboard.' }
 ]
 
 watch(

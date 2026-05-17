@@ -3,13 +3,13 @@ import { z } from 'zod'
 export type RoleKey = 'super_admin' | 'admin' | 'moderator' | 'researcher' | 'public_user'
 
 export type Permission =
-  | 'manage_users'
-  | 'manage_roles'
-  | 'approve_resources'
-  | 'approve_researchers'
-  | 'view_reports'
-  | 'resolve_reports'
-  | 'upload_resource'
+  | 'view_users' | 'create_users' | 'update_users' | 'delete_users'
+  | 'view_roles' | 'create_roles' | 'update_roles' | 'delete_roles'
+  | 'view_resources' | 'create_resources' | 'update_resources' | 'delete_resources' | 'approve_resources'
+  | 'view_reports' | 'resolve_reports'
+  | 'view_researchers' | 'approve_researchers'
+  | 'view_audit_logs'
+  | 'view_dashboard'
 
 export type AdminQuery = {
   page?: number

@@ -18,15 +18,6 @@ const routes = [
   ...resourceRoutes,
   ...adminRoutes,
   {
-    path: "/",
-    redirect: (to) => {
-      const auth = useAuthStore()
-      return (auth.user?.role === 'admin' || auth.user?.role === 'super_admin' || auth.user?.email === 'admin@trc.local') 
-        ? '/admin' 
-        : '/dashboard'
-    }
-  },
-  {
     path: "/unauthorized",
     name: "Unauthorized",
     component: Unauthorized,

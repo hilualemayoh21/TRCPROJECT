@@ -7,17 +7,21 @@ import { avatarUpload } from '../../shared/utils/upload.util';
 const router = Router();
 const adminRouter = Router();
 
-// /admin/users routes
-adminRouter.use(requireAuth, resolvePermissions, requirePermission('manage_users'));
-adminRouter.get('/', UsersController.listUsers);
-adminRouter.post('/', UsersController.createUser);
-adminRouter.get('/:id', UsersController.getUser);
-adminRouter.patch('/:id', UsersController.updateUser);
-adminRouter.patch('/:id/status', UsersController.updateStatus);
-adminRouter.delete('/:id', UsersController.deleteUser);
+// All user management requires authentication
+adminRouter.use(requireAuth, resolvePermissions);
 
-// /users/:id/roles route
-router.post('/:id/roles', requireAuth, resolvePermissions, requirePermission('manage_users'), UsersController.assignRole);
+// Read
+adminRouter.get('/', requirePermission('view_users'), UsersController.listUsers);
+adminRouter.get('/:id', requirePermission('view_users'), UsersController.getUser);
+
+// Create
+adminRouter.post('/', requirePermission('create_users'), UsersController.createUser);
+
+// Update/Delete
+adminRouter.patch('/:id', requirePermission('update_users'), UsersController.updateUser);
+adminRouter.patch('/:id/status', requirePermission('update_users'), UsersController.updateStatus);
+adminRouter.delete('/:id', requirePermission('delete_users'), UsersController.deleteUser);
+adminRouter.post('/:id/roles', requirePermission('update_users'), UsersController.assignRole);
 
 // /users/me routes
 router.get('/me', requireAuth, UsersController.getMe);

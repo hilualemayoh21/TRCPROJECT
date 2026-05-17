@@ -22,7 +22,7 @@ export function useCreateRoleMutation() {
 
   return useMutation({
     mutationFn: async (payload: { name: string; description?: string; permissions?: Permission[] }) => {
-      if (!authStore.can('manage_roles')) {
+      if (!authStore.can('create_roles')) {
         throw new Error('You are not allowed to manage roles.')
       }
       const name = String(payload.name || '').trim().slice(0, 64)
@@ -44,7 +44,7 @@ export function useUpdateRoleMutation() {
 
   return useMutation({
     mutationFn: async (payload: { id: string; name?: string; description?: string; permissions?: Permission[] }) => {
-      if (!authStore.can('manage_roles')) {
+      if (!authStore.can('update_roles')) {
         throw new Error('You are not allowed to manage roles.')
       }
       const id = String(payload.id || '').trim()
@@ -73,7 +73,7 @@ export function useDeleteRoleMutation() {
 
   return useMutation({
     mutationFn: async (payload: { id: string }) => {
-      if (!authStore.can('manage_roles')) {
+      if (!authStore.can('delete_roles')) {
         throw new Error('You are not allowed to manage roles.')
       }
       const id = String(payload.id || '').trim()

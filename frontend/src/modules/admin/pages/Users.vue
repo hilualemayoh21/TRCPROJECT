@@ -257,7 +257,7 @@ import EditUserModal from '@/modules/admin/components/EditUserModal.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const canManageUsers = computed(() => authStore.can('manage_users'))
+const canManageUsers = computed(() => authStore.can('update_users'))
 
 const query = reactive({ page: 1, pageSize: 10, q: '' })
 const users = ref<AdminUser[]>([])
