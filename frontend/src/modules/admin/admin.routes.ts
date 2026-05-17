@@ -94,7 +94,8 @@ export default [
     component: () => import('./pages/AuditLogs.vue'),
     meta: {
       requiresAuth: true,
-      roles: ['admin', 'super_admin']
+      roles: ['admin', 'super_admin'],
+      permissions: ['view_audit_logs']
     }
   }
 ]

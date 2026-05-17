@@ -70,7 +70,7 @@
 <script setup>
 import { 
   UsergroupAddOutlined, 
-  HandOutlined, 
+  GiftOutlined, 
   GlobalOutlined 
 } from '@ant-design/icons-vue'
 import { markRaw } from 'vue'
@@ -89,7 +89,7 @@ const options = [
   {
     title: 'Donate',
     desc: 'Financial support ensures the long-term sustainability of the TRC project.',
-    icon: markRaw(HandOutlined)
+    icon: markRaw(GiftOutlined)
   }
 ]
 </script>

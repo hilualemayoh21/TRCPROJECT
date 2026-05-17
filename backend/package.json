@@ -10,6 +10,7 @@
     "postinstall": "npx prisma generate",
     "deploy:migrate": "tsx scripts/safe-migrate.ts",
     "test:security": "tsx scripts/security-test.ts",
+    "test:rbac": "tsx scripts/rbac-validation.ts",
     "test:load": "k6 run scripts/load-test.js"
   },
   "prisma": {

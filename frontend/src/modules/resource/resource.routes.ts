@@ -9,7 +9,7 @@ export default [
     path: '/upload',
     name: 'UploadResource',
     component: () => import('./pages/UploadResource.vue'),
-    meta: { layout: 'DashboardLayout', requiresAuth: true }
+    meta: { layout: 'DashboardLayout', requiresAuth: true, permissions: ['create_resources'] }
   },
   {
     path: '/resources/:id',

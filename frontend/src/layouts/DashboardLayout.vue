@@ -203,14 +203,14 @@ function isActive(path: string) {
 }
 
 const allNavItems = [
-  { name: 'Dashboard', to: '/dashboard', icon: DashboardOutlined, roles: ['public_user', 'researcher', 'admin', 'super_admin'] },
-  { name: 'Profile',   to: '/profile',   icon: TeamOutlined,      roles: ['public_user', 'researcher', 'admin', 'super_admin'] },
-  { name: 'Notifications', to: '/notifications', icon: BellOutlined, roles: ['public_user', 'researcher', 'admin', 'super_admin'] },
-  { name: 'Users',     to: '/admin/users', icon: TeamOutlined,       roles: ['admin', 'super_admin'] },
-  { name: 'Roles',     to: '/admin/roles', icon: SafetyOutlined,     roles: ['admin', 'super_admin'] },
-  { name: 'Resources', to: '/search',   icon: FolderOpenOutlined, roles: ['public_user', 'researcher', 'admin', 'super_admin'] },
-  { name: 'Logs',      to: '/admin/audit-logs', icon: AuditOutlined, roles: ['admin', 'super_admin'] },
-  { name: 'Settings',  to: '/settings',    icon: SettingOutlined,    roles: ['public_user', 'researcher', 'admin', 'super_admin'] },
+  { name: 'Dashboard', to: '/dashboard', icon: DashboardOutlined },
+  { name: 'Profile',   to: '/profile',   icon: TeamOutlined },
+  { name: 'Notifications', to: '/notifications', icon: BellOutlined },
+  { name: 'Users',     to: '/admin/users', icon: TeamOutlined, permission: 'view_users' },
+  { name: 'Roles',     to: '/admin/roles', icon: SafetyOutlined, permission: 'view_roles' },
+  { name: 'Resources', to: '/search',   icon: FolderOpenOutlined },
+  { name: 'Logs',      to: '/admin/audit-logs', icon: AuditOutlined, permission: 'view_audit_logs' },
+  { name: 'Settings',  to: '/settings',    icon: SettingOutlined },
 ]
 
 const userEmail = computed(() => String(authStore.user?.email || '').toLowerCase())
@@ -218,8 +218,12 @@ const userEmail = computed(() => String(authStore.user?.email || '').toLowerCase
 const visibleNavItems = computed(() => {
   if (userEmail.value === 'admin@trc.local') return allNavItems;
   
-  const role = userRole.value.toLowerCase();
-  return allNavItems.filter(i => i.roles.includes(role));
+  return allNavItems.filter(item => {
+    if (item.permission) {
+      return authStore.can(item.permission)
+    }
+    return true
+  })
 })
 
 

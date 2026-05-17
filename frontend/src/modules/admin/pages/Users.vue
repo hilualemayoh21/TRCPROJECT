@@ -57,7 +57,7 @@
               <span class="hidden sm:inline">Filter</span>
             </button>
             <button
-              v-if="canManageUsers"
+              v-if="canCreateUsers"
               type="button"
               @click="showCreateModal = true"
               class="flex items-center gap-2 h-10 rounded-xl px-5 text-sm font-black
@@ -115,7 +115,7 @@
                 <td class="px-6 py-4">
                   <select
                     :value="u.role || 'public_user'"
-                    :disabled="rowLoading[u.id]?.assignRole || !canManageUsers"
+                    :disabled="rowLoading[u.id]?.assignRole || !canUpdateUsers"
                     @change="handleRoleChange(u, ($event.target as HTMLSelectElement).value as RoleKey)"
                     class="rounded-lg border px-3 py-1.5 text-xs font-bold outline-none transition
                            border-slate-200 bg-slate-50 text-gray-700
@@ -129,7 +129,7 @@
                 <!-- Status -->
                 <td class="px-6 py-4">
                   <button
-                    v-if="canManageUsers"
+                    v-if="canUpdateUsers"
                     type="button"
                     :disabled="rowLoading[u.id]?.status"
                     @click="toggleStatus(u.id)"
@@ -150,7 +150,7 @@
                 <td class="px-6 py-4">
                   <div class="flex items-center justify-end gap-2">
                     <button
-                      v-if="canManageUsers"
+                      v-if="canUpdateUsers"
                       type="button"
                       @click="openEditModal(u)"
                       class="h-8 w-8 flex items-center justify-center rounded-lg border transition
@@ -163,7 +163,7 @@
                       </svg>
                     </button>
                     <button
-                      v-if="canManageUsers"
+                      v-if="canDeleteUsers"
                       type="button"
                       :disabled="rowLoading[u.id]?.deleting"
                       @click="handleDeleteUser(u.id)"
@@ -256,8 +256,10 @@ import CreateUserModal from '@/modules/admin/components/CreateUserModal.vue'
 import EditUserModal from '@/modules/admin/components/EditUserModal.vue'
 
 const router = useRouter()
-const authStore = useAuthStore()
-const canManageUsers = computed(() => authStore.can('update_users'))
+const canViewUsers = computed(() => authStore.can('view_users'))
+const canCreateUsers = computed(() => authStore.can('create_users'))
+const canUpdateUsers = computed(() => authStore.can('update_users'))
+const canDeleteUsers = computed(() => authStore.can('delete_users'))
 
 const query = reactive({ page: 1, pageSize: 10, q: '' })
 const users = ref<AdminUser[]>([])
@@ -329,7 +331,7 @@ async function toggleStatus(userId: string) {
 }
 
 async function handleRoleChange(user: AdminUser, newRole: RoleKey) {
-  if (!canManageUsers.value) return
+  if (!canUpdateUsers.value) return
   const previousRole = user.role || 'public_user'
   if (previousRole === newRole) return
   user.role = newRole
@@ -385,5 +387,5 @@ async function handleDeleteUser(userId: string) {
   }
 }
 
-if (!canManageUsers.value) router.replace({ name: 'Unauthorized' })
+if (!canViewUsers.value) router.replace({ name: 'Unauthorized' })
 </script>

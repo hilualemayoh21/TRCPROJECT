@@ -17,7 +17,7 @@
           </div>
 
           <BaseButton
-            v-if="canManageRoles"
+            v-if="canCreateRoles"
             :full-width="false"
             size="md"
             label="New role"
@@ -65,7 +65,7 @@
       <!-- Empty State -->
       <RolesEmptyState 
         v-else-if="filteredRoles.length === 0"
-        :can-manage-roles="canManageRoles"
+        :can-manage-roles="canCreateRoles"
         @create="openCreate"
       />
 
@@ -132,6 +132,7 @@
             <!-- Buttons -->
             <div class="flex items-center gap-2.5">
               <button
+                v-if="canUpdateRoles"
                 type="button"
                 class="flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-gray-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-95 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 disabled:opacity-40 disabled:pointer-events-none"
                 :disabled="role.isSystem || role.id === 'super_admin'"
@@ -149,7 +150,7 @@
               </button>
               
               <button
-                v-if="canManageRoles"
+                v-if="canDeleteRoles"
                 type="button"
                 class="flex h-11 w-11 items-center justify-center rounded-xl text-slate-400 transition-all hover:bg-red-50 hover:text-red-600 active:scale-95 disabled:pointer-events-none disabled:opacity-30 dark:hover:bg-red-500/10 dark:hover:text-red-400"
                 :disabled="role.isSystem || role.id === 'super_admin' || isDeletingRole"
@@ -195,7 +196,10 @@ import { useCreateRoleMutation, useDeleteRoleMutation, useRolesQuery, useUpdateR
 const router = useRouter()
 const authStore = useAuthStore()
 
-const canManageRoles = computed(() => authStore.can('update_roles') || authStore.can('delete_roles') || authStore.can('create_roles'))
+const canViewRoles = computed(() => authStore.can('view_roles'))
+const canCreateRoles = computed(() => authStore.can('create_roles'))
+const canUpdateRoles = computed(() => authStore.can('update_roles'))
+const canDeleteRoles = computed(() => authStore.can('delete_roles'))
 
 // Filter state
 type FilterType = 'all' | 'system' | 'custom' | 'protected'
