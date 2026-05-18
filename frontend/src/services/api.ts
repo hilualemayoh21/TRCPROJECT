@@ -9,9 +9,6 @@ export const api = axios.create({
   // Hardcoded to ensure it works even if env is missing
   baseURL: 'https://trc-backend.onrender.com/api',
   timeout: 90000, // 90s — extremely safe for slow cold starts
-  headers: {
-    "Content-Type": "application/json"
-  }
 })
 
 // @ts-ignore

@@ -15,6 +15,12 @@ export function registerInterceptors(api: AxiosInstance) {
       console.debug(`[API Interceptor] No token for ${config.url}`)
     }
 
+    // Force deletion of Content-Type for file uploads to let Axios/Browser generate boundaries automatically
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type']
+      delete config.headers['content-type']
+    }
+
     return config
   })
 
