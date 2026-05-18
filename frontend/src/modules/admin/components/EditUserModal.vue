@@ -95,7 +95,7 @@
           </button>
           <button
             type="submit"
-            :disabled="isSubmitting"
+            :disabled="isSubmitting || !hasChanges"
             class="h-10 rounded-xl px-5 text-sm font-black
                    bg-trc text-white hover:bg-trc-dark shadow-lg shadow-trc/25 transition
                    disabled:opacity-50 disabled:cursor-not-allowed"
@@ -116,7 +116,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, computed } from 'vue'
 import type { RoleKey, AdminUser } from '@/modules/admin/types/admin.types'
 
 interface Props {
@@ -142,6 +142,15 @@ const form = reactive({
 const error = ref<string | null>(null)
 const isSubmitting = ref(false)
 
+const hasChanges = computed(() => {
+  if (!props.user) return false
+  return (
+    form.name.trim() !== (props.user.name || '').trim() ||
+    form.email.trim() !== (props.user.email || '').trim() ||
+    form.role !== ((props.user.role as RoleKey) || '')
+  )
+})
+
 watch(() => props.isOpen, (open) => {
   if (open && props.user) {
     form.name = props.user.name || ''
@@ -157,6 +166,11 @@ function close() {
 }
 
 async function handleSubmit() {
+  if (!hasChanges.value) {
+    close()
+    return
+  }
+
   if (!form.name || !form.email || !form.role) {
     error.value = 'Please fill in all required fields'
     return

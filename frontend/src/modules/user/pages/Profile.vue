@@ -174,7 +174,13 @@
 
         <div class="mt-8 flex gap-3">
           <button @click="isEditModalOpen = false" class="flex-1 py-3.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold rounded-xl">Cancel</button>
-          <button @click="saveProfile" class="flex-1 py-3.5 bg-purple-700 text-white font-bold rounded-xl">Save Changes</button>
+          <button
+            @click="saveProfile"
+            :disabled="!hasChanges"
+            class="flex-1 py-3.5 bg-purple-700 text-white font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Save Changes
+          </button>
         </div>
       </div>
     </div>
@@ -183,7 +189,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { message } from 'ant-design-vue'
 import { 
   CameraOutlined, CheckOutlined, EnvironmentOutlined, CalendarOutlined,
@@ -206,11 +212,24 @@ const profileForm = ref({
   avatar: authStore.user?.avatarUrl || ''
 })
 
+const originalProfile = ref({
+  name: authStore.user?.name || '',
+  location: authStore.user?.institution || '',
+  bio: ''
+})
+
 const getAvatarUrl = (url: string) => {
   if (!url) return null
   if (url.startsWith('http')) return url
   return `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${url}`
 }
+
+const hasChanges = computed(() => {
+  return (
+    profileForm.value.name.trim() !== originalProfile.value.name.trim() ||
+    profileForm.value.location.trim() !== originalProfile.value.location.trim()
+  )
+})
 
 onMounted(async () => {
   try {
@@ -218,7 +237,10 @@ onMounted(async () => {
     profileForm.value.name = data.name
     profileForm.value.location = data.institution || ''
     profileForm.value.avatar = data.avatarUrl || ''
-    // If you have bio field in backend, add it here
+    
+    // Store original values
+    originalProfile.value.name = data.name
+    originalProfile.value.location = data.institution || ''
   } catch (err) {
     console.error('Failed to fetch user data', err)
   }
@@ -254,6 +276,10 @@ const copyProfileLink = () => {
 }
 
 const saveProfile = async () => {
+  if (!hasChanges.value) {
+    isEditModalOpen.value = false
+    return
+  }
   try {
     await userService.updateMe({
       name: profileForm.value.name,
@@ -264,6 +290,10 @@ const saveProfile = async () => {
       authStore.user.name = profileForm.value.name
       authStore.user.institution = profileForm.value.location
     }
+    // Update original values
+    originalProfile.value.name = profileForm.value.name
+    originalProfile.value.location = profileForm.value.location
+
     isEditModalOpen.value = false
     message.success('Profile updated!')
   } catch (err) {

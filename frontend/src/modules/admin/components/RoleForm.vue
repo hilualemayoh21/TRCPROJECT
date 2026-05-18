@@ -73,6 +73,7 @@
               variant="primary"
               :label="isEdit ? 'Save Changes' : 'Create Role'"
               :loading="loading"
+              :disabled="!hasChanges"
             />
           </div>
         </form>
@@ -108,6 +109,16 @@ const errors = reactive({
   name: ''
 })
 
+const hasChanges = computed(() => {
+  if (!isEdit.value) return true
+  const initialName = props.initialData?.name || ''
+  const initialDesc = props.initialData?.description || ''
+  return (
+    form.name.trim() !== initialName.trim() ||
+    form.description.trim() !== initialDesc.trim()
+  )
+})
+
 function validate() {
   let valid = true
   errors.name = ''
@@ -122,6 +133,10 @@ function validate() {
 }
 
 function submit() {
+  if (!hasChanges.value) {
+    close()
+    return
+  }
   if (!validate()) return
   
   emit('submit', {
