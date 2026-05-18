@@ -265,8 +265,9 @@ const handleAvatarChange = async (event: Event) => {
       authStore.user.avatarUrl = res.avatarUrl
     }
     message.success('Avatar updated successfully!')
-  } catch (err) {
-    message.error('Failed to upload avatar')
+  } catch (err: any) {
+    const errorMsg = err.response?.data?.error?.message || err.message || 'Failed to upload avatar'
+    message.error(`Failed to upload avatar: ${errorMsg}`)
   } finally {
     uploadingAvatar.value = false
   }
