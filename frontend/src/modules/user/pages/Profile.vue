@@ -266,7 +266,7 @@ const handleAvatarChange = async (event: Event) => {
     }
     message.success('Avatar updated successfully!')
   } catch (err: any) {
-    const errorMsg = err.response?.data?.error?.message || err.message || 'Failed to upload avatar'
+    const errorMsg = err.error?.message || err.message || 'Failed to upload avatar'
     message.error(`Failed to upload avatar: ${errorMsg}`)
   } finally {
     uploadingAvatar.value = false
