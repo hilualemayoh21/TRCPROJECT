@@ -256,6 +256,7 @@ import CreateUserModal from '@/modules/admin/components/CreateUserModal.vue'
 import EditUserModal from '@/modules/admin/components/EditUserModal.vue'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const canViewUsers = computed(() => authStore.can('view_users'))
 const canCreateUsers = computed(() => authStore.can('create_users'))
 const canUpdateUsers = computed(() => authStore.can('update_users'))
