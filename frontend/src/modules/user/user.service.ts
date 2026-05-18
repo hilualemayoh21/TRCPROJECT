@@ -12,10 +12,6 @@ export const userService = {
   updateAvatar: async (file: File) => {
     const formData = new FormData();
     formData.append('avatar', file);
-    return patch<any>('/users/me/avatar', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    return patch<any>('/users/me/avatar', formData);
   },
 };
