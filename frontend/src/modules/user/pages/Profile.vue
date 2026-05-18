@@ -221,7 +221,9 @@ const originalProfile = ref({
 const getAvatarUrl = (url: string) => {
   if (!url) return null
   if (url.startsWith('http')) return url
-  return `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}${url}`
+  const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'
+  const origin = apiBase.replace(/\/api$/, '')
+  return `${origin}${url}`
 }
 
 const hasChanges = computed(() => {
