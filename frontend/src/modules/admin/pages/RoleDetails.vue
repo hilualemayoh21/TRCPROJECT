@@ -126,7 +126,7 @@
                 <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Toggle specific capabilities for this security group.</p>
               </div>
               <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-600 text-lg font-black text-white shadow-lg shadow-violet-200 dark:shadow-none">
-                {{ (role?.permissions ?? []).length }}
+                {{ role?.id === 'super_admin' ? ALL_PERMISSIONS.length : (role?.permissions ?? []).length }}
               </div>
             </div>
           </div>
@@ -138,7 +138,7 @@
               :role-id="role!.id"
               :permission="perm.key"
               :description="perm.description"
-              :enabled="(role!.permissions ?? []).includes(perm.key)"
+              :enabled="role?.id === 'super_admin' ? true : (role!.permissions ?? []).includes(perm.key)"
               :disabled="role?.isSystem"
               @updated="onPermissionToggled"
             />

@@ -268,6 +268,7 @@ function isCellLoading(roleId: string, permission: string) {
 }
 
 function isEnabled(roleId: string, permission: Permission) {
+  if (roleId === 'super_admin') return true
   return effectiveSet(roleId).has(permission)
 }
 
