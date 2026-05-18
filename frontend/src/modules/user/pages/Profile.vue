@@ -1,40 +1,37 @@
 <template>
-  <div class="max-w-7xl mx-auto w-full font-sans text-gray-900 dark:text-gray-100 pb-16 md:pb-10 p-4 md:p-6 lg:p-8 selection:bg-purple-500/20 selection:text-purple-900 transition-colors">
+  <div class="max-w-7xl mx-auto w-full font-sans text-gray-900 dark:text-gray-100 pb-16 md:pb-10 p-4 md:p-6 lg:p-8 transition-colors">
     
     <!-- Cover / Banner Image -->
-    <div class="w-full h-40 md:h-56 lg:h-64 rounded-3xl md:rounded-[2rem] bg-gray-900 relative overflow-hidden shadow-md">
-      <img 
-        src="https://images.unsplash.com/photo-1505909182942-e2f09aee3e89?q=80&w=1200&auto=format&fit=crop" 
-        alt="Cover Background" 
-        class="absolute inset-0 w-full h-full object-cover opacity-80 mix-blend-overlay"
-      />
-      <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10"></div>
+    <div class="w-full h-44 md:h-56 lg:h-64 rounded-[2rem] bg-gradient-to-br from-purple-800 via-purple-900 to-indigo-950 relative overflow-hidden shadow-lg animate-fade-in">
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(139,92,246,0.2),transparent)]"></div>
+      <div class="absolute inset-0 bg-grid-pattern opacity-10"></div>
     </div>
 
-    <!-- Main Responsive Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mt-[-50px] md:mt-[-80px] relative z-10">
-      
-      <!-- Left Sidebar (Identity, Completion, Stats) -->
-      <div class="lg:col-span-4 xl:col-span-3 flex flex-col gap-6">
+    <!-- Profile Identity Area (Overlapping Cover) -->
+    <div class="px-2 md:px-8 pb-4 mt-[-60px] md:mt-[-80px] relative z-10 animate-fade-up">
+      <div class="flex flex-col md:flex-row items-center md:items-end justify-between gap-6">
         
-        <!-- Profile Identity Card -->
-        <div class="bg-white dark:bg-gray-900 rounded-3xl p-6 shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-gray-100 dark:border-gray-800 flex flex-col items-center lg:items-start text-center lg:text-left">
+        <!-- Left: Avatar + Name info -->
+        <div class="flex flex-col md:flex-row items-center md:items-end gap-5 text-center md:text-left">
           
-          <!-- Avatar with Badge -->
-          <div class="relative mb-5 group cursor-pointer" @click="triggerAvatarUpload">
+          <!-- Avatar Squircle with Border & Badge -->
+          <div class="relative group cursor-pointer" @click="triggerAvatarUpload">
             <img 
               :src="getAvatarUrl(profileForm.avatar) || `https://ui-avatars.com/api/?name=${encodeURIComponent(profileForm.name)}&background=6C2BD9&color=fff`" 
               alt="Profile Picture" 
-              class="w-28 h-28 md:w-32 md:h-32 rounded-[2rem] border-4 border-white dark:border-gray-800 shadow-md object-cover bg-gray-100 dark:bg-gray-800 transition-all group-hover:brightness-75"
+              class="w-32 h-32 md:w-36 md:h-36 rounded-[2.2rem] border-[6px] border-white dark:border-gray-900 shadow-xl object-cover bg-gray-100 dark:bg-gray-800 transition-all duration-300 group-hover:brightness-75 group-hover:scale-[1.02]"
               :class="{ 'opacity-50': uploadingAvatar }"
             />
             <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <LoadingOutlined v-if="uploadingAvatar" class="text-white text-2xl" />
-              <CameraOutlined v-else class="text-white text-2xl" />
+              <LoadingOutlined v-if="uploadingAvatar" class="text-white text-3xl animate-spin" />
+              <CameraOutlined v-else class="text-white text-3xl" />
             </div>
-            <div class="absolute bottom-[-4px] right-[-4px] h-8 w-8 bg-purple-700 rounded-xl border-2 border-white flex items-center justify-center shadow-sm">
-              <CheckOutlined class="text-white text-xs font-bold" />
+            
+            <!-- Tiny Verified badge inside the white border shape -->
+            <div class="absolute bottom-1.5 right-1.5 h-8 w-8 bg-purple-700 rounded-xl border-[3px] border-white dark:border-gray-900 flex items-center justify-center shadow-md">
+              <CheckOutlined class="text-white text-[10px] font-black" />
             </div>
+
             <!-- Hidden File Input -->
             <input 
               ref="fileInput"
@@ -45,106 +42,313 @@
             />
           </div>
 
-          <!-- Name & Role -->
-          <h1 class="text-2xl font-black text-gray-900 dark:text-gray-100 mb-1 tracking-tight">{{ profileForm.name }}</h1>
-          <p class="text-sm font-bold text-purple-700 bg-purple-50 dark:bg-purple-900/20 px-3 py-1 rounded-lg inline-flex mb-4 uppercase tracking-widest">{{ authStore.user?.role }}</p>
-
-          <!-- Bio -->
-          <p class="text-[0.85rem] text-gray-600 dark:text-gray-400 font-medium leading-relaxed mb-5">
-            {{ profileForm.bio || 'Contributing to the preservation of Tigray\'s rich cultural and historical heritage.' }}
-          </p>
-
-          <!-- Interest Tags -->
-          <div class="flex flex-wrap gap-2 justify-center lg:justify-start mb-6 w-full">
-            <span class="px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-600 text-[0.65rem] font-bold uppercase tracking-widest rounded-lg border border-gray-100 transition-colors cursor-pointer">#DigitalArchive</span>
-            <span class="px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-600 text-[0.65rem] font-bold uppercase tracking-widest rounded-lg border border-gray-100 transition-colors cursor-pointer">#Research</span>
-            <span class="px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-600 text-[0.65rem] font-bold uppercase tracking-widest rounded-lg border border-gray-100 transition-colors cursor-pointer">#Heritage</span>
-          </div>
-
-          <!-- Joined Date & Location -->
-          <div class="flex flex-col gap-2 text-gray-400 mb-6 w-full items-center lg:items-start">
-            <div class="flex items-center gap-2">
-              <EnvironmentOutlined class="text-sm" />
-              <span class="text-xs font-bold uppercase tracking-wider">{{ profileForm.location || 'Mekelle, Tigray' }}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <CalendarOutlined class="text-sm" />
-              <span class="text-xs font-bold uppercase tracking-wider">Member since {{ new Date(authStore.user?.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) }}</span>
-            </div>
-          </div>
-
-          <!-- Actions -->
-          <div class="w-full flex gap-2">
-             <button @click="isEditModalOpen = true" class="flex-1 bg-purple-800 hover:bg-purple-900 text-white font-bold text-sm py-3.5 rounded-xl shadow-[0_4px_15px_rgba(107,33,168,0.2)] transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
-                <EditOutlined /> Edit Profile
-             </button>
-             <button @click="copyProfileLink" class="w-12 shrink-0 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-sm py-3.5 rounded-xl transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center">
-                <ShareAltOutlined />
-             </button>
+          <!-- Name, Role & Location Info -->
+          <div class="mb-2">
+            <h1 class="text-2xl md:text-3xl font-black tracking-tight text-gray-900 dark:text-gray-50 flex items-center justify-center md:justify-start gap-2.5">
+              {{ profileForm.name }}
+            </h1>
+            <p class="text-sm font-bold text-purple-700 dark:text-purple-400 mt-1">
+              {{ authStore.user?.role === 'super_admin' ? 'Senior Resource Curator' : 'Strategic Resource Contributor' }}
+              <span class="text-gray-300 dark:text-gray-700 mx-1.5">•</span>
+              <span class="text-gray-500 dark:text-gray-400 font-medium">Digital Preservationist</span>
+            </p>
           </div>
         </div>
 
-        <!-- Profile Completion -->
-        <div class="bg-white dark:bg-gray-900 rounded-3xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-gray-100 dark:border-gray-800">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100">Profile Completion</h3>
-            <span class="text-sm font-black text-purple-700 dark:text-purple-400">80%</span>
-          </div>
-          <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2 mb-4 overflow-hidden">
-            <div class="bg-gradient-to-r from-purple-500 to-purple-800 h-full rounded-full transition-all duration-1000 ease-out w-[80%]"></div>
-          </div>
-          <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mb-4">Add your institution to reach 100%.</p>
-          <button @click="isEditModalOpen = true" class="text-xs font-bold text-purple-700 dark:text-purple-400 hover:text-purple-900 transition-colors flex items-center gap-1">
-            Complete your profile <ArrowRightOutlined class="text-[0.6rem]" />
+        <!-- Right: Action Buttons -->
+        <div class="flex items-center gap-3 mb-2 shrink-0">
+          <button 
+            @click="isEditModalOpen = true" 
+            class="px-6 py-3 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-purple-700 dark:text-purple-300 font-black text-xs tracking-wider uppercase rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"
+          >
+            <EditOutlined class="text-sm" /> Edit Profile
+          </button>
+          
+          <button 
+            @click="copyProfileLink" 
+            class="w-12 h-12 rounded-full bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-purple-700 dark:text-purple-300 flex items-center justify-center shadow-sm transition-all hover:scale-105"
+            title="Share Profile"
+          >
+            <ShareAltOutlined class="text-base" />
           </button>
         </div>
       </div>
+    </div>
 
-      <!-- Main Content Area (Tabs, Archives, Activity) -->
-      <div class="lg:col-span-8 xl:col-span-9 flex flex-col gap-8 pt-6 lg:pt-0 lg:mt-[80px]">
-        
-        <!-- Organization Tabs -->
-        <div class="flex overflow-x-auto hide-scrollbar gap-3 pb-2 -mx-4 px-4 md:mx-0 md:px-0">
-          <button 
-            v-for="tab in ['Archives', 'Saved', 'Activity']" :key="tab"
-            @click="activeTab = tab"
-            :class="[
-              'px-6 py-3 font-bold rounded-2xl text-sm whitespace-nowrap shadow-md transition-colors flex items-center',
-              activeTab === tab ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-white' : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800 shadow-[0_2px_8px_rgba(0,0,0,0.02)]'
-            ]"
-          >
-            {{ tab }}
-          </button>
+    <!-- Premium Metrics Row (4 Cards) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6 animate-fade-up" style="animation-delay: 0.1s">
+      <!-- Card 1: Total Resources -->
+      <div class="bg-[#FBFBFF] dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/80 rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md transition-shadow">
+        <p class="text-[0.65rem] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">Total Resources</p>
+        <div class="flex items-baseline gap-2">
+          <span class="text-2xl font-black text-gray-900 dark:text-gray-50 tracking-tight">1,284</span>
+          <span class="px-1.5 py-0.5 bg-purple-50 dark:bg-purple-950/50 text-[#6C2BD9] dark:text-purple-400 text-[0.6rem] font-extrabold rounded-lg">+12%</span>
         </div>
+      </div>
 
-        <!-- Activity Tab -->
-        <div v-if="activeTab === 'Activity'" class="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 lg:p-10 shadow-[0_4px_25px_rgba(0,0,0,0.02)] border border-gray-50 dark:border-gray-800">
-          <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight mb-8">Recent Activity</h2>
-          <div class="space-y-6">
-            <div class="flex gap-6 group cursor-pointer">
-              <div class="shrink-0 w-14 h-14 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-[1.25rem] flex items-center justify-center transition-transform group-hover:scale-105">
-                <CheckOutlined class="text-xl" />
-              </div>
-              <div class="flex-1 flex flex-col justify-center pb-6 border-b border-gray-50 dark:border-gray-800 group-last:border-0 group-last:pb-0">
-                <p class="text-[0.95rem] text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Completed email verification
+      <!-- Card 2: Collection Views -->
+      <div class="bg-[#FBFBFF] dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/80 rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md transition-shadow">
+        <p class="text-[0.65rem] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">Collection Views</p>
+        <div class="flex items-baseline gap-2">
+          <span class="text-2xl font-black text-gray-900 dark:text-gray-50 tracking-tight">42.5k</span>
+          <span class="px-1.5 py-0.5 bg-purple-50 dark:bg-purple-950/50 text-[#6C2BD9] dark:text-purple-400 text-[0.6rem] font-extrabold rounded-lg">-8%</span>
+        </div>
+      </div>
+
+      <!-- Card 3: Network Reach -->
+      <div class="bg-[#FBFBFF] dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/80 rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md transition-shadow">
+        <p class="text-[0.65rem] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">Network Reach</p>
+        <div class="text-2xl font-black text-gray-900 dark:text-gray-50 tracking-tight">
+          312 <span class="text-xs font-bold text-gray-400 dark:text-gray-500 tracking-normal ml-0.5">Curators</span>
+        </div>
+      </div>
+
+      <!-- Card 4: Impact Score -->
+      <div class="bg-[#FBFBFF] dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/80 rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md transition-shadow">
+        <p class="text-[0.65rem] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">Impact Score</p>
+        <div class="text-2xl font-black text-[#6C2BD9] dark:text-purple-400 tracking-tight">
+          94 <span class="text-xs font-bold text-gray-400 dark:text-gray-500 tracking-normal ml-0.5">/ 100</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Section -->
+    <div class="mt-8 border-b border-gray-100 dark:border-gray-800 flex overflow-x-auto hide-scrollbar gap-8 animate-fade-up" style="animation-delay: 0.15s">
+      <button 
+        v-for="tab in ['My Resources', 'Bookmarks', 'Activity History']" 
+        :key="tab"
+        @click="activeTab = tab"
+        :class="[
+          'pb-4 font-bold text-sm whitespace-nowrap transition-colors relative',
+          activeTab === tab 
+            ? 'text-[#6C2BD9] dark:text-purple-400 border-b-2 border-[#6C2BD9] dark:border-purple-400' 
+            : 'text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
+        ]"
+      >
+        {{ tab }}
+        <span v-if="tab === 'My Resources'" class="ml-1 px-1.5 py-0.5 bg-[#F5F3FF] dark:bg-purple-950/60 text-[#6C2BD9] dark:text-purple-400 text-[10px] font-black rounded-lg">48</span>
+        <span v-if="tab === 'Bookmarks'" class="ml-1 px-1.5 py-0.5 bg-[#F5F3FF] dark:bg-purple-950/60 text-[#6C2BD9] dark:text-purple-400 text-[10px] font-black rounded-lg">120</span>
+      </button>
+    </div>
+
+    <!-- Main Two-Column Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6">
+      
+      <!-- LEFT COLUMN: Dynamic Tab Content (9 Cols) -->
+      <div class="lg:col-span-8 xl:col-span-9 flex flex-col gap-6 animate-fade-up" style="animation-delay: 0.2s">
+        
+        <!-- TAB: My Resources -->
+        <div v-if="activeTab === 'My Resources'" class="space-y-6">
+          
+          <!-- Featured Resource Card (Mocked precisely as in design) -->
+          <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800/80 rounded-[2rem] p-6 shadow-[0_4px_25px_rgba(0,0,0,0.015)] flex flex-col md:flex-row gap-6 hover:shadow-md transition-shadow">
+            
+            <!-- Featured Graphic (Abstract organic SVG as in the mockup) -->
+            <div class="w-full md:w-[240px] h-[180px] rounded-2xl overflow-hidden shrink-0 relative bg-teal-800">
+              <svg viewBox="0 0 200 200" class="w-full h-full object-cover">
+                <defs>
+                  <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#0F766E" />
+                    <stop offset="100%" stop-color="#14B8A6" />
+                  </linearGradient>
+                </defs>
+                <rect width="200" height="200" fill="url(#tealGrad)" />
+                <circle cx="60" cy="80" r="45" fill="#0D9488" opacity="0.75" />
+                <circle cx="140" cy="120" r="55" fill="#2DD4BF" opacity="0.65" />
+                <path d="M 30,160 Q 80,100 130,160 T 230,160" fill="none" stroke="#5EEAD4" stroke-width="8" opacity="0.3" />
+              </svg>
+            </div>
+
+            <!-- Card Info -->
+            <div class="flex-1 flex flex-col justify-between">
+              <div>
+                <p class="text-[0.65rem] font-black text-purple-700 dark:text-purple-400 uppercase tracking-widest mb-1.5">
+                  Cultural Heritage <span class="text-gray-300 dark:text-gray-700 mx-1">•</span> Reviewed 2 days ago
                 </p>
-                <div class="flex items-center gap-3 text-[0.7rem] font-bold uppercase tracking-widest text-gray-400">
-                  <span>Account</span> <span class="text-[10px]">●</span> <span>Recent</span>
+                <h3 class="text-lg font-black text-gray-900 dark:text-gray-50 leading-snug hover:text-purple-700 transition-colors cursor-pointer">
+                  Digital Preservation of Timbuktu Manuscripts: Volume IV
+                </h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium leading-relaxed mt-2.5">
+                  A comprehensive digital archive documenting the restoration techniques and historical context of the sacred preservation processes...
+                </p>
+              </div>
+
+              <!-- Bottom Row: Overlapping Avatars & View Link -->
+              <div class="flex items-center justify-between mt-4">
+                <div class="flex items-center -space-x-2.5">
+                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Collab" class="w-7 h-7 rounded-full border-2 border-white dark:border-gray-900 object-cover" />
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" alt="Collab" class="w-7 h-7 rounded-full border-2 border-white dark:border-gray-900 object-cover" />
+                  <div class="w-7 h-7 rounded-full border-2 border-white dark:border-gray-900 bg-purple-50 dark:bg-purple-950 flex items-center justify-center text-[9px] font-black text-[#6C2BD9] dark:text-purple-400">+3</div>
+                </div>
+
+                <a href="#" class="inline-flex items-center gap-1.5 text-xs font-black text-[#6C2BD9] dark:text-purple-400 hover:opacity-85 transition-opacity">
+                  View Archive 
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Secondary Grid of 2 Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Card 1: Quarterly Impact Report -->
+            <div class="bg-[#FBFBFF] dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/80 rounded-[1.75rem] p-5 shadow-[0_2px_8px_rgba(0,0,0,0.005)] hover:shadow-md transition-shadow flex items-start gap-4 cursor-pointer">
+              <div class="w-11 h-11 bg-purple-50 dark:bg-purple-950 text-[#6C2BD9] dark:text-purple-400 rounded-xl flex items-center justify-center shrink-0">
+                <FileTextOutlined class="text-lg" />
+              </div>
+              <div>
+                <h4 class="text-sm font-black text-gray-900 dark:text-gray-50 leading-tight mb-1">Quarterly Impact Report</h4>
+                <p class="text-[0.65rem] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3.5">PDF • 12.4 MB • Updated May 2024</p>
+                <div class="flex gap-2">
+                  <span class="px-2 py-0.5 bg-purple-50 dark:bg-purple-950/60 text-[#6C2BD9] dark:text-purple-400 text-[9px] font-black tracking-widest uppercase rounded">Internal</span>
+                  <span class="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 text-[9px] font-black tracking-widest uppercase rounded">Verified</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: Oral History Interviews -->
+            <div class="bg-[#FBFBFF] dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/80 rounded-[1.75rem] p-5 shadow-[0_2px_8px_rgba(0,0,0,0.005)] hover:shadow-md transition-shadow flex items-start gap-4 cursor-pointer">
+              <div class="w-11 h-11 bg-purple-50 dark:bg-purple-950 text-[#6C2BD9] dark:text-purple-400 rounded-xl flex items-center justify-center shrink-0">
+                <AudioOutlined class="text-lg" />
+              </div>
+              <div>
+                <h4 class="text-sm font-black text-gray-900 dark:text-gray-50 leading-tight mb-1">Oral History Interviews</h4>
+                <p class="text-[0.65rem] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3.5">WAV • 420 MB • Recorded April 2024</p>
+                <div class="flex gap-2">
+                  <span class="px-2 py-0.5 bg-purple-50 dark:bg-purple-950/60 text-[#6C2BD9] dark:text-purple-400 text-[9px] font-black tracking-widest uppercase rounded">Audio</span>
+                  <span class="px-2 py-0.5 bg-purple-50 dark:bg-purple-950/60 text-[#6C2BD9] dark:text-purple-400 text-[9px] font-black tracking-widest uppercase rounded">Restored</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Placeholder for Archives/Saved -->
-        <div v-else class="bg-gray-50/50 dark:bg-gray-800/20 rounded-3xl border border-gray-100 dark:border-gray-800 py-24 flex flex-col items-center justify-center text-center">
-          <FolderOpenOutlined class="text-4xl text-gray-300 mb-4" />
-          <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">No {{ activeTab }} yet</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Your {{ activeTab.toLowerCase() }} will appear here once you start interacting with resources.</p>
+        <!-- TAB: Bookmarks -->
+        <div v-else-if="activeTab === 'Bookmarks'" class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] p-8 text-center py-16">
+          <FolderOpenOutlined class="text-4xl text-purple-300 dark:text-purple-800 mb-4" />
+          <h3 class="text-lg font-black text-gray-900 dark:text-gray-100 mb-2">Bookmarked Publications</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 font-medium max-w-sm mx-auto">
+            Access and manage all saved studies, critical archives, and strategic documents instantly in this dedicated vault.
+          </p>
+        </div>
+
+        <!-- TAB: Activity History -->
+        <div v-else-if="activeTab === 'Activity History'" class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] p-8">
+          <h3 class="text-lg font-black text-gray-900 dark:text-gray-100 mb-6">Recent Curator Actions</h3>
+          <div class="space-y-6 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-gray-100 dark:before:bg-gray-800">
+            <div class="flex gap-4 relative">
+              <div class="w-6.5 h-6.5 bg-[#F5F3FF] dark:bg-purple-950/60 border-2 border-white dark:border-gray-900 rounded-full z-10 shrink-0 flex items-center justify-center mt-1">
+                <div class="w-2.5 h-2.5 bg-[#6C2BD9] dark:bg-purple-400 rounded-full"></div>
+              </div>
+              <div>
+                <p class="text-sm font-black text-gray-800 dark:text-gray-200">Verified "Quarterly Impact Report" submission</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1">Audit Log • 2 hours ago</p>
+              </div>
+            </div>
+            <div class="flex gap-4 relative">
+              <div class="w-6.5 h-6.5 bg-[#F5F3FF] dark:bg-purple-950/60 border-2 border-white dark:border-gray-900 rounded-full z-10 shrink-0 flex items-center justify-center mt-1">
+                <div class="w-2.5 h-2.5 bg-[#6C2BD9] dark:bg-purple-400 rounded-full"></div>
+              </div>
+              <div>
+                <p class="text-sm font-black text-gray-800 dark:text-gray-200">Uploaded "Digital Preservation of Timbuktu Manuscripts: Volume IV"</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1">Audit Log • 1 day ago</p>
+              </div>
+            </div>
+            <div class="flex gap-4 relative">
+              <div class="w-6.5 h-6.5 bg-[#F5F3FF] dark:bg-purple-950/60 border-2 border-white dark:border-gray-900 rounded-full z-10 shrink-0 flex items-center justify-center mt-1">
+                <div class="w-2.5 h-2.5 bg-[#6C2BD9] dark:bg-purple-400 rounded-full"></div>
+              </div>
+              <div>
+                <p class="text-sm font-black text-gray-800 dark:text-gray-200">Completed full email verification sequence</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1">System • May 18, 2026</p>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
+
+      <!-- RIGHT COLUMN: Insights & Collaborators Sidebars (3 Cols) -->
+      <div class="lg:col-span-4 xl:col-span-3 flex flex-col gap-6 animate-fade-up" style="animation-delay: 0.25s">
+        
+        <!-- Curator Insights Card -->
+        <div class="bg-[#FBFBFF] dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/80 rounded-[2rem] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.005)]">
+          <div class="flex items-center gap-2 mb-6">
+            <!-- Sparkles Custom SVG Icon -->
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6C2BD9" stroke-width="2.5" class="shrink-0">
+              <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" stroke-linecap="round"></path>
+            </svg>
+            <h3 class="text-sm font-black text-gray-900 dark:text-gray-100 tracking-tight">Curator Insights</h3>
+          </div>
+
+          <div class="space-y-5">
+            <!-- Insight 1: Most Active Category -->
+            <div class="pl-3.5 border-l-2 border-[#6C2BD9] dark:border-purple-500">
+              <p class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Most Active Category</p>
+              <p class="text-xs font-black text-gray-800 dark:text-gray-200">Archival Linguistics</p>
+            </div>
+            
+            <!-- Insight 2: Verification Status -->
+            <div class="pl-3.5 border-l-2 border-[#6C2BD9] dark:border-purple-500">
+              <p class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Verification Status</p>
+              <p class="text-xs font-black text-gray-800 dark:text-gray-200">Expert Level 4</p>
+            </div>
+
+            <!-- Insight 3: Last Contribution -->
+            <div class="pl-3.5 border-l-2 border-[#6C2BD9] dark:border-purple-500">
+              <p class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Last Contribution</p>
+              <p class="text-xs font-black text-gray-800 dark:text-gray-200">Yesterday, 4:12 PM</p>
+            </div>
+          </div>
+
+          <button class="w-full mt-7 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/80 text-[#6C2BD9] dark:text-purple-300 border border-gray-200 dark:border-gray-700 font-black text-xs py-3.5 rounded-2xl shadow-sm transition-all hover:scale-[1.01]">
+            View Detailed Analytics
+          </button>
+        </div>
+
+        <!-- Top Collaborators Card -->
+        <div class="bg-[#FBFBFF] dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/80 rounded-[2rem] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.005)]">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-sm font-black text-gray-900 dark:text-gray-100 tracking-tight">Top Collaborators</h3>
+            <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Collaborator 1 -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80" alt="Dawit M." class="w-9 h-9 rounded-full object-cover shadow-sm bg-gray-100" />
+                <div>
+                  <h4 class="text-xs font-black text-gray-900 dark:text-gray-100">Dawit M.</h4>
+                  <p class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Lead Archivist</p>
+                </div>
+              </div>
+              <div class="w-6.5 h-6.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 flex items-center justify-center text-[#6C2BD9] dark:text-purple-400">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+              </div>
+            </div>
+
+            <!-- Collaborator 2 -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80" alt="Helen K." class="w-9 h-9 rounded-full object-cover shadow-sm bg-gray-100" />
+                <div>
+                  <h4 class="text-xs font-black text-gray-900 dark:text-gray-100">Helen K.</h4>
+                  <p class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Data Analyst</p>
+                </div>
+              </div>
+              <div class="w-6.5 h-6.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 flex items-center justify-center text-[#6C2BD9] dark:text-purple-400">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
     </div>
 
     <!-- Edit Profile Modal -->
@@ -160,24 +364,24 @@
         <div class="space-y-6">
           <div>
             <label class="block text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Full Name</label>
-            <input v-model="profileForm.name" type="text" class="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-3 text-sm" />
+            <input v-model="profileForm.name" type="text" class="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#6C2BD9]" />
           </div>
           <div>
-            <label class="block text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Location</label>
-            <input v-model="profileForm.location" type="text" class="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-3 text-sm" />
+            <label class="block text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Location / Institution</label>
+            <input v-model="profileForm.location" type="text" class="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#6C2BD9]" />
           </div>
           <div>
             <label class="block text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Bio</label>
-            <textarea v-model="profileForm.bio" rows="3" class="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-3 text-sm resize-none"></textarea>
+            <textarea v-model="profileForm.bio" rows="3" class="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#6C2BD9]"></textarea>
           </div>
         </div>
 
         <div class="mt-8 flex gap-3">
-          <button @click="isEditModalOpen = false" class="flex-1 py-3.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold rounded-xl">Cancel</button>
+          <button @click="isEditModalOpen = false" class="flex-1 py-3.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:opacity-90">Cancel</button>
           <button
             @click="saveProfile"
             :disabled="!hasChanges"
-            class="flex-1 py-3.5 bg-purple-700 text-white font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex-1 py-3.5 bg-purple-700 text-white font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
           >
             Save Changes
           </button>
@@ -194,13 +398,13 @@ import { message } from 'ant-design-vue'
 import { 
   CameraOutlined, CheckOutlined, EnvironmentOutlined, CalendarOutlined,
   EditOutlined, ShareAltOutlined, ArrowRightOutlined, FolderOpenOutlined,
-  CloseOutlined, LoadingOutlined
+  CloseOutlined, LoadingOutlined, FileTextOutlined, AudioOutlined
 } from '@ant-design/icons-vue'
 import { useAuthStore } from '@/modules/auth/auth.store'
 import { userService } from '../user.service'
 
 const authStore = useAuthStore()
-const activeTab = ref('Archives')
+const activeTab = ref('My Resources')
 const isEditModalOpen = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadingAvatar = ref(false)
@@ -229,7 +433,8 @@ const getAvatarUrl = (url: string) => {
 const hasChanges = computed(() => {
   return (
     profileForm.value.name.trim() !== originalProfile.value.name.trim() ||
-    profileForm.value.location.trim() !== originalProfile.value.location.trim()
+    profileForm.value.location.trim() !== originalProfile.value.location.trim() ||
+    profileForm.value.bio.trim() !== originalProfile.value.bio.trim()
   )
 })
 
@@ -314,4 +519,11 @@ const saveProfile = async () => {
   to { opacity: 1; transform: translateY(0); }
 }
 .animate-fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
+
+.bg-grid-pattern {
+  background-size: 20px 20px;
+  background-image: 
+    linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+}
 </style>
