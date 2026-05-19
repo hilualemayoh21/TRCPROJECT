@@ -71,10 +71,14 @@
         </button>
 
         <!-- Avatar -->
-        <div class="flex items-center justify-center xl:justify-start gap-3 pt-2 border-t border-slate-100 dark:border-white/5 mt-2">
+        <div 
+          class="flex items-center justify-center xl:justify-start gap-3 pt-2 border-t border-slate-100 dark:border-white/5 mt-2 cursor-pointer hover:opacity-80 transition-opacity"
+          @click="router.push('/profile')"
+        >
           <img
-            :src="`https://ui-avatars.com/api/?name=${authStore.user?.name || 'A'}&background=6C2BD9&color=fff&size=80`"
-            class="h-9 w-9 rounded-xl shadow-md shrink-0"
+            :src="getAvatarUrl(authStore.user?.avatarUrl) || `https://ui-avatars.com/api/?name=${encodeURIComponent(authStore.user?.name || 'A')}&background=6C2BD9&color=fff&size=80`"
+            class="h-9 w-9 rounded-xl shadow-md shrink-0 object-cover"
+            @error="handleImageError"
           />
           <div class="hidden xl:flex flex-col min-w-0">
             <span class="text-sm font-black text-gray-900 dark:text-white truncate">{{ authStore.user?.name }}</span>
@@ -137,14 +141,18 @@
           </button>
 
           <!-- Profile -->
-          <div class="flex items-center gap-3 pl-3 border-l border-slate-200 dark:border-white/10">
+          <div 
+            class="flex items-center gap-3 pl-3 border-l border-slate-200 dark:border-white/10 cursor-pointer group"
+            @click="router.push('/profile')"
+          >
             <div class="hidden md:flex flex-col items-end">
-              <span class="text-base font-black text-gray-900 dark:text-white">{{ authStore.user?.name || 'Admin' }}</span>
+              <span class="text-base font-black text-gray-900 dark:text-white group-hover:text-trc transition-colors">{{ authStore.user?.name || 'Admin' }}</span>
               <span class="text-[0.65rem] font-bold text-trc uppercase tracking-widest">{{ authStore.user?.role }}</span>
             </div>
             <img
-              :src="`https://ui-avatars.com/api/?name=${authStore.user?.name || 'A'}&background=6C2BD9&color=fff`"
-              class="h-10 w-10 rounded-xl shadow border-2 border-white dark:border-white/10 cursor-pointer hover:scale-105 transition-transform"
+              :src="getAvatarUrl(authStore.user?.avatarUrl) || `https://ui-avatars.com/api/?name=${encodeURIComponent(authStore.user?.name || 'A')}&background=6C2BD9&color=fff`"
+              class="h-10 w-10 rounded-xl shadow border-2 border-white dark:border-white/10 group-hover:scale-105 transition-transform object-cover"
+              @error="handleImageError"
             />
           </div>
         </div>
@@ -230,5 +238,18 @@ const visibleNavItems = computed(() => {
 const handleLogout = async () => {
   await authStore.logout()
   router.replace({ name: 'Login' })
+}
+
+const getAvatarUrl = (url?: string | null) => {
+  if (!url) return null
+  if (url.startsWith('http')) return url
+  const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'
+  const origin = apiBase.replace(/\/api$/, '')
+  return `${origin}${url}`
+}
+
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(authStore.user?.name || 'A')}&background=6C2BD9&color=fff`
 }
 </script>
