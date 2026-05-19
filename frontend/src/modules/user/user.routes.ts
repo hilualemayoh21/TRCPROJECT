@@ -3,7 +3,7 @@ export default [
     path: '/dashboard',
     name: 'dashboard',
     component: () => import('./pages/DashboardDispatcher.vue'),
-    meta: { requiresAuth: true, layout: 'DashboardLayout' }
+    meta: { requiresAuth: true }
   },
   {
     path: '/profile',
