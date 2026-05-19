@@ -16,5 +16,11 @@ export default [
     name: 'notifications',
     component: () => import('./pages/Notifications.vue'),
     meta: { requiresAuth: true, layout: 'DashboardLayout' }
+  },
+  {
+    path: '/settings',
+    name: 'settings',
+    component: () => import('./pages/Settings.vue'),
+    meta: { requiresAuth: true, layout: 'DashboardLayout' }
   }
 ]
