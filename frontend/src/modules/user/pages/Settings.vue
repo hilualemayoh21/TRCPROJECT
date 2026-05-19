@@ -20,9 +20,9 @@
 
       <button 
         @click="saveAllSettings"
-        class="px-7 py-3.5 bg-[#6C2BD9] dark:bg-purple-700 hover:bg-[#5B21B6] dark:hover:bg-purple-800 text-white font-black text-[11px] tracking-wider uppercase rounded-2xl shadow-md transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2"
+        class="shrink-0 px-8 py-3.5 bg-[#6C2BD9] dark:bg-purple-700 hover:bg-[#5B21B6] dark:hover:bg-purple-800 text-white font-black text-[11px] tracking-wider uppercase rounded-full shadow-md transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2.5"
       >
-        <SaveOutlined /> Save All Changes
+        <SaveOutlined class="text-lg" /> Save All Changes
       </button>
     </div>
 
@@ -30,20 +30,20 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       
       <!-- LEFT COLUMN: Settings Tabs (3 Cols) -->
-      <div class="lg:col-span-4 xl:col-span-3 bg-[#FBFBFF] dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/80 rounded-[2.2rem] p-6 shadow-sm flex flex-col gap-1.5 animate-fade-up">
+      <div class="lg:col-span-4 xl:col-span-3 bg-[#FBFBFF] dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/80 rounded-[2.2rem] p-5 shadow-sm flex flex-col gap-2 animate-fade-up">
         <button 
           v-for="tab in visibleTabs" 
           :key="tab.id"
           @click="activeTab = tab.id"
-          class="w-full flex items-center gap-3.5 px-5 py-4 rounded-2xl text-left text-xs font-black uppercase tracking-wider transition-all duration-200"
+          class="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-left text-[11px] font-black uppercase tracking-wider transition-all duration-200"
           :class="[
             activeTab === tab.id
-              ? 'bg-[#F5F3FF] dark:bg-purple-950/60 text-[#6C2BD9] dark:text-purple-400 shadow-[0_2px_8px_rgba(108,43,217,0.04)] scale-[1.01]'
+              ? 'bg-[#F5F3FF] dark:bg-purple-950/60 text-[#6C2BD9] dark:text-purple-400 shadow-[0_2px_8px_rgba(108,43,217,0.04)]'
               : 'text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800/40 hover:text-gray-800 dark:hover:text-gray-200'
           ]"
         >
           <component :is="tab.icon" class="text-sm shrink-0" />
-          <span>{{ tab.name }}</span>
+          <span class="break-words whitespace-normal leading-relaxed pr-2">{{ tab.name }}</span>
         </button>
       </div>
 
