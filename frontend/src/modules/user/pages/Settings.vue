@@ -30,7 +30,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       
       <!-- LEFT COLUMN: Settings Tabs (3 Cols) -->
-      <div class="lg:col-span-4 xl:col-span-3 bg-white dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/80 rounded-[2.2rem] p-6 shadow-sm flex flex-col gap-1.5 animate-fade-up">
+      <div class="lg:col-span-4 xl:col-span-3 bg-[#FBFBFF] dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/80 rounded-[2.2rem] p-6 shadow-sm flex flex-col gap-1.5 animate-fade-up">
         <button 
           v-for="tab in visibleTabs" 
           :key="tab.id"
@@ -52,7 +52,7 @@
         
         <!-- PANEL 1: ACCOUNT PREFERENCES -->
         <div v-if="activeTab === 'account'" class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800/80 rounded-[2.5rem] p-6 md:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.005)] space-y-6">
-          <div class="border-b border-gray-100 dark:border-gray-850 pb-5">
+          <div class="border-b border-gray-100 dark:border-gray-800/80 pb-5">
             <h3 class="text-base font-black text-gray-900 dark:text-gray-50 uppercase tracking-tight">Account Preferences</h3>
             <p class="text-[11px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider mt-1">Configure profile and regional synchronization details</p>
           </div>
@@ -60,27 +60,43 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="flex flex-col gap-2">
               <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider">Public Profile Visibility</label>
-              <div class="flex items-center gap-3 bg-[#FBFBFF] dark:bg-gray-800/40 p-4.5 rounded-2xl border border-gray-100 dark:border-gray-800">
-                <input type="checkbox" v-model="accountForm.publicProfile" class="w-4.5 h-4.5 accent-[#6C2BD9] cursor-pointer" />
+              <div class="flex items-center justify-between gap-4 bg-[#FBFBFF] dark:bg-gray-850 p-4.5 rounded-2xl border border-gray-100 dark:border-gray-800">
                 <div>
-                  <span class="text-xs font-black text-gray-800 dark:text-gray-200 block">Make Profile Public</span>
+                  <span class="text-xs font-black text-gray-850 dark:text-gray-250 block">Make Profile Public</span>
                   <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500">Allow other curators to find your contributions</span>
                 </div>
+                <!-- Premium Custom Switch -->
+                <button 
+                  @click="accountForm.publicProfile = !accountForm.publicProfile"
+                  class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none shadow-sm"
+                  :class="accountForm.publicProfile ? 'bg-[#6C2BD9]' : 'bg-gray-200 dark:bg-gray-800'"
+                >
+                  <span 
+                    class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                    :class="accountForm.publicProfile ? 'translate-x-5' : 'translate-x-0'"
+                  ></span>
+                </button>
               </div>
             </div>
 
             <div class="flex flex-col gap-2">
               <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider">Primary Server Sync Node</label>
-              <select v-model="accountForm.serverNode" class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl px-4 py-3.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6C2BD9] text-gray-800 dark:text-gray-200">
+              <select v-model="accountForm.serverNode" class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-850 rounded-2xl px-4 py-3.5 text-xs font-bold focus:outline-none focus:ring-4 focus:ring-[#6C2BD9]/10 focus:border-[#6C2BD9] text-gray-800 dark:text-gray-200 transition-all">
                 <option value="Mekele">Mek'ele Core Node (Active)</option>
                 <option value="Aksum">Aksum Regional Node</option>
                 <option value="Adigrat">Adigrat Regional Node</option>
               </select>
+              
+              <!-- Telemetry Badge -->
+              <div class="mt-2.5 flex items-center gap-2.5 text-[9px] font-black uppercase tracking-wider text-emerald-500 dark:text-emerald-400 bg-emerald-500/5 px-3 py-2.5 rounded-xl border border-emerald-500/10">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                <span>Server Telemetry: 12ms Latency. Synced 2 mins ago.</span>
+              </div>
             </div>
 
             <div class="flex flex-col gap-2">
               <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider">Default Catalog Language</label>
-              <select v-model="accountForm.catalogLanguage" class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl px-4 py-3.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6C2BD9] text-gray-800 dark:text-gray-200">
+              <select v-model="accountForm.catalogLanguage" class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-850 rounded-2xl px-4 py-3.5 text-xs font-bold focus:outline-none focus:ring-4 focus:ring-[#6C2BD9]/10 focus:border-[#6C2BD9] text-gray-800 dark:text-gray-200 transition-all">
                 <option value="English">English</option>
                 <option value="Tigrinya">Tigrinya (ትግርኛ)</option>
                 <option value="Geez">Ge'ez (ግዕዝ)</option>
@@ -89,60 +105,96 @@
 
             <div class="flex flex-col gap-2">
               <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider">Institution / Association</label>
-              <input type="text" v-model="accountForm.institution" placeholder="e.g. Mekelle University" class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl px-4 py-3.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6C2BD9] text-gray-800 dark:text-gray-200" />
+              <input type="text" v-model="accountForm.institution" placeholder="e.g. Mekelle University" class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-850 rounded-2xl px-4 py-3.5 text-xs font-bold focus:outline-none focus:ring-4 focus:ring-[#6C2BD9]/10 focus:border-[#6C2BD9] text-gray-800 dark:text-gray-200 transition-all" />
             </div>
           </div>
         </div>
 
         <!-- PANEL 2: NOTIFICATION MATRIX -->
         <div v-if="activeTab === 'notifications'" class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800/80 rounded-[2.5rem] p-6 md:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.005)] space-y-6">
-          <div class="border-b border-gray-100 dark:border-gray-850 pb-5">
+          <div class="border-b border-gray-100 dark:border-gray-800/80 pb-5">
             <h3 class="text-base font-black text-gray-900 dark:text-gray-50 uppercase tracking-tight">Notification Preference Matrix</h3>
             <p class="text-[11px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider mt-1">Select dynamic notification events based on your platform privileges</p>
           </div>
 
           <div class="space-y-4.5">
             <!-- Row 1: Email Digest -->
-            <div class="flex items-start justify-between gap-4 p-4.5 bg-[#FBFBFF] dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
+            <div class="flex items-center justify-between gap-4 p-4.5 bg-[#FBFBFF] dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
               <div class="flex-1">
-                <span class="text-xs font-black text-gray-800 dark:text-gray-200 block">Weekly Digest Email Summary</span>
+                <span class="text-xs font-black text-gray-850 dark:text-gray-250 block">Weekly Digest Email Summary</span>
                 <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500 mt-0.5 block">Receive weekly roundups of platform curation achievements, top saved assets, and statistics</span>
               </div>
-              <input type="checkbox" v-model="notificationForm.emailDigest" class="w-4.5 h-4.5 accent-[#6C2BD9] cursor-pointer" />
+              <button 
+                @click="notificationForm.emailDigest = !notificationForm.emailDigest"
+                class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none shadow-sm"
+                :class="notificationForm.emailDigest ? 'bg-[#6C2BD9]' : 'bg-gray-200 dark:bg-gray-800'"
+              >
+                <span 
+                  class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                  :class="notificationForm.emailDigest ? 'translate-x-5' : 'translate-x-0'"
+                ></span>
+              </button>
             </div>
 
             <!-- Dynamic Admin Row: Vetting Requests -->
-            <div v-if="userRole === 'admin' || userRole === 'super_admin'" class="flex items-start justify-between gap-4 p-4.5 bg-[#FBFBFF] dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
+            <div v-if="userRole === 'admin' || userRole === 'super_admin'" class="flex items-center justify-between gap-4 p-4.5 bg-[#FBFBFF] dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
               <div class="flex-1">
-                <span class="text-xs font-black text-gray-800 dark:text-gray-200 block">Vetting & Review Applications</span>
+                <span class="text-xs font-black text-gray-850 dark:text-gray-250 block">Vetting & Review Applications</span>
                 <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500 mt-0.5 block">Notify instantly when a researcher submits resources requiring editorial approval</span>
               </div>
-              <input type="checkbox" v-model="notificationForm.vettingRequests" class="w-4.5 h-4.5 accent-[#6C2BD9] cursor-pointer" />
+              <button 
+                @click="notificationForm.vettingRequests = !notificationForm.vettingRequests"
+                class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none shadow-sm"
+                :class="notificationForm.vettingRequests ? 'bg-[#6C2BD9]' : 'bg-gray-200 dark:bg-gray-800'"
+              >
+                <span 
+                  class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                  :class="notificationForm.vettingRequests ? 'translate-x-5' : 'translate-x-0'"
+                ></span>
+              </button>
             </div>
 
             <!-- Dynamic Researcher Row: Citation updates -->
-            <div v-if="userRole === 'researcher'" class="flex items-start justify-between gap-4 p-4.5 bg-[#FBFBFF] dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
+            <div v-if="userRole === 'researcher'" class="flex items-center justify-between gap-4 p-4.5 bg-[#FBFBFF] dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
               <div class="flex-1">
-                <span class="text-xs font-black text-gray-800 dark:text-gray-200 block">Asset Downloads & Citations</span>
+                <span class="text-xs font-black text-gray-850 dark:text-gray-250 block">Asset Downloads & Citations</span>
                 <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500 mt-0.5 block">Notify instantly whenever your published resources receive 5-star ratings or community downloads</span>
               </div>
-              <input type="checkbox" v-model="notificationForm.citationAlerts" class="w-4.5 h-4.5 accent-[#6C2BD9] cursor-pointer" />
+              <button 
+                @click="notificationForm.citationAlerts = !notificationForm.citationAlerts"
+                class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none shadow-sm"
+                :class="notificationForm.citationAlerts ? 'bg-[#6C2BD9]' : 'bg-gray-200 dark:bg-gray-800'"
+              >
+                <span 
+                  class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                  :class="notificationForm.citationAlerts ? 'translate-x-5' : 'translate-x-0'"
+                ></span>
+              </button>
             </div>
 
             <!-- Row 3: Comment notices -->
-            <div class="flex items-start justify-between gap-4 p-4.5 bg-[#FBFBFF] dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
+            <div class="flex items-center justify-between gap-4 p-4.5 bg-[#FBFBFF] dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
               <div class="flex-1">
-                <span class="text-xs font-black text-gray-800 dark:text-gray-200 block">Collection Comments & Notes</span>
+                <span class="text-xs font-black text-gray-850 dark:text-gray-250 block">Collection Comments & Notes</span>
                 <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500 mt-0.5 block">Alert whenever a peer reviewer or verified curator leaves comments on cataloged items</span>
               </div>
-              <input type="checkbox" v-model="notificationForm.commentNotices" class="w-4.5 h-4.5 accent-[#6C2BD9] cursor-pointer" />
+              <button 
+                @click="notificationForm.commentNotices = !notificationForm.commentNotices"
+                class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none shadow-sm"
+                :class="notificationForm.commentNotices ? 'bg-[#6C2BD9]' : 'bg-gray-200 dark:bg-gray-800'"
+              >
+                <span 
+                  class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                  :class="notificationForm.commentNotices ? 'translate-x-5' : 'translate-x-0'"
+                ></span>
+              </button>
             </div>
           </div>
         </div>
 
         <!-- PANEL 3: SECURITY & ACCESS -->
         <div v-if="activeTab === 'security'" class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800/80 rounded-[2.5rem] p-6 md:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.005)] space-y-6">
-          <div class="border-b border-gray-100 dark:border-gray-850 pb-5">
+          <div class="border-b border-gray-100 dark:border-gray-800/80 pb-5">
             <h3 class="text-base font-black text-gray-900 dark:text-gray-50 uppercase tracking-tight">Security & Access Management</h3>
             <p class="text-[11px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider mt-1">Harden account defenses and manage active browser session entries</p>
           </div>
@@ -150,25 +202,25 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div class="flex flex-col gap-2">
               <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider">Current Password</label>
-              <input type="password" v-model="securityForm.currentPassword" class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6C2BD9]" />
+              <input type="password" v-model="securityForm.currentPassword" class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-850 rounded-2xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-4 focus:ring-[#6C2BD9]/10 focus:border-[#6C2BD9] transition-all" />
             </div>
 
             <div class="flex flex-col gap-2">
               <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider">New Password</label>
-              <input type="password" v-model="securityForm.newPassword" class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6C2BD9]" />
+              <input type="password" v-model="securityForm.newPassword" class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-850 rounded-2xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-4 focus:ring-[#6C2BD9]/10 focus:border-[#6C2BD9] transition-all" />
             </div>
 
             <div class="flex flex-col gap-2">
               <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider">Confirm New Password</label>
-              <input type="password" v-model="securityForm.confirmPassword" class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6C2BD9]" />
+              <input type="password" v-model="securityForm.confirmPassword" class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-850 rounded-2xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-4 focus:ring-[#6C2BD9]/10 focus:border-[#6C2BD9] transition-all" />
             </div>
           </div>
 
-          <button @click="updatePassword" class="px-5 py-3 bg-purple-50 hover:bg-purple-100 text-[#6C2BD9] dark:bg-purple-950/60 dark:text-purple-300 border-none font-black text-[10px] uppercase tracking-wider rounded-xl transition-all">
+          <button @click="updatePassword" class="px-5.5 py-3.5 bg-purple-50 hover:bg-purple-100 text-[#6C2BD9] dark:bg-purple-950/60 dark:text-purple-300 border-none font-black text-[10px] uppercase tracking-wider rounded-xl transition-all">
             Update Access Key
           </button>
 
-          <div class="border-t border-gray-100 dark:border-gray-850 pt-6">
+          <div class="border-t border-gray-100 dark:border-gray-800/80 pt-6">
             <h4 class="text-xs font-black text-gray-800 dark:text-gray-200 uppercase tracking-wider mb-4">Active Login Sessions</h4>
             
             <div class="overflow-x-auto">
@@ -183,9 +235,16 @@
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-850">
                   <tr v-for="sess in activeSessions" :key="sess.id" class="text-xs font-bold text-gray-600 dark:text-gray-400">
-                    <td class="py-4.5 flex items-center gap-2">
-                      <span class="w-2 h-2 rounded-full bg-emerald-500" v-if="sess.current"></span>
-                      <span>{{ sess.device }}</span>
+                    <td class="py-4.5 flex items-center gap-3">
+                      <!-- Render premium responsive screen vectors -->
+                      <svg v-if="sess.device.includes('Desktop')" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-[#6C2BD9] dark:text-purple-400 shrink-0"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                      <svg v-else-if="sess.device.includes('Mobile')" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-slate-500 shrink-0"><rect x="5" y="2" width="14" height="20" rx="2"></rect><line x1="12" y1="18" x2="12" y2="18"></line></svg>
+                      <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-slate-500 shrink-0"><rect x="2" y="4" width="20" height="12" rx="2"></rect><line x1="2" y1="20" x2="22" y2="20"></line></svg>
+                      
+                      <span class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500" v-if="sess.current"></span>
+                        <span>{{ sess.device }}</span>
+                      </span>
                     </td>
                     <td class="py-4.5">{{ sess.ip }}</td>
                     <td class="py-4.5">{{ sess.time }}</td>
@@ -208,7 +267,7 @@
 
         <!-- PANEL 4: CURATION OPTIONS -->
         <div v-if="activeTab === 'curation'" class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800/80 rounded-[2.5rem] p-6 md:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.005)] space-y-6">
-          <div class="border-b border-gray-100 dark:border-gray-850 pb-5">
+          <div class="border-b border-gray-100 dark:border-gray-800/80 pb-5">
             <h3 class="text-base font-black text-gray-900 dark:text-gray-50 uppercase tracking-tight">Curation & Licensing Standards</h3>
             <p class="text-[11px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider mt-1">Configure publishing permissions, licensing templates, and metadata assists</p>
           </div>
@@ -216,7 +275,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="flex flex-col gap-2">
               <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider">Default License Protocol</label>
-              <select v-model="curationForm.defaultLicense" class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl px-4 py-3.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#6C2BD9] text-gray-800 dark:text-gray-200">
+              <select v-model="curationForm.defaultLicense" class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-850 rounded-2xl px-4 py-3.5 text-xs font-bold focus:outline-none focus:ring-4 focus:ring-[#6C2BD9]/10 focus:border-[#6C2BD9] text-gray-800 dark:text-gray-200 transition-all">
                 <option value="CC-BY-NC">Creative Commons BY-NC (Attribution-NonCommercial)</option>
                 <option value="CC-BY-SA">Creative Commons BY-SA (Attribution-ShareAlike)</option>
                 <option value="PublicDomain">CC0 Public Domain (Unrestricted Academic)</option>
@@ -226,24 +285,42 @@
             <!-- Dynamic Admin Row: AI Metadata Checks -->
             <div class="flex flex-col gap-2" v-if="userRole === 'admin' || userRole === 'super_admin'">
               <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider">Automated AI Vetting Assist</label>
-              <div class="flex items-center gap-3 bg-[#FBFBFF] dark:bg-gray-800/40 p-4.5 rounded-2xl border border-gray-100 dark:border-gray-800">
-                <input type="checkbox" v-model="curationForm.aiVetting" class="w-4.5 h-4.5 accent-[#6C2BD9] cursor-pointer" />
+              <div class="flex items-center justify-between gap-4 bg-[#FBFBFF] dark:bg-gray-850 p-4.5 rounded-2xl border border-gray-100 dark:border-gray-800">
                 <div>
-                  <span class="text-xs font-black text-gray-800 dark:text-gray-200 block">Enable Automated Vetting Checks</span>
+                  <span class="text-xs font-black text-gray-850 dark:text-gray-250 block">Enable Automated Vetting Checks</span>
                   <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500">Run security, language audits automatically before queueing</span>
                 </div>
+                <button 
+                  @click="curationForm.aiVetting = !curationForm.aiVetting"
+                  class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none shadow-sm"
+                  :class="curationForm.aiVetting ? 'bg-[#6C2BD9]' : 'bg-gray-200 dark:bg-gray-800'"
+                >
+                  <span 
+                    class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                    :class="curationForm.aiVetting ? 'translate-x-5' : 'translate-x-0'"
+                  ></span>
+                </button>
               </div>
             </div>
 
             <!-- Dynamic Researcher Row: Auto DOI Lookup -->
             <div class="flex flex-col gap-2" v-if="userRole === 'researcher'">
               <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider">Auto DOI metadata lookup</label>
-              <div class="flex items-center gap-3 bg-[#FBFBFF] dark:bg-gray-800/40 p-4.5 rounded-2xl border border-gray-100 dark:border-gray-800">
-                <input type="checkbox" v-model="curationForm.autoDoiLookup" class="w-4.5 h-4.5 accent-[#6C2BD9] cursor-pointer" />
+              <div class="flex items-center justify-between gap-4 bg-[#FBFBFF] dark:bg-gray-850 p-4.5 rounded-2xl border border-gray-100 dark:border-gray-800">
                 <div>
-                  <span class="text-xs font-black text-gray-800 dark:text-gray-200 block">Fetch DOI publication info</span>
+                  <span class="text-xs font-black text-gray-850 dark:text-gray-250 block">Fetch DOI publication info</span>
                   <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500">Automatically pull indexing metadata when uploading documents</span>
                 </div>
+                <button 
+                  @click="curationForm.autoDoiLookup = !curationForm.autoDoiLookup"
+                  class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none shadow-sm"
+                  :class="curationForm.autoDoiLookup ? 'bg-[#6C2BD9]' : 'bg-gray-200 dark:bg-gray-800'"
+                >
+                  <span 
+                    class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                    :class="curationForm.autoDoiLookup ? 'translate-x-5' : 'translate-x-0'"
+                  ></span>
+                </button>
               </div>
             </div>
           </div>
@@ -251,7 +328,7 @@
 
         <!-- PANEL 5: ACADEMIC DEVELOPER HUB (Admins & Researchers only) -->
         <div v-if="activeTab === 'developer'" class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800/80 rounded-[2.5rem] p-6 md:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.005)] space-y-6">
-          <div class="border-b border-gray-100 dark:border-gray-850 pb-5">
+          <div class="border-b border-gray-100 dark:border-gray-800/80 pb-5">
             <h3 class="text-base font-black text-gray-900 dark:text-gray-50 uppercase tracking-tight">Academic Developer Hub</h3>
             <p class="text-[11px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider mt-1">Generate access keys to query raw database collections for automated research scripts</p>
           </div>
@@ -297,8 +374,7 @@ import { ref, computed } from 'vue'
 import { message } from 'ant-design-vue'
 import { 
   UserOutlined, BellOutlined, LockOutlined, 
-  SafetyCertificateOutlined, KeyOutlined, SaveOutlined,
-  ThunderboltFilled
+  SafetyCertificateOutlined, KeyOutlined, SaveOutlined
 } from '@ant-design/icons-vue'
 import { useAuthStore } from '@/modules/auth/auth.store'
 
