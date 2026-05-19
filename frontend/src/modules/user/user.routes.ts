@@ -3,18 +3,18 @@ export default [
     path: '/dashboard',
     name: 'dashboard',
     component: () => import('./pages/DashboardDispatcher.vue'),
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, layout: 'DashboardLayout' }
   },
   {
     path: '/profile',
     name: 'profile',
     component: () => import('./pages/Profile.vue'),
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, layout: 'DashboardLayout' }
   },
   {
     path: '/notifications',
     name: 'notifications',
     component: () => import('./pages/Notifications.vue'),
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, layout: 'DashboardLayout' }
   }
 ]

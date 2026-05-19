@@ -49,7 +49,7 @@
               {{ profileForm.name }}
             </h1>
             <p class="text-sm font-bold text-purple-700 dark:text-purple-400 mt-1">
-              {{ authStore.user?.role === 'super_admin' ? 'Senior Resource Curator' : 'Strategic Resource Contributor' }}
+              {{ roleConfig.roleBadge }}
               <span class="text-gray-300 dark:text-gray-700 mx-1.5">•</span>
               <span class="text-gray-500 dark:text-gray-400 font-medium">Digital Preservationist</span>
             </p>
@@ -80,35 +80,35 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6 animate-fade-up" style="animation-delay: 0.1s">
       <!-- Card 1: Total Resources -->
       <div class="bg-[#FBFBFF] dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/80 rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md transition-shadow">
-        <p class="text-[0.65rem] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">Total Resources</p>
+        <p class="text-[0.65rem] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">{{ roleConfig.metric1Label }}</p>
         <div class="flex items-baseline gap-2">
-          <span class="text-2xl font-black text-gray-900 dark:text-gray-50 tracking-tight">1,284</span>
-          <span class="px-1.5 py-0.5 bg-purple-50 dark:bg-purple-950/50 text-[#6C2BD9] dark:text-purple-400 text-[0.6rem] font-extrabold rounded-lg">+12%</span>
+          <span class="text-2xl font-black text-gray-900 dark:text-gray-50 tracking-tight">{{ roleConfig.metric1Val }}</span>
+          <span class="px-1.5 py-0.5 bg-purple-50 dark:bg-purple-950/50 text-[#6C2BD9] dark:text-purple-400 text-[0.6rem] font-extrabold rounded-lg">{{ roleConfig.metric1Sub }}</span>
         </div>
       </div>
 
       <!-- Card 2: Collection Views -->
       <div class="bg-[#FBFBFF] dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/80 rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md transition-shadow">
-        <p class="text-[0.65rem] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">Collection Views</p>
+        <p class="text-[0.65rem] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">{{ roleConfig.metric2Label }}</p>
         <div class="flex items-baseline gap-2">
-          <span class="text-2xl font-black text-gray-900 dark:text-gray-50 tracking-tight">42.5k</span>
-          <span class="px-1.5 py-0.5 bg-purple-50 dark:bg-purple-950/50 text-[#6C2BD9] dark:text-purple-400 text-[0.6rem] font-extrabold rounded-lg">-8%</span>
+          <span class="text-2xl font-black text-gray-900 dark:text-gray-50 tracking-tight">{{ roleConfig.metric2Val }}</span>
+          <span class="px-1.5 py-0.5 bg-purple-50 dark:bg-purple-950/50 text-[#6C2BD9] dark:text-purple-400 text-[0.6rem] font-extrabold rounded-lg">{{ roleConfig.metric2Sub }}</span>
         </div>
       </div>
 
       <!-- Card 3: Network Reach -->
       <div class="bg-[#FBFBFF] dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/80 rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md transition-shadow">
-        <p class="text-[0.65rem] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">Network Reach</p>
+        <p class="text-[0.65rem] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">{{ roleConfig.metric3Label }}</p>
         <div class="text-2xl font-black text-gray-900 dark:text-gray-50 tracking-tight">
-          312 <span class="text-xs font-bold text-gray-400 dark:text-gray-500 tracking-normal ml-0.5">Curators</span>
+          {{ roleConfig.metric3Val }} <span class="text-xs font-bold text-gray-400 dark:text-gray-500 tracking-normal ml-0.5">{{ roleConfig.metric3Sub }}</span>
         </div>
       </div>
 
       <!-- Card 4: Impact Score -->
       <div class="bg-[#FBFBFF] dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/80 rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md transition-shadow">
-        <p class="text-[0.65rem] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">Impact Score</p>
+        <p class="text-[0.65rem] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">{{ roleConfig.metric4Label }}</p>
         <div class="text-2xl font-black text-[#6C2BD9] dark:text-purple-400 tracking-tight">
-          94 <span class="text-xs font-bold text-gray-400 dark:text-gray-500 tracking-normal ml-0.5">/ 100</span>
+          {{ roleConfig.metric4Val }} <span class="text-xs font-bold text-gray-400 dark:text-gray-500 tracking-normal ml-0.5">{{ roleConfig.metric4Sub }}</span>
         </div>
       </div>
     </div>
@@ -116,7 +116,7 @@
     <!-- Tab Section -->
     <div class="mt-8 border-b border-gray-100 dark:border-gray-800 flex overflow-x-auto hide-scrollbar gap-8 animate-fade-up" style="animation-delay: 0.15s">
       <button 
-        v-for="tab in ['My Resources', 'Bookmarks', 'Activity History']" 
+        v-for="tab in ['Resources', 'Bookmarks', 'Activity History']" 
         :key="tab"
         @click="activeTab = tab"
         :class="[
@@ -126,8 +126,8 @@
             : 'text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
         ]"
       >
-        {{ tab }}
-        <span v-if="tab === 'My Resources'" class="ml-1 px-1.5 py-0.5 bg-[#F5F3FF] dark:bg-purple-950/60 text-[#6C2BD9] dark:text-purple-400 text-[10px] font-black rounded-lg">48</span>
+        {{ tab === 'Resources' ? roleConfig.tab1Label : tab }}
+        <span v-if="tab === 'Resources'" class="ml-1 px-1.5 py-0.5 bg-[#F5F3FF] dark:bg-purple-950/60 text-[#6C2BD9] dark:text-purple-400 text-[10px] font-black rounded-lg">48</span>
         <span v-if="tab === 'Bookmarks'" class="ml-1 px-1.5 py-0.5 bg-[#F5F3FF] dark:bg-purple-950/60 text-[#6C2BD9] dark:text-purple-400 text-[10px] font-black rounded-lg">120</span>
       </button>
     </div>
@@ -138,8 +138,8 @@
       <!-- LEFT COLUMN: Dynamic Tab Content (9 Cols) -->
       <div class="lg:col-span-8 xl:col-span-9 flex flex-col gap-6 animate-fade-up" style="animation-delay: 0.2s">
         
-        <!-- TAB: My Resources -->
-        <div v-if="activeTab === 'My Resources'" class="space-y-6">
+        <!-- TAB: Resources -->
+        <div v-if="activeTab === 'Resources'" class="space-y-6">
           
           <!-- Featured Resource Card (Mocked precisely as in design) -->
           <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800/80 rounded-[2rem] p-6 shadow-[0_4px_25px_rgba(0,0,0,0.015)] flex flex-col md:flex-row gap-6 hover:shadow-md transition-shadow">
@@ -164,13 +164,13 @@
             <div class="flex-1 flex flex-col justify-between">
               <div>
                 <p class="text-[0.65rem] font-black text-purple-700 dark:text-purple-400 uppercase tracking-widest mb-1.5">
-                  Cultural Heritage <span class="text-gray-300 dark:text-gray-700 mx-1">•</span> Reviewed 2 days ago
+                  {{ roleConfig.featuredTitle }} <span class="text-gray-300 dark:text-gray-700 mx-1">•</span> {{ roleConfig.featuredMeta }}
                 </p>
                 <h3 class="text-lg font-black text-gray-900 dark:text-gray-50 leading-snug hover:text-purple-700 transition-colors cursor-pointer">
-                  Digital Preservation of Timbuktu Manuscripts: Volume IV
+                  {{ roleConfig.featuredHeader }}
                 </h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400 font-medium leading-relaxed mt-2.5">
-                  A comprehensive digital archive documenting the restoration techniques and historical context of the sacred preservation processes...
+                  {{ roleConfig.featuredDesc }}
                 </p>
               </div>
 
@@ -280,26 +280,26 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6C2BD9" stroke-width="2.5" class="shrink-0">
               <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" stroke-linecap="round"></path>
             </svg>
-            <h3 class="text-sm font-black text-gray-900 dark:text-gray-100 tracking-tight">Curator Insights</h3>
+            <h3 class="text-sm font-black text-gray-900 dark:text-gray-100 tracking-tight">{{ roleConfig.insightsTitle }}</h3>
           </div>
 
           <div class="space-y-5">
             <!-- Insight 1: Most Active Category -->
             <div class="pl-3.5 border-l-2 border-[#6C2BD9] dark:border-purple-500">
-              <p class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Most Active Category</p>
-              <p class="text-xs font-black text-gray-800 dark:text-gray-200">Archival Linguistics</p>
+              <p class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{{ roleConfig.insight1Label }}</p>
+              <p class="text-xs font-black text-gray-800 dark:text-gray-200">{{ roleConfig.insight1Val }}</p>
             </div>
             
             <!-- Insight 2: Verification Status -->
             <div class="pl-3.5 border-l-2 border-[#6C2BD9] dark:border-purple-500">
-              <p class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Verification Status</p>
-              <p class="text-xs font-black text-gray-800 dark:text-gray-200">Expert Level 4</p>
+              <p class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{{ roleConfig.insight2Label }}</p>
+              <p class="text-xs font-black text-gray-800 dark:text-gray-200">{{ roleConfig.insight2Val }}</p>
             </div>
 
             <!-- Insight 3: Last Contribution -->
             <div class="pl-3.5 border-l-2 border-[#6C2BD9] dark:border-purple-500">
-              <p class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Last Contribution</p>
-              <p class="text-xs font-black text-gray-800 dark:text-gray-200">Yesterday, 4:12 PM</p>
+              <p class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{{ roleConfig.insight3Label }}</p>
+              <p class="text-xs font-black text-gray-800 dark:text-gray-200">{{ roleConfig.insight3Val }}</p>
             </div>
           </div>
 
@@ -311,7 +311,7 @@
         <!-- Top Collaborators Card -->
         <div class="bg-[#FBFBFF] dark:bg-gray-900/40 border border-gray-100 dark:border-gray-800/80 rounded-[2rem] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.005)]">
           <div class="flex items-center justify-between mb-6">
-            <h3 class="text-sm font-black text-gray-900 dark:text-gray-100 tracking-tight">Top Collaborators</h3>
+            <h3 class="text-sm font-black text-gray-900 dark:text-gray-100 tracking-tight">{{ roleConfig.collaboratorSectionTitle }}</h3>
             <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
             </button>
@@ -405,7 +405,7 @@ import { useAuthStore } from '@/modules/auth/auth.store'
 import { userService } from '../user.service'
 
 const authStore = useAuthStore()
-const activeTab = ref('My Resources')
+const activeTab = ref('Resources')
 const isEditModalOpen = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 const uploadingAvatar = ref(false)
@@ -442,6 +442,107 @@ const hasChanges = computed(() => {
     profileForm.value.location.trim() !== originalProfile.value.location.trim() ||
     profileForm.value.bio.trim() !== originalProfile.value.bio.trim()
   )
+})
+
+const userRole = computed(() => authStore.user?.role || 'public_user')
+
+const roleConfig = computed(() => {
+  const role = String(userRole.value).toLowerCase()
+  if (role === 'admin' || role === 'super_admin') {
+    return {
+      title: 'Administrator Profile',
+      roleBadge: 'Super Administrator',
+      metric1Label: 'Total Resources Managed',
+      metric1Val: '1,284',
+      metric1Sub: '+12% this month',
+      metric2Label: 'System Access Audits',
+      metric2Val: '42.5k',
+      metric2Sub: '-8% load latency',
+      metric3Label: 'Registered Members',
+      metric3Val: '312 Active',
+      metric3Sub: 'Curators & Researchers',
+      metric4Label: 'Platform Health Score',
+      metric4Val: '99 / 100',
+      metric4Sub: 'Optimized uptime',
+      insightsTitle: 'Platform Administration',
+      insight1Label: 'Primary Admin Domain',
+      insight1Val: 'Global System Control',
+      insight2Label: 'Privilege Level',
+      insight2Val: 'Super Admin Access',
+      insight3Label: 'Last Security Audit',
+      insight3Val: 'Today, 10:45 AM',
+      featuredTitle: 'Admin System Highlight',
+      featuredMeta: 'Platform Core Module',
+      featuredHeader: 'Tigray Resource Repository Core Cluster',
+      featuredDesc: 'Global admin node monitoring and verifying institutional and public research submissions with custom pipelines.',
+      collaboratorSectionTitle: 'System Operators',
+      tab1Label: 'All Submitted Resources',
+      tab2Label: 'System Alerts & Reports'
+    }
+  } else if (role === 'researcher') {
+    return {
+      title: 'Researcher Profile',
+      roleBadge: 'Verified Researcher',
+      metric1Label: 'Published Resources',
+      metric1Val: '48 Papers',
+      metric1Sub: '+3 new this month',
+      metric2Label: 'Total Citations & Views',
+      metric2Val: '12.8k Reads',
+      metric2Sub: '+18% citation index',
+      metric3Label: 'Academic Network',
+      metric3Val: '56 Researchers',
+      metric3Sub: 'Institutional co-authors',
+      metric4Label: 'H-Index Rating',
+      metric4Val: '14 / 20',
+      metric4Sub: 'High academic impact',
+      insightsTitle: 'Research Insights',
+      insight1Label: 'Primary Field',
+      insight1Val: 'Archival Linguistics',
+      insight2Label: 'Verification Status',
+      insight2Val: 'Accredited Level 4',
+      insight3Label: 'Last Contribution',
+      insight3Val: 'Yesterday, 4:12 PM',
+      featuredTitle: 'Featured Research',
+      featuredMeta: 'Highly Cited Publication',
+      featuredHeader: 'Post-Conflict Cultural Heritage Reconstruction',
+      featuredDesc: 'A comprehensive study documenting the architectural and linguistic recovery methodologies for archaeological archives.',
+      collaboratorSectionTitle: 'Research Collaborators',
+      tab1Label: 'My Publications',
+      tab2Label: 'Bookmarked Resources'
+    }
+  } else {
+    // public_user
+    return {
+      title: 'Member Profile',
+      roleBadge: 'Community Curator',
+      metric1Label: 'Saved Resources',
+      metric1Val: '18 Documents',
+      metric1Sub: 'Organized in collections',
+      metric2Label: 'Resource Downloads',
+      metric2Val: '142 Files',
+      metric2Sub: 'Cached locally',
+      metric3Label: 'Curator Network',
+      metric3Val: '12 Curators',
+      metric3Sub: 'Followed experts',
+      metric4Label: 'Contribution Score',
+      metric4Val: '85 / 100',
+      metric4Sub: 'Active community member',
+      insightsTitle: 'Community Insights',
+      insight1Label: 'Saved Categories',
+      insight1Val: 'General Tigray History',
+      insight2Label: 'User Status',
+      insight2Val: 'Verified Public Member',
+      insight3Label: 'Last Activity',
+      insight3Val: '2 hours ago',
+      featuredTitle: 'Saved Resource Highlight',
+      featuredMeta: 'Public Archive Selection',
+      featuredHeader: 'Tigray Historical Manuscripts Overview',
+      featuredDesc: 'An illustrative overview of digital manuscripts covering the ancient linguistic evolution of the region.',
+      collaboratorSectionTitle: 'Followed Curators',
+      tab1Label: 'Saved Library',
+      tab2Label: 'Public Submissions'
+    }
+  }
 })
 
 onMounted(async () => {

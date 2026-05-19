@@ -15,6 +15,7 @@ type AuthUser = {
   institution?: string
   status?: string
   emailVerified?: boolean
+  avatarUrl?: string | null
 }
 
 type AuthTokens = {
