@@ -21,6 +21,7 @@
               alt="Profile Picture" 
               class="w-32 h-32 md:w-36 md:h-36 rounded-[2.2rem] border-[6px] border-white dark:border-gray-900 shadow-xl object-cover bg-gray-100 dark:bg-gray-800 transition-all duration-300 group-hover:brightness-75 group-hover:scale-[1.02]"
               :class="{ 'opacity-50': uploadingAvatar }"
+              @error="handleImageError"
             />
             <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
               <LoadingOutlined v-if="uploadingAvatar" class="text-white text-3xl animate-spin" />
@@ -428,6 +429,11 @@ const getAvatarUrl = (url: string) => {
   const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'
   const origin = apiBase.replace(/\/api$/, '')
   return `${origin}${url}`
+}
+
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profileForm.value.name)}&background=6C2BD9&color=fff`
 }
 
 const hasChanges = computed(() => {
