@@ -35,7 +35,7 @@
           v-for="tab in visibleTabs" 
           :key="tab.id"
           @click="activeTab = tab.id"
-          class="w-full flex items-center gap-3.5 px-4.5 py-4 rounded-2xl text-left text-xs font-black uppercase tracking-wider transition-all duration-200"
+          class="w-full flex items-center gap-3.5 px-5 py-4 rounded-2xl text-left text-xs font-black uppercase tracking-wider transition-all duration-200"
           :class="[
             activeTab === tab.id
               ? 'bg-[#F5F3FF] dark:bg-purple-950/60 text-[#6C2BD9] dark:text-purple-400 shadow-[0_2px_8px_rgba(108,43,217,0.04)] scale-[1.01]'
@@ -60,7 +60,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="flex flex-col gap-2">
               <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider">Public Profile Visibility</label>
-              <div class="flex items-center justify-between gap-4 bg-[#FBFBFF] dark:bg-gray-850 p-4.5 rounded-2xl border border-gray-100 dark:border-gray-800">
+              <div class="flex items-center justify-between gap-4 bg-[#FBFBFF] dark:bg-gray-850 p-5 rounded-2xl border border-gray-100 dark:border-gray-800">
                 <div>
                   <span class="text-xs font-black text-gray-850 dark:text-gray-250 block">Make Profile Public</span>
                   <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500">Allow other curators to find your contributions</span>
@@ -119,7 +119,7 @@
 
           <div class="space-y-4.5">
             <!-- Row 1: Email Digest -->
-            <div class="flex items-center justify-between gap-4 p-4.5 bg-[#FBFBFF] dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
+            <div class="flex items-center justify-between gap-4 p-5 bg-[#FBFBFF] dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
               <div class="flex-1">
                 <span class="text-xs font-black text-gray-850 dark:text-gray-250 block">Weekly Digest Email Summary</span>
                 <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500 mt-0.5 block">Receive weekly roundups of platform curation achievements, top saved assets, and statistics</span>
@@ -137,7 +137,7 @@
             </div>
 
             <!-- Dynamic Admin Row: Vetting Requests -->
-            <div v-if="userRole === 'admin' || userRole === 'super_admin'" class="flex items-center justify-between gap-4 p-4.5 bg-[#FBFBFF] dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
+            <div v-if="userRole === 'admin' || userRole === 'super_admin'" class="flex items-center justify-between gap-4 p-5 bg-[#FBFBFF] dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
               <div class="flex-1">
                 <span class="text-xs font-black text-gray-850 dark:text-gray-250 block">Vetting & Review Applications</span>
                 <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500 mt-0.5 block">Notify instantly when a researcher submits resources requiring editorial approval</span>
@@ -155,7 +155,7 @@
             </div>
 
             <!-- Dynamic Researcher Row: Citation updates -->
-            <div v-if="userRole === 'researcher'" class="flex items-center justify-between gap-4 p-4.5 bg-[#FBFBFF] dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
+            <div v-if="userRole === 'researcher'" class="flex items-center justify-between gap-4 p-5 bg-[#FBFBFF] dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
               <div class="flex-1">
                 <span class="text-xs font-black text-gray-850 dark:text-gray-250 block">Asset Downloads & Citations</span>
                 <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500 mt-0.5 block">Notify instantly whenever your published resources receive 5-star ratings or community downloads</span>
@@ -173,7 +173,7 @@
             </div>
 
             <!-- Row 3: Comment notices -->
-            <div class="flex items-center justify-between gap-4 p-4.5 bg-[#FBFBFF] dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
+            <div class="flex items-center justify-between gap-4 p-5 bg-[#FBFBFF] dark:bg-gray-850 rounded-2xl border border-gray-100 dark:border-gray-800">
               <div class="flex-1">
                 <span class="text-xs font-black text-gray-850 dark:text-gray-250 block">Collection Comments & Notes</span>
                 <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500 mt-0.5 block">Alert whenever a peer reviewer or verified curator leaves comments on cataloged items</span>
@@ -216,7 +216,7 @@
             </div>
           </div>
 
-          <button @click="updatePassword" class="px-5.5 py-3.5 bg-purple-50 hover:bg-purple-100 text-[#6C2BD9] dark:bg-purple-950/60 dark:text-purple-300 border-none font-black text-[10px] uppercase tracking-wider rounded-xl transition-all">
+          <button @click="updatePassword" class="px-6 py-3.5 bg-purple-50 hover:bg-purple-100 text-[#6C2BD9] dark:bg-purple-950/60 dark:text-purple-300 border-none font-black text-[10px] uppercase tracking-wider rounded-xl transition-all">
             Update Access Key
           </button>
 
@@ -235,7 +235,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-850">
                   <tr v-for="sess in activeSessions" :key="sess.id" class="text-xs font-bold text-gray-600 dark:text-gray-400">
-                    <td class="py-4.5 flex items-center gap-3">
+                    <td class="py-5 flex items-center gap-3">
                       <!-- Render premium responsive screen vectors -->
                       <svg v-if="sess.device.includes('Desktop')" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-[#6C2BD9] dark:text-purple-400 shrink-0"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
                       <svg v-else-if="sess.device.includes('Mobile')" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-slate-500 shrink-0"><rect x="5" y="2" width="14" height="20" rx="2"></rect><line x1="12" y1="18" x2="12" y2="18"></line></svg>
@@ -246,9 +246,9 @@
                         <span>{{ sess.device }}</span>
                       </span>
                     </td>
-                    <td class="py-4.5">{{ sess.ip }}</td>
-                    <td class="py-4.5">{{ sess.time }}</td>
-                    <td class="py-4.5 text-right">
+                    <td class="py-5">{{ sess.ip }}</td>
+                    <td class="py-5">{{ sess.time }}</td>
+                    <td class="py-5 text-right">
                       <button 
                         @click="revokeSession(sess.id)"
                         v-if="!sess.current"
@@ -285,7 +285,7 @@
             <!-- Dynamic Admin Row: AI Metadata Checks -->
             <div class="flex flex-col gap-2" v-if="userRole === 'admin' || userRole === 'super_admin'">
               <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider">Automated AI Vetting Assist</label>
-              <div class="flex items-center justify-between gap-4 bg-[#FBFBFF] dark:bg-gray-850 p-4.5 rounded-2xl border border-gray-100 dark:border-gray-800">
+              <div class="flex items-center justify-between gap-4 bg-[#FBFBFF] dark:bg-gray-850 p-5 rounded-2xl border border-gray-100 dark:border-gray-800">
                 <div>
                   <span class="text-xs font-black text-gray-850 dark:text-gray-250 block">Enable Automated Vetting Checks</span>
                   <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500">Run security, language audits automatically before queueing</span>
@@ -306,7 +306,7 @@
             <!-- Dynamic Researcher Row: Auto DOI Lookup -->
             <div class="flex flex-col gap-2" v-if="userRole === 'researcher'">
               <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider">Auto DOI metadata lookup</label>
-              <div class="flex items-center justify-between gap-4 bg-[#FBFBFF] dark:bg-gray-850 p-4.5 rounded-2xl border border-gray-100 dark:border-gray-800">
+              <div class="flex items-center justify-between gap-4 bg-[#FBFBFF] dark:bg-gray-850 p-5 rounded-2xl border border-gray-100 dark:border-gray-800">
                 <div>
                   <span class="text-xs font-black text-gray-850 dark:text-gray-250 block">Fetch DOI publication info</span>
                   <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500">Automatically pull indexing metadata when uploading documents</span>
@@ -339,7 +339,7 @@
               <h4 class="text-xs font-black uppercase tracking-wider">Active Academic API Access Key</h4>
             </div>
             
-            <p class="text-[11px] font-medium text-gray-500 mb-4.5 leading-relaxed">
+            <p class="text-[11px] font-medium text-gray-500 mb-5 leading-relaxed">
               Use this bearer credential inside your scripts to access public manuscripts cataloged in Aksumite collections. Do not share your access token.
             </p>
 
