@@ -19,7 +19,9 @@ const app = express();
 const swaggerDocument = YAML.load(path.join(__dirname, 'swagger.yaml'));
 
 // Global Middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(cors({
   origin: true, 
   credentials: true,

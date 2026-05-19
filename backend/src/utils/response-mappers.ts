@@ -11,6 +11,7 @@ export interface PrismaUser {
   status?: string;
   emailVerified?: boolean;
   institution?: string;
+  avatarUrl?: string | null;
   permissionVersion?: number;
   roles?: {
     role: {
@@ -64,6 +65,7 @@ export function mapUser(user: PrismaUser) {
     status: user.status,
     emailVerified: !!user.emailVerified,
     institution: user.institution || undefined,
+    avatarUrl: user.avatarUrl || null,
   };
 }
 
