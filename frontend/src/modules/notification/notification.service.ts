@@ -1,6 +1,6 @@
 import type { Notification } from './notification.types';
 
-const MOCK_NOTIFICATIONS: Notification[] = [
+const DEFAULT_MOCK_NOTIFICATIONS: Notification[] = [
   {
     id: '1',
     type: 'success',
@@ -39,25 +39,44 @@ const MOCK_NOTIFICATIONS: Notification[] = [
   }
 ];
 
+const getStoredNotifications = (): Notification[] => {
+  try {
+    const saved = localStorage.getItem('trc_notifications');
+    if (saved) return JSON.parse(saved);
+  } catch (e) {
+    console.error('Failed to load notifications from local storage', e);
+  }
+  return [...DEFAULT_MOCK_NOTIFICATIONS];
+};
+
+const saveNotifications = (notifications: Notification[]) => {
+  localStorage.setItem('trc_notifications', JSON.stringify(notifications));
+};
+
 export const notificationService = {
   async getNotifications(): Promise<Notification[]> {
-    // Simulate API delay
     return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([...MOCK_NOTIFICATIONS]);
-      }, 800);
+      setTimeout(() => resolve(getStoredNotifications()), 800);
     });
   },
 
   async markAsRead(id: string | number): Promise<void> {
-    console.log(`Marking notification ${id} as read`);
+    const notifications = getStoredNotifications();
+    const target = notifications.find(n => n.id === String(id));
+    if (target) {
+      target.unread = false;
+      saveNotifications(notifications);
+    }
   },
 
   async markAllAsRead(): Promise<void> {
-    console.log('Marking all notifications as read');
+    const notifications = getStoredNotifications();
+    notifications.forEach(n => n.unread = false);
+    saveNotifications(notifications);
   },
 
   async deleteNotification(id: string | number): Promise<void> {
-    console.log(`Deleting notification ${id}`);
+    const notifications = getStoredNotifications().filter(n => n.id !== String(id));
+    saveNotifications(notifications);
   }
 };

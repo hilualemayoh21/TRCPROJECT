@@ -370,30 +370,42 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
 import { 
   UserOutlined, BellOutlined, LockOutlined, 
   SafetyCertificateOutlined, KeyOutlined, SaveOutlined
 } from '@ant-design/icons-vue'
 import { useAuthStore } from '@/modules/auth/auth.store'
+import { userService } from '@/modules/user/user.service'
 
 const authStore = useAuthStore()
 
-// Forms Setup
-const accountForm = ref({
+// Initial State defaults
+const defaultAccount = {
   publicProfile: true,
   serverNode: 'Mekele',
   catalogLanguage: 'English',
   institution: authStore.user?.institution || ''
-})
+}
 
-const notificationForm = ref({
+const defaultNotification = {
   emailDigest: true,
   vettingRequests: true,
   citationAlerts: true,
   commentNotices: true
-})
+}
+
+const defaultCuration = {
+  defaultLicense: 'CC-BY-NC',
+  aiVetting: true,
+  autoDoiLookup: true
+}
+
+// Forms Setup
+const accountForm = ref({ ...defaultAccount })
+const notificationForm = ref({ ...defaultNotification })
+const curationForm = ref({ ...defaultCuration })
 
 const securityForm = ref({
   currentPassword: '',
@@ -401,11 +413,26 @@ const securityForm = ref({
   confirmPassword: ''
 })
 
-const curationForm = ref({
-  defaultLicense: 'CC-BY-NC',
-  aiVetting: true,
-  autoDoiLookup: true
+// Load from LocalStorage
+onMounted(() => {
+  try {
+    const savedAccount = localStorage.getItem('trc_account_settings')
+    if (savedAccount) accountForm.value = { ...defaultAccount, ...JSON.parse(savedAccount) }
+    
+    const savedNotif = localStorage.getItem('trc_notification_settings')
+    if (savedNotif) notificationForm.value = { ...defaultNotification, ...JSON.parse(savedNotif) }
+    
+    const savedCuration = localStorage.getItem('trc_curation_settings')
+    if (savedCuration) curationForm.value = { ...defaultCuration, ...JSON.parse(savedCuration) }
+  } catch (e) {
+    console.error('Failed to load settings', e)
+  }
 })
+
+// Auto-save to LocalStorage
+watch(accountForm, (val) => localStorage.setItem('trc_account_settings', JSON.stringify(val)), { deep: true })
+watch(notificationForm, (val) => localStorage.setItem('trc_notification_settings', JSON.stringify(val)), { deep: true })
+watch(curationForm, (val) => localStorage.setItem('trc_curation_settings', JSON.stringify(val)), { deep: true })
 
 // UI States
 const activeTab = ref('account')
@@ -433,7 +460,7 @@ const activeSessions = ref([
 ])
 
 // Actions
-const updatePassword = () => {
+const updatePassword = async () => {
   if (!securityForm.value.currentPassword || !securityForm.value.newPassword) {
     message.error('Please input password parameters')
     return
@@ -442,10 +469,15 @@ const updatePassword = () => {
     message.error('New passwords do not match')
     return
   }
-  message.success('System credentials updated successfully!')
-  securityForm.value.currentPassword = ''
-  securityForm.value.newPassword = ''
-  securityForm.value.confirmPassword = ''
+  try {
+    await userService.updateMe({ password: securityForm.value.newPassword })
+    message.success('System credentials updated successfully!')
+    securityForm.value.currentPassword = ''
+    securityForm.value.newPassword = ''
+    securityForm.value.confirmPassword = ''
+  } catch(e) {
+    message.error('Failed to update system credentials')
+  }
 }
 
 const revokeSession = (id: number) => {

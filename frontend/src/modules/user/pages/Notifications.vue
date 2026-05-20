@@ -242,7 +242,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
 import { 
   CheckCircleOutlined, CheckOutlined, CloseOutlined, 
@@ -262,159 +262,96 @@ const toggleFilterView = () => {
 }
 
 // Dynamic Mock Notifications list per role
-const adminNotifications = ref([
+const defaultAdminNotifs = [
   {
-    id: 1,
-    title: 'Resource Pending Approval',
-    category: 'Approvals',
-    time: '2 mins ago',
+    id: 1, title: 'Resource Pending Approval', category: 'Approvals', time: '2 mins ago',
     desc: 'A new researcher submission "Ancient Artifacts of Aksum" has been submitted for verification.',
-    tag: 'PENDING APPROVAL',
-    actionText: 'Review Submission',
-    actionType: 'review',
-    unread: true,
-    type: 'approval'
+    tag: 'PENDING APPROVAL', actionText: 'Review Submission', actionType: 'review', unread: true, type: 'approval'
   },
   {
-    id: 2,
-    title: 'New User Report',
-    category: 'Comments',
-    time: '45 mins ago',
+    id: 2, title: 'New User Report', category: 'Comments', time: '45 mins ago',
     desc: 'A public user reported a broken external document link in the "Ge\'ez Manuscripts Collection".',
-    tag: 'REPORTED',
-    actionText: 'Investigate Link',
-    actionType: 'audit',
-    unread: true,
-    type: 'comment'
+    tag: 'REPORTED', actionText: 'Investigate Link', actionType: 'audit', unread: true, type: 'comment'
   },
   {
-    id: 3,
-    title: 'System Node Alert',
-    category: 'Rejections',
-    time: '2 hours ago',
+    id: 3, title: 'System Node Alert', category: 'Rejections', time: '2 hours ago',
     desc: 'Storage cluster node TRC-West is reaching 92% capacity limit. High replication latency warning.',
-    tag: 'SYSTEM ERROR',
-    actionText: 'View Cluster Logs',
-    actionType: 'logs',
-    unread: true,
-    type: 'rejection'
+    tag: 'SYSTEM ERROR', actionText: 'View Cluster Logs', actionType: 'logs', unread: true, type: 'rejection'
   },
   {
-    id: 4,
-    title: 'Security Sync Successful',
-    category: 'Ratings',
-    time: '5 hours ago',
+    id: 4, title: 'Security Sync Successful', category: 'Ratings', time: '5 hours ago',
     desc: 'Automatic weekly platform vulnerability scan and access control audit completed with zero threats detected.',
-    tag: 'SECURITY',
-    actionText: 'Download PDF Report',
-    actionType: 'security',
-    unread: false,
-    type: 'rating'
+    tag: 'SECURITY', actionText: 'Download PDF Report', actionType: 'security', unread: false, type: 'rating'
   }
-])
+]
 
-const researcherNotifications = ref([
+const defaultResearcherNotifs = [
   {
-    id: 1,
-    title: 'Resource Approved',
-    category: 'Approvals',
-    time: '2 mins ago',
+    id: 1, title: 'Resource Approved', category: 'Approvals', time: '2 mins ago',
     desc: 'Your submission "Cultural Heritage Archive 2024" has been vetted and published to the public directory.',
-    tag: 'APPROVAL',
-    actionText: 'View Asset',
-    actionType: 'view',
-    unread: true,
-    type: 'approval'
+    tag: 'APPROVAL', actionText: 'View Asset', actionType: 'view', unread: true, type: 'approval'
   },
   {
-    id: 2,
-    title: 'New Comment',
-    category: 'Comments',
-    time: '45 mins ago',
+    id: 2, title: 'New Comment', category: 'Comments', time: '45 mins ago',
     desc: 'Sarah Connor left a note on your recent collection entry about Tigrinya dialects: "The historical references here are incredibly detailed. Could you provide the source for the 18th-century manuscript mentioned?"',
-    tag: 'COMMENT',
-    actionText: 'Reply',
-    actionType: 'reply',
-    unread: true,
-    type: 'comment',
+    tag: 'COMMENT', actionText: 'Reply', actionType: 'reply', unread: true, type: 'comment',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'
   },
   {
-    id: 3,
-    title: 'Submission Rejected',
-    category: 'Rejections',
-    time: '2 hours ago',
+    id: 3, title: 'Submission Rejected', category: 'Rejections', time: '2 hours ago',
     desc: 'The document "Economic Indicators Q3" was rejected due to missing metadata tags and low-resolution source files.',
-    tag: 'REJECTION',
-    actionText: 'Edit & Resubmit',
-    actionType: 'edit',
-    unread: true,
-    type: 'rejection'
+    tag: 'REJECTION', actionText: 'Edit & Resubmit', actionType: 'edit', unread: true, type: 'rejection'
   },
   {
-    id: 4,
-    title: 'Asset Rated High',
-    category: 'Ratings',
-    time: '5 hours ago',
+    id: 4, title: 'Asset Rated High', category: 'Ratings', time: '5 hours ago',
     desc: 'Your resource "Topographical Maps of Axum" just received a 5-star rating from a peer reviewer.',
-    tag: 'RATING',
-    actionText: '',
-    actionType: '',
-    unread: false,
-    type: 'rating'
+    tag: 'RATING', actionText: '', actionType: '', unread: false, type: 'rating'
   }
-])
+]
 
-const publicNotifications = ref([
+const defaultPublicNotifs = [
   {
-    id: 1,
-    title: 'Resource Saved to Library',
-    category: 'Approvals',
-    time: '5 mins ago',
+    id: 1, title: 'Resource Saved to Library', category: 'Approvals', time: '5 mins ago',
     desc: 'You successfully bookmarked "Preserving Aksumite Archeology". It is now added to your local library.',
-    tag: 'SAVED',
-    actionText: 'Open Library',
-    actionType: 'library',
-    unread: true,
-    type: 'approval'
+    tag: 'SAVED', actionText: 'Open Library', actionType: 'library', unread: true, type: 'approval'
   },
   {
-    id: 2,
-    title: 'New Resource in Linguistics',
-    category: 'Comments',
-    time: '1 hour ago',
+    id: 2, title: 'New Resource in Linguistics', category: 'Comments', time: '1 hour ago',
     desc: 'A new premium publication "Evolution of Tigrinya Orthography" has been verified and published in your followed category.',
-    tag: 'RECOMMENDED',
-    actionText: 'Read Publication',
-    actionType: 'read',
-    unread: true,
-    type: 'comment'
+    tag: 'RECOMMENDED', actionText: 'Read Publication', actionType: 'read', unread: true, type: 'comment'
   },
   {
-    id: 3,
-    title: 'Download Limit Alert',
-    category: 'Rejections',
-    time: '3 hours ago',
+    id: 3, title: 'Download Limit Alert', category: 'Rejections', time: '3 hours ago',
     desc: 'You have reached 80% of your daily anonymous download bandwidth limit. Log in with full credentials for unlimited storage access.',
-    tag: 'LIMIT ALERT',
-    actionText: 'Upgrade Access',
-    actionType: 'upgrade',
-    unread: true,
-    type: 'rejection'
+    tag: 'LIMIT ALERT', actionText: 'Upgrade Access', actionType: 'upgrade', unread: true, type: 'rejection'
   },
   {
-    id: 4,
-    title: 'Account Verification Level 2',
-    category: 'Ratings',
-    time: '1 day ago',
+    id: 4, title: 'Account Verification Level 2', category: 'Ratings', time: '1 day ago',
     desc: 'Congratulations! Your community curation contributions have unlocked verified level 2 library badge privilege.',
-    tag: 'BADGE UPGRADE',
-    actionText: 'View Badges',
-    actionType: 'badges',
-    unread: false,
-    type: 'rating'
+    tag: 'BADGE UPGRADE', actionText: 'View Badges', actionType: 'badges', unread: false, type: 'rating'
   }
-])
+]
+
+const adminNotifications = ref([...defaultAdminNotifs])
+const researcherNotifications = ref([...defaultResearcherNotifs])
+const publicNotifications = ref([...defaultPublicNotifs])
+
+onMounted(() => {
+  try {
+    const sAdmin = localStorage.getItem('trc_admin_notifs')
+    if (sAdmin) adminNotifications.value = JSON.parse(sAdmin)
+    const sRes = localStorage.getItem('trc_res_notifs')
+    if (sRes) researcherNotifications.value = JSON.parse(sRes)
+    const sPub = localStorage.getItem('trc_pub_notifs')
+    if (sPub) publicNotifications.value = JSON.parse(sPub)
+  } catch (e) {
+    console.error('Failed loading notifications', e)
+  }
+})
+
+watch(adminNotifications, (v) => localStorage.setItem('trc_admin_notifs', JSON.stringify(v)), { deep: true })
+watch(researcherNotifications, (v) => localStorage.setItem('trc_res_notifs', JSON.stringify(v)), { deep: true })
+watch(publicNotifications, (v) => localStorage.setItem('trc_pub_notifs', JSON.stringify(v)), { deep: true })
 
 const activeNotificationsList = computed(() => {
   const role = String(userRole.value).toLowerCase()
