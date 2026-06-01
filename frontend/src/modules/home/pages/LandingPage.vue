@@ -1,120 +1,82 @@
 <template>
-  <div class="min-h-screen bg-white font-sans overflow-x-hidden">
-    <!-- Header -->
-    <header class="absolute top-0 left-0 right-0 z-[100] bg-transparent">
-      <nav class="mx-auto flex h-24 max-w-7xl items-center justify-between px-6 lg:px-8">
-        <!-- Logo -->
-        <div class="flex items-center gap-3">
-          <img src="@/assets/images/tigray-logo.svg" alt="Tigray Logo" class="h-14 w-14" />
-          <div class="flex flex-col">
-            <span class="text-2xl font-black uppercase leading-none tracking-tight text-gray-900">TIGRAY</span>
-            <span class="mt-1 text-[11px] font-bold uppercase tracking-[0.25em] leading-none text-[#5e35b1]">Resource Center</span>
-          </div>
-        </div>
-
-        <!-- Links -->
-        <div class="hidden items-center gap-10 lg:flex">
-          <RouterLink v-for="l in nav" :key="l" to="#" class="text-[15px] font-bold text-gray-700 hover:text-[#5e35b1] transition-colors">{{ l }}</RouterLink>
-        </div>
-
-        <!-- CTA -->
-        <button class="hidden lg:block rounded-xl bg-[#5e35b1] px-8 py-3.5 text-sm font-black text-white hover:bg-[#4a2bb1] transition-all shadow-md">
-          Support Us
-        </button>
-      </nav>
-    </header>
-
-    <!-- Hero Section -->
-    <section class="relative min-h-[90vh] flex flex-col justify-center overflow-hidden">
-      <!-- Background Image -->
-      <div class="absolute inset-0 z-0">
+  <div class="min-h-screen overflow-x-hidden bg-white">
+    <section class="relative isolate overflow-hidden">
+      <div class="absolute inset-0">
         <img
           src="@/assets/images/aksum_landscape_bg.png"
-          alt="Tigray Landscape"
-          class="h-full w-full object-cover object-[70%_center] lg:object-[80%_center]"
+          alt="Aksum landscape"
+          class="h-full w-full object-cover object-[70%_center]"
         />
-        <!-- White to Transparent Gradient -->
-        <div class="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-transparent lg:via-white/60"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-white via-white/82 to-white/8"></div>
       </div>
 
-      <!-- Hero Content Container -->
-      <!-- Added explicit pt-32 (128px) so it clears the 96px header -->
-      <div class="relative z-10 mx-auto max-w-7xl px-6 lg:px-8 w-full pt-32 pb-48">
-        <div class="max-w-3xl flex flex-col gap-6">
-          
-          <!-- Headings Container -->
-          <div class="flex flex-col gap-4 animate-fade-up">
-            <!-- First Line -->
-            <div>
-              <h1 class="text-5xl sm:text-6xl lg:text-[5rem] font-black text-gray-900 tracking-tight leading-tight">
-                Empowering Tigray.
-              </h1>
-              <!-- Underline -->
-              <div class="mt-4 h-2 w-24 rounded-full bg-[#5e35b1]"></div>
-            </div>
-            
-            <!-- Second Line -->
-            <div>
-              <h1 class="text-5xl sm:text-6xl lg:text-[5rem] font-black text-[#5e35b1] tracking-tight leading-tight">
-                Inspiring the Future.
-              </h1>
+      <div class="relative z-10 mx-auto flex min-h-[720px] max-w-[1280px] flex-col px-6 pt-5 lg:px-8">
+        <header class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <img src="@/assets/images/tigray-logo.svg" alt="Tigray Resource Center logo" class="h-11 w-11" />
+            <div class="leading-none">
+              <p class="text-[27px] font-black tracking-[0.12em] text-[#191744]">TIGRAY</p>
+              <p class="mt-1 text-[12px] font-bold uppercase tracking-[0.22em] text-[#6552a7]">Resource Center</p>
             </div>
           </div>
 
-          <!-- Description -->
-          <p class="animate-fade-up max-w-xl text-lg lg:text-xl text-gray-600 font-medium leading-relaxed mt-4" style="animation-delay: 0.1s">
-            The Tigray Resource Center is dedicated to preserving our heritage, promoting knowledge, and supporting sustainable development for a stronger tomorrow.
-          </p>
+          <nav class="hidden items-center gap-11 text-[15px] font-semibold text-[#2e2a4a] lg:flex">
+            <a v-for="item in nav" :key="item.label" :href="item.href" class="transition hover:text-[#5e35b1]">
+              {{ item.label }}
+            </a>
+          </nav>
 
-          <!-- Action Buttons -->
-          <div class="animate-fade-up flex flex-wrap items-center gap-5 mt-6" style="animation-delay: 0.2s">
-            <button class="flex items-center gap-3 rounded-xl bg-[#5e35b1] px-8 py-4 text-base font-black text-white hover:bg-[#4a2bb1] transition-all shadow-xl shadow-[#5e35b1]/30">
-              Explore Resources
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </button>
+          <button class="rounded-xl bg-[#5e35b1] px-5 py-3 text-sm font-bold text-white shadow-md transition hover:bg-[#4e2b9a]">
+            Support Us
+          </button>
+        </header>
 
-            <button class="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white/80 px-6 py-4 text-base font-black text-gray-700 backdrop-blur-md hover:border-[#5e35b1] hover:text-[#5e35b1] transition-all">
-              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-[#5e35b1]/10 text-[#5e35b1] group-hover:bg-[#5e35b1] group-hover:text-white transition-all">
-                <svg class="ml-0.5 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
+        <div class="flex flex-1 items-center pb-44 pt-14 lg:pt-8">
+          <div class="max-w-[560px]">
+            <h1 class="text-[56px] font-black leading-[1.04] tracking-tight text-[#120d42] sm:text-[68px]">
+              Empowering Tigray.
+              <span class="block text-[#5f35b5]">Inspiring the Future.</span>
+            </h1>
+            <div class="mt-5 h-[4px] w-[68px] rounded-full bg-[#5f35b5]"></div>
+
+            <p class="mt-5 max-w-[520px] text-[32px] text-base font-medium leading-[1.55] text-[#3f4152]">
+              The Tigray Resource Center is dedicated to preserving our heritage, promoting knowledge, and supporting
+              sustainable development for a stronger tomorrow.
+            </p>
+
+            <div class="mt-6 flex flex-wrap gap-3.5">
+              <button class="inline-flex items-center gap-2 rounded-xl bg-[#5e35b1] px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#5e35b1]/30 transition hover:bg-[#4d2a99]">
+                Explore Resources
+                <svg viewBox="0 0 20 20" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M3 10h14M11 4l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
-              </div>
-              Learn More
-            </button>
+              </button>
+              <button class="inline-flex items-center gap-2 rounded-xl border border-[#cdcde0] bg-white/85 px-5 py-3.5 text-sm font-semibold text-[#35384a] backdrop-blur transition hover:border-[#5e35b1] hover:text-[#5e35b1]">
+                <span class="inline-flex h-5 w-5 items-center justify-center rounded-full border border-current text-[10px]">▶</span>
+                Learn More
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Footer Bar / Waves -->
-      <div class="absolute bottom-0 left-0 right-0 z-20">
-        <!-- SVG Waves -->
-        <div class="relative h-20 sm:h-28 -mb-px">
-          <!-- Light Wave -->
-          <svg class="absolute inset-0 w-full h-full text-[#5e35b1]/10" viewBox="0 0 1440 320" preserveAspectRatio="none">
-            <path fill="currentColor" d="M0,160L48,176C96,192,192,224,288,213.3C384,203,480,149,576,144C672,139,768,181,864,181.3C960,181,1056,139,1152,122.7C1248,107,1344,117,1392,122.7L1440,128L1440,320L0,320Z"></path>
-          </svg>
-          <!-- Dark Wave -->
-          <svg class="absolute inset-0 w-full h-full text-[#1a0b2e]" viewBox="0 0 1440 320" preserveAspectRatio="none">
-            <path fill="currentColor" d="M0,224L60,213.3C120,203,240,181,360,186.7C480,192,600,224,720,213.3C840,203,960,149,1080,144C1200,139,1320,181,1380,202.7L1440,224L1440,320L0,320Z"></path>
-          </svg>
-        </div>
-        <!-- Dark Bar -->
-        <div class="bg-[#1a0b2e] pb-12 pt-0">
-          <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              <div v-for="f in feats" :key="f.t" class="flex items-center gap-5 group">
-                <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white/5 border border-white/10 text-white transition-all group-hover:bg-white group-hover:text-[#1a0b2e]">
-                  <component :is="f.i" class="h-6 w-6" />
-                </div>
-                <div>
-                  <h3 class="text-base font-black uppercase tracking-tight text-white leading-none">{{ f.t }}</h3>
-                  <p class="mt-1.5 text-xs font-medium text-white/50 leading-tight pr-4">{{ f.d }}</p>
-                </div>
-              </div>
+      <div class="pointer-events-none absolute bottom-[92px] left-0 right-0 z-20 h-[96px]">
+        <svg class="h-full w-full" viewBox="0 0 1440 160" preserveAspectRatio="none">
+          <path fill="#2f1160" d="M0,94 C190,122 345,43 560,52 C801,63 999,133 1204,119 C1324,111 1385,87 1440,73 L1440,160 L0,160 Z" />
+        </svg>
+      </div>
+
+      <div class="relative z-30 bg-[#2f1160] pb-9 pt-6">
+        <div class="mx-auto grid max-w-[1280px] grid-cols-1 gap-8 px-6 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
+          <article v-for="feature in features" :key="feature.title" class="flex items-start gap-4">
+            <div class="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-white/14 bg-white/10 text-white">
+              <component :is="feature.icon" class="h-5 w-5" />
             </div>
-          </div>
+            <div>
+              <h3 class="text-[24px] text-sm font-bold text-white">{{ feature.title }}</h3>
+              <p class="mt-1 text-[13px] leading-5 text-white/75">{{ feature.text }}</p>
+            </div>
+          </article>
         </div>
       </div>
     </section>
@@ -124,21 +86,34 @@
 <script setup>
 import { markRaw } from 'vue'
 
-const nav = ['About Us', 'Resources', 'News & Updates', 'Events', 'Get Involved']
-const feats = [
-  { t: 'Knowledge', d: 'Access reliable information and research.', i: markRaw({ template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"></path></svg>' }) },
-  { t: 'Community', d: 'Building connections and strengthening unity.', i: markRaw({ template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>' }) },
-  { t: 'Development', d: 'Supporting sustainable growth and innovation.', i: markRaw({ template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 22V10m0 0c-3-2-6-1-6 2s3 4 6 2zm0 0c3-2 6-1 6 2s-3 4-6 2"></path></svg>' }) },
-  { t: 'Heritage', d: 'Preserving our rich history and culture.', i: markRaw({ template: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path></svg>' }) }
+const nav = [
+  { label: 'About Us', href: '/about' },
+  { label: 'Resources', href: '#' },
+  { label: 'News & Updates', href: '/news' },
+  { label: 'Events', href: '/events' },
+  { label: 'Get Involved', href: '/get-involved' }
+]
+
+const features = [
+  {
+    title: 'Knowledge',
+    text: 'Access reliable information and research.',
+    icon: markRaw({ template: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5c2.5-1.7 5.1-2.5 8-2.5s5.5.8 8 2.5V5.2A14.3 14.3 0 0012 3a14.3 14.3 0 00-8 2.2V19.5z"/><path d="M12 3v14"/></svg>' })
+  },
+  {
+    title: 'Community',
+    text: 'Building connections and strengthening unity.',
+    icon: markRaw({ template: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 19a4 4 0 00-8 0"/><circle cx="12" cy="11" r="3"/><path d="M2.5 19a4 4 0 013.7-3.9"/><path d="M21.5 19a4 4 0 00-3.7-3.9"/></svg>' })
+  },
+  {
+    title: 'Development',
+    text: 'Supporting sustainable growth and innovation.',
+    icon: markRaw({ template: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21v-8"/><path d="M12 13c-4-1.1-6-3.2-6-6 3.5 0 5.6 1.1 6 3.5C12.4 8.1 14.5 7 18 7c0 2.8-2 4.9-6 6z"/></svg>' })
+  },
+  {
+    title: 'Heritage',
+    text: 'Preserving our rich history and culture.',
+    icon: markRaw({ template: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M4 10h16v11H4z"/><path d="M2 10h20"/><path d="M12 3l8 4H4l8-4z"/></svg>' })
+  }
 ]
 </script>
-
-<style scoped>
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-up {
-  animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-</style>
