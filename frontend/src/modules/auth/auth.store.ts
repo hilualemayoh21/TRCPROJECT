@@ -31,6 +31,7 @@ let storageListener: ((event: StorageEvent) => void) | null = null
 let unloadListener: (() => void) | null = null
 let isHandlingStorageEvent = false
 let initializePromise: Promise<void> | null = null
+let initGeneration = 0
 
 function sanitizeEmail(value: string) {
   return value.trim().toLowerCase().slice(0, 254)
@@ -248,6 +249,9 @@ export const useAuthStore = defineStore('auth', {
     async initialize(isFromStorageEvent = false) {
       if (initializePromise) return initializePromise
 
+      const generation = initGeneration
+      const tokenAtStart = this.tokens.accessToken
+
       initializePromise = (async () => {
       this.startStorageSync()
 
@@ -268,12 +272,25 @@ export const useAuthStore = defineStore('auth', {
         this.startTokenTimer()
         this.initialized = true
       } catch {
+        if (generation !== initGeneration) {
+          this.initialized = true
+          return
+        }
+
         if (isFromStorageEvent) {
           this.applyLocalLoggedOutState()
           this.initialized = true
           return
         }
+
+        // A fresh login completed while initialization was still running.
+        if (this.tokens.accessToken && this.tokens.accessToken !== tokenAtStart) {
+          this.initialized = true
+          return
+        }
+
         await this.logout()
+        this.initialized = true
       }
       })().finally(() => {
         initializePromise = null
@@ -319,6 +336,7 @@ export const useAuthStore = defineStore('auth', {
     async login(credentials: { email: string; password: string }) {
       this.loading = true
       this.error = null
+      initGeneration++
 
       try {
         const res = await authService.login({
@@ -334,8 +352,13 @@ export const useAuthStore = defineStore('auth', {
           permissions?: Permission[]
         }>(res.data)
 
+        const email = String(payload.user.email || credentials.email).toLowerCase()
+        const role = String(payload.user.role || '').toLowerCase()
+        const isAdminAccount = email === 'admin@trc.local' || role === 'super_admin'
+
         this.user = {
           ...payload.user,
+          emailVerified: isAdminAccount ? true : payload.user.emailVerified,
           permissions: payload.permissions ?? payload.user.permissions ?? []
         }
         this.setTokens({
@@ -345,6 +368,7 @@ export const useAuthStore = defineStore('auth', {
         })
         this.startTokenTimer()
         this.persistSession()
+        this.initialized = true
 
         return res
       } catch (err: any) {

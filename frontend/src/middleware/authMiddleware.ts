@@ -22,6 +22,13 @@ const unverifiedAuthRoutes = new Set([
   'ResetPassword',
 ])
 
+const guestAuthRoutes = new Set([
+  'Login',
+  'Register',
+  'ForgotPassword',
+  'ResetPassword',
+])
+
 export function authMiddleware(
   to: RouteLocationNormalized,
   _from: RouteLocationNormalized,
@@ -42,6 +49,20 @@ export function authMiddleware(
       await auth.initialize()
     }
 
+    const routeName = String(to.name || '')
+    const userEmail = String(auth.user?.email || '').toLowerCase()
+    const userRole = String(auth.user?.role || '').toLowerCase()
+    const isAdminAccount = userEmail === 'admin@trc.local' || userRole === 'super_admin'
+
+    if (auth.isAuthenticated && guestAuthRoutes.has(routeName)) {
+      if (isAdminAccount || auth.user?.emailVerified) {
+        return next({ path: auth.getPostLoginRoute() })
+      }
+      if (routeName !== 'EmailVerification') {
+        return next({ name: 'EmailVerification', query: { email: auth.user?.email } })
+      }
+    }
+
     // ✅ Auth required
     if (needsIdentity && !auth.isAuthenticated) {
       return next({
@@ -52,11 +73,8 @@ export function authMiddleware(
 
     // ✅ Status check (Handle email verification and pending approvals)
     if (auth.isAuthenticated) {
-      const userEmail = String(auth.user?.email || '').toLowerCase()
-      const userRole = String(auth.user?.role || '').toLowerCase()
-      
       // Super Admin bypass for verification/pending flows
-      if (userEmail === 'admin@trc.local' || userRole === 'super_admin') {
+      if (isAdminAccount) {
         return next()
       }
 

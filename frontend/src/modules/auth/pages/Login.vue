@@ -222,7 +222,7 @@
             <h1 class="mb-1 text-[1.9rem] font-bold text-gray-900 leading-tight">Welcome Back</h1>
             <p class="mb-8 text-[0.9rem] text-gray-500 font-medium">Please enter your details to sign in.</p>
 
-            <form class="flex flex-col gap-5" @submit.prevent="handleSubmit">
+            <form class="flex flex-col gap-5" @submit.prevent="handleSubmit" novalidate>
               <!-- Social -->
               <div class="grid grid-cols-2 gap-3">
                 <BaseButton variant="social" size="md" @click="onSocial('google')">
@@ -410,7 +410,9 @@ const fieldErrors = ref<{ email?: string; password?: string }>({})
 
 function validate(): boolean {
   fieldErrors.value = {}
-  if (!email.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+  const normalizedEmail = email.value.trim().toLowerCase()
+  const isAdminEmail = normalizedEmail === 'admin@trc.local'
+  if (!normalizedEmail || (!isAdminEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail))) {
     fieldErrors.value.email = 'Please enter a valid email address.'
   }
   if (!password.value || password.value.length < 6) {
@@ -429,17 +431,18 @@ const handleSubmit = async () => {
     const isAdminAccount = userEmail === 'admin@trc.local' || userRole === 'super_admin'
 
     if (!authStore.user?.emailVerified && !isAdminAccount) {
-      router.push({
+      await router.replace({
         path: '/verify-email',
         query: { email: authStore.user?.email || email.value.trim().toLowerCase() }
       })
       return
     }
+
     let redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null
     if (redirect === '/') {
       redirect = null
     }
-    router.push(redirect || authStore.getPostLoginRoute())
+    await router.replace(redirect || authStore.getPostLoginRoute())
   } catch {
     /* error surfaced from store */
   }
