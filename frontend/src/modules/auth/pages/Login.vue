@@ -423,7 +423,12 @@ const handleSubmit = async () => {
   if (!validate()) return
   try {
     await login(email.value.trim().toLowerCase(), password.value)
-    if (!authStore.user?.emailVerified) {
+
+    const userEmail = String(authStore.user?.email || '').toLowerCase()
+    const userRole = String(authStore.user?.role || '').toLowerCase()
+    const isAdminAccount = userEmail === 'admin@trc.local' || userRole === 'super_admin'
+
+    if (!authStore.user?.emailVerified && !isAdminAccount) {
       router.push({
         path: '/verify-email',
         query: { email: authStore.user?.email || email.value.trim().toLowerCase() }

@@ -93,11 +93,24 @@ export class AuthService {
       data: { failedLoginAttempts: 0, lockUntil: null }
     });
 
-    // Self-healing: Ensure admin@trc.local always has the super_admin role
+    // Self-healing: primary admin must stay verified and keep super_admin role
     if (user.email === 'admin@trc.local') {
+      let needsRefresh = false;
+
+      if (!user.emailVerified) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            emailVerified: true,
+            verificationCode: null,
+            verificationCodeExpires: null,
+          },
+        });
+        needsRefresh = true;
+      }
+
       const hasSuperAdmin = user.roles.some(ur => ur.roleId === 'super_admin' || ur.role.name === 'super_admin');
       if (!hasSuperAdmin) {
-        console.info('[AuthService] Self-healing: Assigning super_admin role to primary admin');
         const superAdminRole = await prisma.role.findUnique({ where: { id: 'super_admin' } });
         if (superAdminRole) {
           await prisma.userRole.upsert({
@@ -105,12 +118,18 @@ export class AuthService {
             update: {},
             create: { userId: user.id, roleId: superAdminRole.id }
           });
-          // Refresh user object to include the new role
-          const updatedUser = await prisma.user.findUnique({
-            where: { id: user.id },
-            include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
-          });
-          if (updatedUser) return this.generateAuthResponse(updatedUser);
+          needsRefresh = true;
+        }
+      }
+
+      if (needsRefresh) {
+        const updatedUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
+        });
+        if (updatedUser) {
+          AuditService.log(req, updatedUser.id, 'Login successful', 'Auth', updatedUser.id);
+          return this.generateAuthResponse(updatedUser);
         }
       }
     }
