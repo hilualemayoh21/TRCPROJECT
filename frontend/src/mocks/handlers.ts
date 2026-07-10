@@ -39,6 +39,28 @@ function makeRefreshToken(userId: string) {
   return `mock-refresh-${userId}-${Date.now()}`
 }
 
+function generateVerificationOtp(email: string) {
+  const otp = String(Math.floor(100000 + Math.random() * 900000))
+  mockDb.verificationOtps[email.toLowerCase()] = {
+    otp,
+    expiresAt: Date.now() + 15 * 60 * 1000
+  }
+  console.info(`[Mock] Verification code for ${email}: ${otp}`)
+  return otp
+}
+
+function verifyStoredOtp(email: string, submittedOtp: string) {
+  const entry = mockDb.verificationOtps[email.toLowerCase()]
+  if (!entry) return false
+  if (entry.expiresAt < Date.now()) {
+    delete mockDb.verificationOtps[email.toLowerCase()]
+    return false
+  }
+  if (entry.otp !== submittedOtp) return false
+  delete mockDb.verificationOtps[email.toLowerCase()]
+  return true
+}
+
 function toPublicUser(user: (typeof mockDb.users)[number]) {
   const { password: _password, ...rest } = user
   return rest
@@ -72,7 +94,12 @@ function prependAudit(action: string, actor?: string, context?: string) {
 export function handleMockRequest(ctx: MockContext): unknown {
   const path = safePath(ctx.url)
 
-  if (path !== '/auth/login' && path !== '/auth/register') {
+  if (
+    path !== '/auth/login' &&
+    path !== '/auth/register' &&
+    path !== '/auth/verify-email' &&
+    path !== '/auth/resend-verification'
+  ) {
     assertSimulation()
   }
 
@@ -135,10 +162,12 @@ export function handleMockRequest(ctx: MockContext): unknown {
       role,
       active: true,
       permissions: defaultPermissions,
-      institution: body.institution
+      institution: body.institution,
+      emailVerified: false
     }
 
     mockDb.users.push(newUser)
+    generateVerificationOtp(email)
 
     const accessToken = makeToken(userId)
     const refreshToken = makeRefreshToken(userId)
@@ -157,6 +186,42 @@ export function handleMockRequest(ctx: MockContext): unknown {
       },
       'Registration successful'
     )
+  }
+
+  if (ctx.method === 'POST' && path === '/auth/verify-email') {
+    const body = (ctx.data || {}) as { email?: string; otp?: string }
+    const email = String(body.email || '').trim().toLowerCase()
+    const otp = String(body.otp || '').trim()
+
+    if (!email || otp.length !== 6) {
+      throw { status: 400, message: 'Email and 6-digit code are required' }
+    }
+
+    const user = mockDb.users.find((u) => u.email.toLowerCase() === email)
+    if (!user) throw { status: 404, message: 'User not found' }
+    if (user.emailVerified) throw { status: 400, message: 'Email already verified' }
+    if (!verifyStoredOtp(email, otp)) {
+      throw { status: 400, message: 'Invalid or expired verification code' }
+    }
+
+    user.emailVerified = true
+    persistMockDb()
+    return withMessage({ ok: true }, 'Email verified successfully')
+  }
+
+  if (ctx.method === 'POST' && path === '/auth/resend-verification') {
+    const body = (ctx.data || {}) as { email?: string }
+    const email = String(body.email || '').trim().toLowerCase()
+
+    if (!email) throw { status: 400, message: 'Email is required' }
+
+    const user = mockDb.users.find((u) => u.email.toLowerCase() === email)
+    if (!user) throw { status: 404, message: 'User not found' }
+    if (user.emailVerified) throw { status: 400, message: 'Email already verified' }
+
+    generateVerificationOtp(email)
+    persistMockDb()
+    return withMessage({ ok: true }, 'Verification code resent')
   }
 
   if (ctx.method === 'GET' && path === '/auth/me') {

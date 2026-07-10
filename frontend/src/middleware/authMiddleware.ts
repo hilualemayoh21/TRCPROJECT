@@ -14,6 +14,14 @@ function normalizePermissionArray(value: unknown): Permission[] {
   return value.filter((v) => typeof v === 'string') as Permission[]
 }
 
+const unverifiedAuthRoutes = new Set([
+  'EmailVerification',
+  'Register',
+  'Login',
+  'ForgotPassword',
+  'ResetPassword',
+])
+
 export function authMiddleware(
   to: RouteLocationNormalized,
   _from: RouteLocationNormalized,
@@ -62,7 +70,8 @@ export function authMiddleware(
 
       // 1. Force Email Verification
       if (!emailVerified) {
-        if (!isEmailVerificationPage) {
+        const routeName = String(to.name || '')
+        if (!unverifiedAuthRoutes.has(routeName)) {
           return next({ name: 'EmailVerification', query: { email: auth.user?.email } })
         }
         return next()

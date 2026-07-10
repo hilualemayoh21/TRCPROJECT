@@ -381,6 +381,8 @@ export const useAuthStore = defineStore('auth', {
           refreshToken?: string
           expiresAt?: number
           permissions?: Permission[]
+          verificationEmailSent?: boolean
+          emailDeliveryHint?: string
         }>(res.data)
 
         this.user = {
@@ -395,12 +397,46 @@ export const useAuthStore = defineStore('auth', {
         this.startTokenTimer()
         this.persistSession()
 
-        return res
+        return {
+          ...res,
+          verificationEmailSent: payload.verificationEmailSent,
+          emailDeliveryHint: payload.emailDeliveryHint,
+        }
       } catch (err: any) {
         this.error = getErrorMessage(err, 'Registration failed')
         throw err
       } finally {
         this.loading = false
+      }
+    },
+
+    async verifyEmail(email: string, otp: string) {
+      this.loading = true
+      this.error = null
+
+      try {
+        await authService.verifyEmail({ email, otp })
+        if (this.user) {
+          this.user = { ...this.user, emailVerified: true }
+          this.persistSession()
+        } else {
+          await this.fetchUser()
+        }
+      } catch (err: any) {
+        this.error = getErrorMessage(err, 'Email verification failed')
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async resendVerification(email: string) {
+      this.error = null
+      try {
+        return await authService.resendVerification({ email })
+      } catch (err: any) {
+        this.error = getErrorMessage(err, 'Could not resend verification code')
+        throw err
       }
     },
 

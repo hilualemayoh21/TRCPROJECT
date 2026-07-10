@@ -8,6 +8,7 @@ const SupportUs = () => import('./pages/SupportUs.vue')
 const Faqs = () => import('./pages/Faqs.vue')
 const TermsOfUse = () => import('./pages/TermsOfUse.vue')
 const PrivacyPolicy = () => import('./pages/PrivacyPolicy.vue')
+import { useAuthStore } from '@/modules/auth/auth.store'
 
 export default [
   {
@@ -16,7 +17,6 @@ export default [
     component: LandingPage,
     meta: { public: true, layout: 'MainLayout' },
     beforeEnter: (to, from, next) => {
-      const { useAuthStore } = require('@/modules/auth/auth.store')
       const auth = useAuthStore()
       if (auth.isAuthenticated) {
         next(auth.getPostLoginRoute())

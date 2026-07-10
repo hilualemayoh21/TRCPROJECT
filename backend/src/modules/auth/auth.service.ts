@@ -7,14 +7,12 @@ import { z } from 'zod';
 import { AuditService } from '../audit/audit.service';
 import { AlertingService } from '../../utils/alerting';
 import { EmailService } from '../../utils/email';
-
+import { OtpService } from '../../utils/otp';
 import { mapUser } from '../../utils/response-mappers';
 import { config } from '../../config';
 
 const ACCESS_EXP = '15m';
 const REFRESH_EXP_DAYS = 7;
-
-import { RedisService } from '../../utils/redis';
 
 export const AuthSchema = z.object({
   email: z.string().email(),
@@ -156,18 +154,23 @@ export class AuthService {
         name,
         passwordHash,
         institution,
+        emailVerified: false,
         status: (role.toLowerCase() === 'researcher') ? 'pending' : 'active',
         roles: dbRole ? { create: { roleId: dbRole.id } } : undefined,
       },
       include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
     });
 
-    // 2. Redis OTP for verification
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    await RedisService.setOTP(`otp:verify:${user.email}`, otp);
-    await EmailService.sendOTP(user.email, otp, 'verification');
+    // Send OTP for email verification (stored in Postgres — no Redis required)
+    const otp = OtpService.generate();
+    await OtpService.saveForUser(user.id, otp);
+    const emailDelivery = await EmailService.sendOTP(user.email, otp, 'verification');
 
-    return this.generateAuthResponse(user);
+    return {
+      ...await this.generateAuthResponse(user),
+      verificationEmailSent: emailDelivery.sent,
+      emailDeliveryHint: emailDelivery.hint,
+    };
   }
 
   static async verifyEmail(email: string, otp: string) {
@@ -177,12 +180,13 @@ export class AuthService {
     if (!user) throw new AppError('User not found', 404);
     if (user.emailVerified) throw new AppError('Email already verified', 400);
 
-    const isValid = await RedisService.getAndVerifyOTP(`otp:verify:${user.email}`, otp);
-    if (!isValid) throw new AppError('Invalid or expired verification code', 400);
+    if (!OtpService.isValid(user, otp)) {
+      throw new AppError('Invalid or expired verification code', 400);
+    }
 
     await prisma.user.update({
       where: { id: user.id },
-      data: { emailVerified: true }
+      data: { emailVerified: true, verificationCode: null, verificationCodeExpires: null }
     });
 
     return { ok: true, message: 'Email verified successfully' };
@@ -195,11 +199,18 @@ export class AuthService {
     if (!user) throw new AppError('User not found', 404);
     if (user.emailVerified) throw new AppError('Email already verified', 400);
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    await RedisService.setOTP(`otp:verify:${user.email}`, otp);
-    await EmailService.sendOTP(user.email, otp, 'verification');
+    const otp = OtpService.generate();
+    await OtpService.saveForUser(user.id, otp);
+    const emailDelivery = await EmailService.sendOTP(user.email, otp, 'verification');
 
-    return { ok: true, message: 'Verification code resent' };
+    return {
+      ok: true,
+      message: emailDelivery.sent
+        ? 'Verification code resent'
+        : 'Verification code generated, but email could not be delivered',
+      verificationEmailSent: emailDelivery.sent,
+      emailDeliveryHint: emailDelivery.hint,
+    };
   }
 
   static async forgotPassword(email: string) {
@@ -209,8 +220,8 @@ export class AuthService {
     
     // Security: Don't reveal if email exists, just say "If account exists..."
     if (user) {
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      await RedisService.setOTP(`otp:reset:${user.email}`, otp);
+      const otp = OtpService.generate();
+      await OtpService.saveForUser(user.id, otp);
       await EmailService.sendOTP(user.email, otp, 'reset');
     }
 
@@ -223,8 +234,9 @@ export class AuthService {
     });
     if (!user) throw new AppError('User not found', 404);
 
-    const isValid = await RedisService.getAndVerifyOTP(`otp:reset:${user.email}`, otp);
-    if (!isValid) throw new AppError('Invalid or expired reset code', 400);
+    if (!OtpService.isValid(user, otp)) {
+      throw new AppError('Invalid or expired reset code', 400);
+    }
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
     await prisma.user.update({
@@ -232,7 +244,9 @@ export class AuthService {
       data: { 
         passwordHash,
         failedLoginAttempts: 0,
-        lockUntil: null
+        lockUntil: null,
+        verificationCode: null,
+        verificationCodeExpires: null,
       }
     });
 

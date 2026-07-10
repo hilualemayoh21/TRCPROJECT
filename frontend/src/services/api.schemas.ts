@@ -14,6 +14,8 @@ export const UserSchema = z.object({
   role: z.string(),
   permissions: z.array(PermissionSchema).catch([]).nullable().optional().default([]),
   active: z.boolean().optional(),
+  status: z.string().optional().nullable(),
+  emailVerified: z.boolean().optional(),
   institution: z.string().optional().nullable()
 })
 
@@ -23,7 +25,9 @@ export const AuthResponseSchema = z.object({
   accessToken: z.string(),
   refreshToken: z.string().optional(),
   expiresAt: z.number().optional(),
-  permissions: z.array(z.string()).optional()
+  permissions: z.array(z.string()).optional(),
+  verificationEmailSent: z.boolean().optional(),
+  emailDeliveryHint: z.string().optional(),
 })
 
 export const RefreshResponseSchema = z.object({

@@ -405,15 +405,23 @@ function validate(): boolean {
 const handleSubmit = async () => {
   if (!validate()) return
   try {
-    await register(
+    const result = await register(
       form.name.trim(),
       form.email.trim().toLowerCase(),
       form.password,
       form.role,
       form.institution?.trim()
     )
-    // Redirect to email verification page, passing the email in query
-    router.push({ path: '/verify-email', query: { email: form.email.trim().toLowerCase() } })
+    const query: Record<string, string> = {
+      email: form.email.trim().toLowerCase(),
+    }
+    if (result.verificationEmailSent === false) {
+      query.emailSent = 'false'
+      if (result.emailDeliveryHint) {
+        query.emailHint = result.emailDeliveryHint
+      }
+    }
+    router.push({ path: '/verify-email', query })
   } catch (err) {
     console.error('Registration failed', err)
   }

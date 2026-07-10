@@ -35,3 +35,13 @@ export const refresh = (refreshToken?: string) => {
 export const logout = () => {
   return api.post('/auth/logout')
 }
+
+// ✅ Verify email with OTP
+export const verifyEmail = (data: { email: string; otp: string }) => {
+  return api.post<{ ok: boolean; message: string }>('/auth/verify-email', data)
+}
+
+// ✅ Resend verification code
+export const resendVerification = (data: { email: string }) => {
+  return api.post<{ ok: boolean; message: string }>('/auth/resend-verification', data)
+}

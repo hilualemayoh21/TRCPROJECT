@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import { RolesController } from './roles.controller';
-import { requireAuth } from '../../middleware/auth.middleware';
+import { requireAuth, requireVerifiedEmail } from '../../middleware/auth.middleware';
 import { requirePermission, resolvePermissions } from '../../middleware/rbac.middleware';
 
 const router = Router();
 
 // Apply auth and permission resolve to all role routes
-router.use(requireAuth, resolvePermissions);
+router.use(requireAuth, requireVerifiedEmail, resolvePermissions);
 
 // Read roles
 router.get('/roles', requirePermission('view_roles'), RolesController.getRoles);

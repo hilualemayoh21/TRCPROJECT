@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { UsersController } from './users.controller';
-import { requireAuth } from '../../middleware/auth.middleware';
+import { requireAuth, requireVerifiedEmail } from '../../middleware/auth.middleware';
 import { requirePermission, resolvePermissions } from '../../middleware/rbac.middleware';
 import { avatarUpload } from '../../shared/utils/upload.util';
 
@@ -8,7 +8,7 @@ const router = Router();
 const adminRouter = Router();
 
 // All user management requires authentication
-adminRouter.use(requireAuth, resolvePermissions);
+adminRouter.use(requireAuth, requireVerifiedEmail, resolvePermissions);
 
 // Read
 adminRouter.get('/', requirePermission('view_users'), UsersController.listUsers);
@@ -24,8 +24,8 @@ adminRouter.delete('/:id', requirePermission('delete_users'), UsersController.de
 adminRouter.post('/:id/roles', requirePermission('update_users'), UsersController.assignRole);
 
 // /users/me routes
-router.get('/me', requireAuth, UsersController.getMe);
-router.patch('/me', requireAuth, UsersController.updateMe);
-router.patch('/me/avatar', requireAuth, avatarUpload.single('avatar'), UsersController.updateAvatar);
+router.get('/me', requireAuth, requireVerifiedEmail, UsersController.getMe);
+router.patch('/me', requireAuth, requireVerifiedEmail, UsersController.updateMe);
+router.patch('/me/avatar', requireAuth, requireVerifiedEmail, avatarUpload.single('avatar'), UsersController.updateAvatar);
 
 export { router as usersRouter, adminRouter as adminUsersRouter };

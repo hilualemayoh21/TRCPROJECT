@@ -423,6 +423,13 @@ const handleSubmit = async () => {
   if (!validate()) return
   try {
     await login(email.value.trim().toLowerCase(), password.value)
+    if (!authStore.user?.emailVerified) {
+      router.push({
+        path: '/verify-email',
+        query: { email: authStore.user?.email || email.value.trim().toLowerCase() }
+      })
+      return
+    }
     let redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null
     if (redirect === '/') {
       redirect = null

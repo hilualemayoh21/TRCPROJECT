@@ -4,9 +4,22 @@ import './modules/audit/audit.worker'; // Register worker
 import { prisma } from './prisma/client';
 import { redis, auditQueue, emailQueue } from './utils/redis';
 import logger from './utils/logger';
+import { getEmailProviderStatus } from './utils/email';
 
 const server = app.listen(config.port, () => {
   logger.info(`🚀 TRC Backend (${config.env}) running on http://localhost:${config.port}`);
+
+  const emailStatus = getEmailProviderStatus();
+  if (emailStatus.configured) {
+    logger.info(
+      `✉️  Email delivery enabled via ${emailStatus.provider} (from: ${emailStatus.from})`
+    );
+    if (emailStatus.sandboxHint) {
+      logger.warn(`⚠️  ${emailStatus.sandboxHint}`);
+    }
+  } else {
+    logger.warn('⚠️  No email provider configured — OTP codes will only appear in server logs');
+  }
 });
 
 const gracefulShutdown = async (signal: string) => {

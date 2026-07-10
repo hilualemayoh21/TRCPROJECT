@@ -94,13 +94,15 @@ async function main() {
       passwordHash,
       failedLoginAttempts: 0,
       lockUntil: null,
-      status: 'active'
+      status: 'active',
+      emailVerified: true
     },
     create: {
       email: adminEmail,
       name: 'TRC Admin',
       passwordHash,
-      status: 'active'
+      status: 'active',
+      emailVerified: true
     }
   });
 

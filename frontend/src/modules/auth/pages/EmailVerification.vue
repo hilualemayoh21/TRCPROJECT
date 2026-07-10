@@ -56,6 +56,17 @@
           </div>
         </div>
 
+        <!-- Delivery warning -->
+        <Transition name="slide-down">
+          <div
+            v-if="deliveryWarning"
+            class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+          >
+            <p class="font-semibold">Verification email was not delivered.</p>
+            <p class="mt-1">{{ deliveryWarning }}</p>
+          </div>
+        </Transition>
+
         <!-- Error -->
         <Transition name="slide-down">
           <div v-if="error" class="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
@@ -118,7 +129,13 @@
         <!-- Back to register -->
         <p class="mt-6 text-center text-[0.8rem] font-medium text-gray-400">
           Wrong email?
-          <RouterLink to="/register" class="font-bold text-trc hover:underline">Go back</RouterLink>
+          <button
+            type="button"
+            @click="handleGoBack"
+            class="font-bold text-trc hover:underline"
+          >
+            Go back
+          </button>
         </p>
 
       </div>
@@ -130,15 +147,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
-import axios from 'axios'
 import Logo from '@/components/ui/Logo.vue'
 import { useAuthStore } from '@/modules/auth/auth.store'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
-
-const API_BASE = import.meta.env.VITE_API_BASE
 
 // ── State ──────────────────────────────────────────────────
 const digits = ref<string[]>(['', '', '', '', '', ''])
@@ -147,12 +161,13 @@ const loading = ref(false)
 const resending = ref(false)
 const error = ref('')
 const successMsg = ref('')
+const deliveryWarning = ref('')
 const resendCountdown = ref(0)
 let countdownTimer: ReturnType<typeof setInterval> | null = null
 
 // Email from query param (passed by Register.vue)
 const displayEmail = computed(() =>
-  (route.query.email as string) || authStore.user?.email || 'your email'
+  (route.query.email as string) || authStore.user?.email || ''
 )
 
 const otp = computed(() => digits.value.join(''))
@@ -198,6 +213,11 @@ function handlePaste(e: ClipboardEvent) {
 
 // ── Verify ──────────────────────────────────────────────────
 async function handleVerify() {
+  const email = displayEmail.value
+  if (!email) {
+    error.value = 'Missing email address. Please register again.'
+    return
+  }
   if (otp.value.length < 6) {
     error.value = 'Please enter all 6 digits of the verification code.'
     return
@@ -205,25 +225,15 @@ async function handleVerify() {
   loading.value = true
   error.value = ''
   try {
-    await axios.post(
-      `${API_BASE}/auth/verify-email`,
-      { otp: otp.value, email: route.query.email || authStore.user?.email },
-      { withCredentials: true }
-    )
-    // Refresh user data so role/status is up to date
-    await authStore.fetchUser()
+    await authStore.verifyEmail(email, otp.value)
 
-    // Role-aware redirect after email verification
     if (authStore.user?.role === 'researcher') {
       router.push('/researcher-info')
     } else {
       router.push(authStore.getPostLoginRoute())
     }
   } catch (err: any) {
-    error.value =
-      err?.response?.data?.message ||
-      'Invalid or expired code. Please try again.'
-    // Clear digits on wrong code
+    error.value = authStore.error || 'Invalid or expired code. Please try again.'
     digits.value = ['', '', '', '', '', '']
     inputRefs.value[0]?.focus()
   } finally {
@@ -233,21 +243,30 @@ async function handleVerify() {
 
 // ── Resend ──────────────────────────────────────────────────
 async function handleResend() {
+  const email = displayEmail.value
+  if (!email) {
+    error.value = 'Missing email address. Please register again.'
+    return
+  }
   resending.value = true
   error.value = ''
   successMsg.value = ''
   try {
-    await axios.post(
-      `${API_BASE}/auth/resend-verification`,
-      { email: route.query.email || authStore.user?.email },
-      { withCredentials: true }
-    )
-    successMsg.value = 'A new code has been sent to your email.'
-    startCountdown(60)
-  } catch (err: any) {
-    error.value =
-      err?.response?.data?.message ||
-      'Could not resend code. Please try again.'
+    const result = await authStore.resendVerification(email)
+    const payload = (result as any)?.data ?? result
+    const sent = payload?.verificationEmailSent
+    const hint = payload?.emailDeliveryHint
+
+    if (sent === false) {
+      deliveryWarning.value = hint || 'Email could not be delivered. Check spam, or register with the same email as your Resend account if using test mode.'
+      successMsg.value = ''
+    } else {
+      deliveryWarning.value = ''
+      successMsg.value = 'A new code has been sent to your email.'
+      startCountdown(60)
+    }
+  } catch {
+    error.value = authStore.error || 'Could not resend code. Please try again.'
   } finally {
     resending.value = false
   }
@@ -266,10 +285,24 @@ function startCountdown(seconds: number) {
   }, 1000)
 }
 
+async function handleGoBack() {
+  try {
+    await authStore.logout()
+  } catch {
+    // Allow navigation even if logout API fails
+  }
+  router.push('/register')
+}
+
 // ── Lifecycle ───────────────────────────────────────────────
 onMounted(() => {
   inputRefs.value[0]?.focus()
-  startCountdown(60) // start 60s resend cooldown on page load
+  startCountdown(60)
+
+  if (route.query.emailSent === 'false') {
+    deliveryWarning.value = String(route.query.emailHint || '')
+      || 'Email could not be delivered. If using Resend test mode, register with the same email as your Resend account.'
+  }
 })
 
 onUnmounted(() => {

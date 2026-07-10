@@ -9,6 +9,7 @@ export type MockUser = {
   active: boolean
   permissions: string[]
   institution?: string
+  emailVerified?: boolean
 }
 
 export type MockRoleDef = {
@@ -60,6 +61,7 @@ type MockDbSnapshot = {
   reports: MockReport[]
   auditLogs: MockAuditLog[]
   tokens: Record<string, string>
+  verificationOtps: Record<string, { otp: string; expiresAt: number }>
   simulation: MockSimulationState
 }
 
@@ -73,7 +75,8 @@ const initialUsers: MockUser[] = [
     password: 'password123',
     role: 'super_admin',
     active: true,
-    permissions: ['*']
+    permissions: ['*'],
+    emailVerified: true
   },
   {
     id: 'u-2',
@@ -82,7 +85,8 @@ const initialUsers: MockUser[] = [
     password: 'password123',
     role: 'admin',
     active: true,
-    permissions: ['manage_users', 'manage_roles', 'approve_resources', 'approve_researchers', 'view_reports', 'resolve_reports']
+    permissions: ['manage_users', 'manage_roles', 'approve_resources', 'approve_researchers', 'view_reports', 'resolve_reports'],
+    emailVerified: true
   },
   {
     id: 'u-3',
@@ -92,7 +96,8 @@ const initialUsers: MockUser[] = [
     role: 'researcher',
     active: true,
     permissions: ['upload_resource'],
-    institution: 'Mekelle University'
+    institution: 'Mekelle University',
+    emailVerified: true
   }
 ]
 
@@ -180,6 +185,7 @@ export const mockDb: {
   reports: MockReport[]
   auditLogs: MockAuditLog[]
   tokens: Record<string, string>
+  verificationOtps: Record<string, { otp: string; expiresAt: number }>
   simulation: MockSimulationState
 } = {
   users: clone(initialUsers),
@@ -190,6 +196,7 @@ export const mockDb: {
   reports: clone(initialReports),
   auditLogs: clone(initialAuditLogs),
   tokens: {},
+  verificationOtps: {},
   simulation: {
     forceUnauthorized: false,
     forceForbidden: false,
@@ -211,6 +218,7 @@ function snapshotMockDb(): MockDbSnapshot {
     reports: clone(mockDb.reports),
     auditLogs: clone(mockDb.auditLogs),
     tokens: clone(mockDb.tokens),
+    verificationOtps: clone(mockDb.verificationOtps),
     simulation: clone(mockDb.simulation)
   }
 }
@@ -224,6 +232,7 @@ function applySnapshot(snapshot: Partial<MockDbSnapshot>) {
   if (snapshot.reports) mockDb.reports = snapshot.reports
   if (snapshot.auditLogs) mockDb.auditLogs = snapshot.auditLogs
   if (snapshot.tokens) mockDb.tokens = snapshot.tokens
+  if (snapshot.verificationOtps) mockDb.verificationOtps = snapshot.verificationOtps
   if (snapshot.simulation) mockDb.simulation = snapshot.simulation
 }
 
@@ -258,6 +267,7 @@ export function resetMockDb() {
   mockDb.reports = clone(initialReports)
   mockDb.auditLogs = clone(initialAuditLogs)
   mockDb.tokens = {}
+  mockDb.verificationOtps = {}
   mockDb.simulation = {
     forceUnauthorized: false,
     forceForbidden: false,

@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import { AdminController } from './admin.controller';
 import { RolesController } from '../roles/roles.controller';
-import { requireAuth } from '../../middleware/auth.middleware';
+import { requireAuth, requireVerifiedEmail } from '../../middleware/auth.middleware';
 import { requirePermission, resolvePermissions } from '../../middleware/rbac.middleware';
 
 const router = Router();
 
-router.use(requireAuth, resolvePermissions);
+router.use(requireAuth, requireVerifiedEmail, resolvePermissions);
 
 // Roles
 router.get('/roles', requirePermission('view_roles'), RolesController.getRoles);

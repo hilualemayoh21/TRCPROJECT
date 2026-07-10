@@ -14,6 +14,7 @@ import adminRoutes from './modules/admin/admin.routes';
 import resourceRoutes from './modules/resources/resources.routes';
 import publicRoutes from './modules/public/public.routes';
 import { prisma } from './prisma/client';
+import { getEmailProviderStatus } from './utils/email';
 
 const app = express();
 const swaggerDocument = YAML.load(path.join(__dirname, 'swagger.yaml'));
@@ -58,9 +59,12 @@ app.get('/health', async (req, res) => {
     dbStatus = 'connected';
   } catch (e) {}
 
+  const email = getEmailProviderStatus();
+
   res.json({
     status: 'ok',
     database: dbStatus,
+    email,
     uptime: process.uptime(),
     timestamp: new Date().toISOString()
   });
