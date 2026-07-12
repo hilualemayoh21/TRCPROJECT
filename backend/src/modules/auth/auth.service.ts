@@ -48,18 +48,21 @@ export const ResetPasswordSchema = z.object({
 
 export const ResearcherInfoSchema = z.object({
   orcid: z.string().optional(),
-  researchFocus: z.string(),
-  academicTitle: z.string(),
-  yearsExperience: z.number().optional(),
-  bio: z.string().max(500),
-  profileUrl: z.string().url().optional()
+  researchFocus: z.string().min(1),
+  academicTitle: z.string().min(1),
+  yearsExperience: z.coerce.number().int().min(0).max(60).optional(),
+  bio: z.string().min(1).max(500),
+  profileUrl: z.string().url().optional().or(z.literal('')).transform((v) => v || undefined),
 });
 
 export class AuthService {
   static async login(req: Request, email: string, password: string) {
     const user = await prisma.user.findUnique({
       where: { email },
-      include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
+      include: {
+        roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } },
+        researcherProfile: true,
+      }
     });
 
     if (!user || user.deletedAt) {
@@ -296,7 +299,10 @@ export class AuthService {
 
     const user = await prisma.user.findUnique({
       where: { id: rt.userId },
-      include: { roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } } }
+      include: {
+        roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } },
+        researcherProfile: true,
+      }
     });
 
     if (!user || user.deletedAt) throw new AuthError('User not found');
@@ -312,19 +318,76 @@ export class AuthService {
     return { ok: true };
   }
 
-  static async submitResearcherInfo(userId: string, data: any) {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+  static async submitResearcherInfo(
+    userId: string,
+    data: z.infer<typeof ResearcherInfoSchema>,
+    files: Record<string, Express.Multer.File[]>
+  ) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { roles: { include: { role: true } } },
+    });
     if (!user) throw new AppError('User not found', 404);
 
-    const profile = await prisma.researcherProfile.create({
-      data: {
-        userId,
-        ...data
-      }
-    });
+    const isResearcher = user.roles.some(
+      (entry) => entry.roleId === 'researcher' || entry.role.name === 'researcher'
+    );
+    if (!isResearcher) {
+      throw new AppError('Only researcher accounts can submit this application', 403);
+    }
+    if (user.status !== 'pending') {
+      throw new AppError('Your account is not awaiting researcher approval', 400);
+    }
 
-    // Researcher stays pending until admin approves them.
-    // If we wanted to change status, we'd do it here.
+    const idFile = files.idDocument?.[0];
+    const affiliationFile = files.affiliationDocument?.[0];
+    const cvFile = files.cvDocument?.[0];
+
+    if (!idFile || !affiliationFile) {
+      throw new AppError('Government/university ID and affiliation letter are required', 400);
+    }
+
+    const documents = [
+      { docType: 'id_document', file: idFile },
+      { docType: 'affiliation_letter', file: affiliationFile },
+      ...(cvFile ? [{ docType: 'cv', file: cvFile }] : []),
+    ];
+
+    const profile = await prisma.$transaction(async (tx) => {
+      const savedProfile = await tx.researcherProfile.upsert({
+        where: { userId },
+        update: {
+          ...data,
+          submittedAt: new Date(),
+        },
+        create: {
+          userId,
+          ...data,
+          submittedAt: new Date(),
+        },
+      });
+
+      for (const doc of documents) {
+        await tx.researcherDocument.upsert({
+          where: { userId_docType: { userId, docType: doc.docType } },
+          update: {
+            fileUrl: `/uploads/researcher-docs/${doc.file.filename}`,
+            fileName: doc.file.originalname,
+            fileSize: doc.file.size,
+            uploadedAt: new Date(),
+          },
+          create: {
+            userId,
+            docType: doc.docType,
+            fileUrl: `/uploads/researcher-docs/${doc.file.filename}`,
+            fileName: doc.file.originalname,
+            fileSize: doc.file.size,
+          },
+        });
+      }
+
+      return savedProfile;
+    });
 
     return profile;
   }

@@ -3,6 +3,7 @@ import { prisma } from '../../prisma/client';
 import { mapPaginatedResponse } from '../../utils/response-mappers';
 import { NotFoundError, AppError } from '../../utils/api';
 import { AuditService } from '../audit/audit.service';
+import { EmailService } from '../../utils/email';
 
 export class AdminController {
   /** GET /admin/analytics/overview — Real dashboard stats */
@@ -12,7 +13,14 @@ export class AdminController {
         prisma.user.count({ where: { deletedAt: null } }),
         prisma.resource.count({ where: { deletedAt: null, status: 'approved' } }),
         prisma.resource.count({ where: { deletedAt: null, status: 'pending' } }),
-        prisma.user.count({ where: { status: 'pending', deletedAt: null } }),
+        prisma.user.count({
+          where: {
+            status: 'pending',
+            deletedAt: null,
+            researcherProfile: { is: { submittedAt: { not: null } } },
+            roles: { some: { roleId: 'researcher' } },
+          },
+        }),
         prisma.report.count({ where: { status: 'open' } }),
         prisma.auditLog.findMany({ take: 10, orderBy: { createdAt: 'desc' } }),
       ]);
@@ -43,11 +51,20 @@ export class AdminController {
       let pageSize = parseInt(req.query.pageSize as string) || 10;
       if (pageSize > 100) pageSize = 100;
 
-      const where = { status: 'pending', deletedAt: null };
+      const where: any = {
+        status: 'pending',
+        deletedAt: null,
+        researcherProfile: { is: { submittedAt: { not: null } } },
+        roles: { some: { roleId: 'researcher' } },
+      };
+
       const [items, total] = await Promise.all([
         prisma.user.findMany({
           where,
-          select: { id: true, name: true, email: true, institution: true, status: true, createdAt: true },
+          include: {
+            researcherProfile: true,
+            researcherDocuments: true,
+          },
           orderBy: { createdAt: 'desc' },
           skip: (page - 1) * pageSize,
           take: pageSize,
@@ -55,7 +72,34 @@ export class AdminController {
         prisma.user.count({ where }),
       ]);
 
-      res.json(mapPaginatedResponse(items, { page, pageSize, total }));
+      const mappedItems = items.map((item: any) => ({
+        id: item.id,
+        userId: item.id,
+        name: item.name,
+        email: item.email,
+        institution: item.institution,
+        status: item.status,
+        createdAt: item.createdAt.toISOString(),
+        profile: item.researcherProfile ? {
+          researchFocus: item.researcherProfile.researchFocus,
+          academicTitle: item.researcherProfile.academicTitle,
+          yearsExperience: item.researcherProfile.yearsExperience,
+          bio: item.researcherProfile.bio,
+          orcid: item.researcherProfile.orcid,
+          profileUrl: item.researcherProfile.profileUrl,
+          submittedAt: item.researcherProfile.submittedAt?.toISOString() || null,
+        } : null,
+        documents: (item.researcherDocuments || []).map((d: any) => ({
+          id: d.id,
+          docType: d.docType,
+          fileUrl: d.fileUrl,
+          fileName: d.fileName,
+          fileSize: d.fileSize,
+          uploadedAt: d.uploadedAt.toISOString(),
+        })),
+      }));
+
+      res.json(mapPaginatedResponse(mappedItems, { page, pageSize, total }));
     } catch (e) { next(e); }
   }
 
@@ -69,6 +113,9 @@ export class AdminController {
       await prisma.user.update({ where: { id }, data: { status: 'active' } });
       AuditService.log(req, req.user!.id, 'researcher.approved', 'User', id).catch(() => {});
 
+      // Notify researcher by email (fire-and-forget)
+      EmailService.sendResearcherApprovalEmail(user.email, user.name).catch(() => {});
+
       res.json({ ok: true, message: 'Researcher approved' });
     } catch (e) { next(e); }
   }
@@ -77,11 +124,20 @@ export class AdminController {
   static async rejectResearcher(req: Request, res: Response, next: NextFunction) {
     try {
       const id = req.params.id as string;
+      const { reason } = req.body as { reason?: string };
+
+      if (!reason || !reason.trim()) {
+        throw new AppError('A rejection reason is required', 400);
+      }
+
       const user = await prisma.user.findFirst({ where: { id, status: 'pending' } });
       if (!user) throw new NotFoundError('Pending researcher not found');
 
       await prisma.user.update({ where: { id }, data: { status: 'inactive' } });
-      AuditService.log(req, req.user!.id, 'researcher.rejected', 'User', id).catch(() => {});
+      AuditService.log(req, req.user!.id, 'researcher.rejected', 'User', id, { reason: reason.trim() }).catch(() => {});
+
+      // Notify researcher by email with reason (fire-and-forget)
+      EmailService.sendResearcherRejectionEmail(user.email, user.name, reason.trim()).catch(() => {});
 
       res.json({ ok: true, message: 'Researcher rejected' });
     } catch (e) { next(e); }

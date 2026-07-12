@@ -25,6 +25,7 @@ model User {
   verificationCode    String?
   verificationCodeExpires DateTime?
   researcherProfile   ResearcherProfile?
+  researcherDocuments ResearcherDocument[]
   institution         String?
   roles               UserRole[]
   tokens              RefreshToken[]
@@ -35,16 +36,31 @@ model User {
 }
 
 model ResearcherProfile {
-  id              String   @id @default(uuid())
-  userId          String   @unique
+  id              String    @id @default(uuid())
+  userId          String    @unique
   orcid           String?
   researchFocus   String
   academicTitle   String
   yearsExperience Int?
   bio             String
   profileUrl      String?
+  submittedAt     DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ResearcherDocument {
+  id         String   @id @default(uuid())
+  userId     String
+  docType    String   // id_document, affiliation_letter, cv
+  fileUrl    String
+  fileName   String
+  fileSize   Int
+  uploadedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, docType])
 }
 
 model Category {

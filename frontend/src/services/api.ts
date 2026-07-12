@@ -6,9 +6,9 @@ import { registerInterceptors } from "./interceptors"
 export const USE_MOCK_API = String(import.meta.env.VITE_USE_MOCK_API || 'false').toLowerCase() === 'true'
 
 export const api = axios.create({
-  // Hardcoded to ensure it works even if env is missing
-  baseURL: 'https://trc-backend.onrender.com/api',
-  timeout: 90000, // 90s — extremely safe for slow cold starts
+  // Fallback to Render if VITE_API_BASE is not defined
+  baseURL: import.meta.env.VITE_API_BASE || 'https://trc-backend.onrender.com/api',
+  timeout: 90000,
 })
 
 // @ts-ignore

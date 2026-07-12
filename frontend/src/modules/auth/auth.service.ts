@@ -45,3 +45,8 @@ export const verifyEmail = (data: { email: string; otp: string }) => {
 export const resendVerification = (data: { email: string }) => {
   return api.post<{ ok: boolean; message: string }>('/auth/resend-verification', data)
 }
+
+// ✅ Submit researcher application (profile + verification documents)
+export const submitResearcherInfo = (formData: FormData) => {
+  return api.post<{ ok: boolean; message: string }>('/auth/researcher-info', formData)
+}

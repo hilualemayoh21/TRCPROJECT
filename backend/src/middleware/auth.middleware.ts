@@ -45,10 +45,10 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
       throw new AppError('Account is inactive', 401);
     }
 
-    if (user.permissionVersion !== decoded.permissionVersion) {
-      console.warn(`[AuthMiddleware] Permission version mismatch for user ${user.id}`);
-      throw new AppError('Permissions changed. Please re-authenticate.', 401);
-    }
+  if (user.permissionVersion !== decoded.permissionVersion) {
+    console.warn(`[AuthMiddleware] Permission version mismatch for user ${user.id}`);
+    throw new AppError('Permissions changed. Please re-authenticate.', 401);
+  }
 
     req.user = user;
     next();
@@ -56,6 +56,27 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     console.error('[AuthMiddleware] General error:', error instanceof Error ? error.message : error);
     next(error instanceof AppError ? error : new AppError('Unauthorized', 401));
   }
+};
+
+export const requireActiveAccount = (req: Request, res: Response, next: NextFunction) => {
+  const user = req.user as { email?: string; status?: string } | undefined;
+  if (!user) {
+    return next(new AppError('Unauthorized', 401));
+  }
+
+  if (user.email === 'admin@trc.local') {
+    return next();
+  }
+
+  if (user.status === 'pending') {
+    return next(new AppError('Your researcher application is pending admin approval.', 403));
+  }
+
+  if (user.status === 'inactive') {
+    return next(new AppError('Account is inactive', 403));
+  }
+
+  next();
 };
 
 export const requireVerifiedEmail = (req: Request, res: Response, next: NextFunction) => {

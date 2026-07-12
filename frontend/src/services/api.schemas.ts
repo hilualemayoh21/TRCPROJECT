@@ -16,7 +16,8 @@ export const UserSchema = z.object({
   active: z.boolean().optional(),
   status: z.string().optional().nullable(),
   emailVerified: z.boolean().optional(),
-  institution: z.string().optional().nullable()
+  institution: z.string().optional().nullable(),
+  researcherApplicationSubmitted: z.boolean().optional(),
 })
 
 export const AuthResponseSchema = z.object({

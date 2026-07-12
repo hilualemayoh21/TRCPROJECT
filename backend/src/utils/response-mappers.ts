@@ -10,9 +10,10 @@ export interface PrismaUser {
   email: string;
   status?: string;
   emailVerified?: boolean;
-  institution?: string;
+  institution?: string | null;
   avatarUrl?: string | null;
   permissionVersion?: number;
+  researcherProfile?: { submittedAt?: Date | null } | null;
   roles?: {
     role: {
       id: string;
@@ -66,6 +67,7 @@ export function mapUser(user: PrismaUser) {
     emailVerified: !!user.emailVerified,
     institution: user.institution || undefined,
     avatarUrl: user.avatarUrl || null,
+    researcherApplicationSubmitted: !!user.researcherProfile?.submittedAt,
   };
 }
 

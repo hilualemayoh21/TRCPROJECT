@@ -58,7 +58,25 @@ export type ResearcherApprovalRequest = {
   name: string
   email: string
   institution?: string
+  status?: string
   createdAt?: string
+  profile?: {
+    researchFocus?: string
+    academicTitle?: string
+    yearsExperience?: number | null
+    bio?: string
+    orcid?: string | null
+    profileUrl?: string | null
+    submittedAt?: string | null
+  } | null
+  documents?: Array<{
+    id: string
+    docType: string
+    fileUrl: string
+    fileName: string
+    fileSize: number
+    uploadedAt: string
+  }>
 }
 
 export type ResourceApprovalItem = {

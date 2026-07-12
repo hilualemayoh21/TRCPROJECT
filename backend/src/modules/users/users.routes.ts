@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { UsersController } from './users.controller';
-import { requireAuth, requireVerifiedEmail } from '../../middleware/auth.middleware';
+import { requireAuth, requireVerifiedEmail, requireActiveAccount } from '../../middleware/auth.middleware';
 import { requirePermission, resolvePermissions } from '../../middleware/rbac.middleware';
 import { avatarUpload } from '../../shared/utils/upload.util';
 
@@ -25,7 +25,7 @@ adminRouter.post('/:id/roles', requirePermission('update_users'), UsersControlle
 
 // /users/me routes
 router.get('/me', requireAuth, requireVerifiedEmail, UsersController.getMe);
-router.patch('/me', requireAuth, requireVerifiedEmail, UsersController.updateMe);
-router.patch('/me/avatar', requireAuth, requireVerifiedEmail, avatarUpload.single('avatar'), UsersController.updateAvatar);
+router.patch('/me', requireAuth, requireVerifiedEmail, requireActiveAccount, UsersController.updateMe);
+router.patch('/me/avatar', requireAuth, requireVerifiedEmail, requireActiveAccount, avatarUpload.single('avatar'), UsersController.updateAvatar);
 
 export { router as usersRouter, adminRouter as adminUsersRouter };

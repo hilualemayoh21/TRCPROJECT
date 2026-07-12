@@ -2,6 +2,7 @@ import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { AuthController } from './auth.controller';
 import { requireAuth, requireVerifiedEmail } from '../../middleware/auth.middleware';
+import { researcherApplicationUpload } from '../../shared/utils/upload.util';
 
 const router = Router();
 
@@ -25,7 +26,17 @@ router.post('/verify-email', AuthController.verifyEmail);
 router.post('/resend-verification', resendVerificationLimiter, AuthController.resendVerification);
 router.post('/forgot-password', AuthController.forgotPassword);
 router.post('/reset-password', AuthController.resetPassword);
-router.post('/researcher-info', requireAuth, requireVerifiedEmail, AuthController.submitResearcherInfo);
+router.post(
+  '/researcher-info',
+  requireAuth,
+  requireVerifiedEmail,
+  researcherApplicationUpload.fields([
+    { name: 'idDocument', maxCount: 1 },
+    { name: 'affiliationDocument', maxCount: 1 },
+    { name: 'cvDocument', maxCount: 1 },
+  ]),
+  AuthController.submitResearcherInfo
+);
 router.post('/refresh', AuthController.refresh);
 router.post('/logout', AuthController.logout);
 router.get('/me', requireAuth, AuthController.me);

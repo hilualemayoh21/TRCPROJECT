@@ -15,6 +15,7 @@ type AuthUser = {
   institution?: string
   status?: string
   emailVerified?: boolean
+  researcherApplicationSubmitted?: boolean
   avatarUrl?: string | null
 }
 
@@ -316,7 +317,11 @@ export const useAuthStore = defineStore('auth', {
 
     getPostLoginRoute() {
       if (this.user?.status === 'pending') {
-        return '/pending-approval';
+        const role = String(this.user?.role || '').toLowerCase()
+        if (role === 'researcher') {
+          return this.user?.researcherApplicationSubmitted ? '/pending-approval' : '/researcher-info'
+        }
+        return '/pending-approval'
       }
 
       const role = String(this.user?.role || '').toLowerCase();

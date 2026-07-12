@@ -116,6 +116,133 @@ export function getEmailProviderStatus() {
 }
 
 export class EmailService {
+  /** Generic internal send helper — tries Resend, then SMTP, then console fallback */
+  private static async sendHtml(
+    email: string,
+    subject: string,
+    html: string
+  ): Promise<EmailSendResult> {
+    const from = getFromAddress();
+    const resendKey = process.env.RESEND_API_KEY?.trim();
+    const smtpTransport = getSmtpTransport();
+
+    if (resendKey) {
+      try {
+        const { data, error } = await getResendClient().emails.send({ from, to: email, subject, html });
+        if (error) {
+          const hint = String(error.message || JSON.stringify(error));
+          if (smtpTransport) {
+            try {
+              await smtpTransport.sendMail({ from, to: email, subject, html });
+              return { sent: true, provider: 'smtp' };
+            } catch {}
+          }
+          logger.warn({ email, subject, hint }, 'Resend failed to send email, falling back to console');
+          console.log('\n' + '='.repeat(40));
+          console.log(`✉️  [EMAIL NOT SENT] To: ${email} | Subject: ${subject}`);
+          console.log('='.repeat(40) + '\n');
+          return { sent: false, provider: 'console', hint };
+        }
+        logger.info({ email, subject, messageId: data?.id }, 'Resend delivered email');
+        return { sent: true, provider: 'resend' };
+      } catch (err: any) {
+        logger.error({ email, subject, error: err?.message }, 'Resend exception');
+      }
+    }
+
+    if (smtpTransport) {
+      try {
+        await smtpTransport.sendMail({ from, to: email, subject, html });
+        return { sent: true, provider: 'smtp' };
+      } catch (err: any) {
+        logger.error({ email, subject, error: err?.message }, 'SMTP failed');
+      }
+    }
+
+    console.log('\n' + '='.repeat(40));
+    console.log(`✉️  [EMAIL NOT SENT] To: ${email} | Subject: ${subject}`);
+    console.log('='.repeat(40) + '\n');
+    return { sent: false, provider: 'console', hint: 'No email provider configured' };
+  }
+
+  static async sendResearcherApprovalEmail(
+    email: string,
+    name: string
+  ): Promise<EmailSendResult> {
+    const subject = '🎉 Your TRC Researcher Account Has Been Approved!';
+    const html = `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; background-color: #f9f9fb; border-radius: 16px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #6C2BD9; margin: 0; font-size: 28px;">TRC</h1>
+          <p style="color: #6b7280; font-size: 14px; margin-top: 5px;">Tigray Resources Center</p>
+        </div>
+        <div style="background-color: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="width: 64px; height: 64px; background: #ecfdf5; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 32px;">✅</div>
+          </div>
+          <h2 style="color: #111827; margin-top: 0; font-size: 22px; text-align: center;">Welcome aboard, ${name}!</h2>
+          <p style="color: #4b5563; line-height: 1.7; text-align: center;">
+            Great news! Your researcher account at the <strong>Tigray Resources Center</strong> has been <strong style="color: #059669;">approved</strong> by our admin team.
+          </p>
+          <div style="background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border-radius: 12px; padding: 20px; margin: 24px 0; border-left: 4px solid #6C2BD9;">
+            <p style="margin: 0; color: #4c1d95; font-weight: 600;">You now have full researcher access to:</p>
+            <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #5b21b6; line-height: 1.8;">
+              <li>Upload and manage research resources</li>
+              <li>Access the full research repository</li>
+              <li>Collaborate with other researchers</li>
+            </ul>
+          </div>
+          <div style="text-align: center; margin-top: 24px;">
+            <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/login"
+               style="display: inline-block; background: #6C2BD9; color: #ffffff; padding: 14px 32px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 15px;">
+              Log In to Your Dashboard →
+            </a>
+          </div>
+        </div>
+        <div style="text-align: center; margin-top: 30px; color: #9ca3af; font-size: 12px;">
+          <p>© 2024 Tigray Resources Center. All rights reserved.</p>
+        </div>
+      </div>
+    `;
+    return this.sendHtml(email, subject, html);
+  }
+
+  static async sendResearcherRejectionEmail(
+    email: string,
+    name: string,
+    reason: string
+  ): Promise<EmailSendResult> {
+    const subject = 'Update on Your TRC Researcher Application';
+    const html = `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; background-color: #f9f9fb; border-radius: 16px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #6C2BD9; margin: 0; font-size: 28px;">TRC</h1>
+          <p style="color: #6b7280; font-size: 14px; margin-top: 5px;">Tigray Resources Center</p>
+        </div>
+        <div style="background-color: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <h2 style="color: #111827; margin-top: 0; font-size: 20px;">Dear ${name},</h2>
+          <p style="color: #4b5563; line-height: 1.7;">
+            Thank you for applying for a researcher account at the Tigray Resources Center. After careful review of your application and submitted documents, we are unable to approve your request at this time.
+          </p>
+          <div style="background: #fff7ed; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #f97316;">
+            <p style="margin: 0 0 8px 0; font-weight: 700; color: #9a3412;">Reason for rejection:</p>
+            <p style="margin: 0; color: #7c2d12; line-height: 1.6;">${reason}</p>
+          </div>
+          <p style="color: #4b5563; line-height: 1.7;">
+            If you believe this decision was made in error, or if you have additional documentation that may support your application, please contact our support team.
+          </p>
+          <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
+            You may continue to use TRC as a standard user. If you wish to re-apply with updated documents, please create a new account or contact support.
+          </p>
+        </div>
+        <div style="text-align: center; margin-top: 30px; color: #9ca3af; font-size: 12px;">
+          <p>© 2024 Tigray Resources Center. All rights reserved.</p>
+        </div>
+      </div>
+    `;
+    return this.sendHtml(email, subject, html);
+  }
+
   static async sendOTP(
     email: string,
     otp: string,

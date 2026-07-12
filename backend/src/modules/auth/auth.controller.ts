@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthService, AuthSchema, RegisterSchema, VerifyEmailSchema, ResendVerificationSchema, ResearcherInfoSchema, ForgotPasswordSchema, ResetPasswordSchema } from './auth.service';
 import { mapAuthResponse, mapUser, mapRefreshResponse } from '../../utils/response-mappers';
+import { AppError } from '../../utils/api';
+import { prisma } from '../../prisma/client';
 import logger from '../../utils/logger';
 
 export class AuthController {
@@ -92,8 +94,9 @@ export class AuthController {
     try {
       const userId = (req.user as any).id;
       const validatedData = ResearcherInfoSchema.parse(req.body);
-      const result = await AuthService.submitResearcherInfo(userId, validatedData);
-      res.json(result);
+      const files = (req.files || {}) as Record<string, Express.Multer.File[]>;
+      const result = await AuthService.submitResearcherInfo(userId, validatedData, files);
+      res.json({ ok: true, profile: result, message: 'Application submitted for admin review' });
     } catch (error) {
       next(error);
     }
@@ -101,7 +104,15 @@ export class AuthController {
 
   static async me(req: Request, res: Response, next: NextFunction) {
     try {
-      res.json(mapUser(req.user as any));
+      const user = await prisma.user.findUnique({
+        where: { id: (req.user as any).id },
+        include: {
+          roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } },
+          researcherProfile: true,
+        },
+      });
+      if (!user) throw new AppError('User not found', 404);
+      res.json(mapUser(user));
     } catch (error) {
       next(error);
     }

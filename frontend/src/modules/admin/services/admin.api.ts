@@ -151,11 +151,11 @@ export const adminApi = {
   },
 
   async approveResearcher(id: string) {
-    return post(`/admin/researchers/requests/${encodeURIComponent(id)}/approve`)
+    return post(`/admin/researchers/${encodeURIComponent(id)}/approve`)
   },
 
   async rejectResearcher(id: string, reason?: string) {
-    return post(`/admin/researchers/requests/${encodeURIComponent(id)}/reject`, { reason })
+    return post(`/admin/researchers/${encodeURIComponent(id)}/reject`, { reason })
   },
 
   async listPendingResources(query: AdminQuery = {}) {

@@ -95,10 +95,17 @@ export function authMiddleware(
         return next()
       }
 
-      // 2. Handle Researcher Flow (Researcher Info -> Pending Approval)
+      // 2. Handle Researcher Flow (profile + documents -> pending approval)
       if (isPendingStatus && isResearcher) {
-        if (!isResearcherInfoPage && !isPendingPage) {
-          return next({ name: 'ResearcherInfo' })
+        const applicationSubmitted = auth.user?.researcherApplicationSubmitted
+        if (!applicationSubmitted) {
+          if (!isResearcherInfoPage) {
+            return next({ name: 'ResearcherInfo' })
+          }
+          return next()
+        }
+        if (!isPendingPage && !isResearcherInfoPage) {
+          return next({ name: 'PendingApproval' })
         }
         return next()
       }
